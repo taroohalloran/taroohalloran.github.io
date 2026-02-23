@@ -1,20 +1,80 @@
-/
-  index.html
-  styles.css
-  app.js
-  data/
-    site.json
-  assets/
-    stills/
-      hero-humanzee.jpg
-      rail-01.jpg
-      rail-02.jpg
-      rail-03.jpg
-      rail-04.jpg
-      gal-01.jpg
-      gal-02.jpg
-      gal-03.jpg
-      gal-04.jpg
-      about-hero.jpg
-      contact-hero.jpg
-      tlura-hero.jpg
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Taro O’Halloran</title>
+  <meta name="description" content="Taro O’Halloran — writer, director, producer. Films, screenings, and contact." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <!-- Texture / CRT overlays -->
+  <div class="overlay overlay-grain" aria-hidden="true"></div>
+  <div class="overlay overlay-scanlines" aria-hidden="true"></div>
+  <div class="overlay overlay-vignette" aria-hidden="true"></div>
+
+  <header class="header">
+    <div class="title-block">
+      <div class="title" id="siteTitle">Taro O’Halloran</div>
+      <div class="subtitle" id="siteSubtitle">( writer , director , producer )</div>
+    </div>
+
+    <nav class="nav" aria-label="Primary">
+      <button class="nav-btn" data-route="films" aria-current="page">FILMS</button>
+      <button class="nav-btn" data-route="about">ABOUT</button>
+      <button class="nav-btn" data-route="contact">CONTACT</button>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <!-- Left rail -->
+    <aside class="rail rail-left" aria-label="Left still rail">
+      <div class="rail-inner" id="railLeft"></div>
+      <div class="rail-shade" aria-hidden="true"></div>
+    </aside>
+
+    <!-- Stage + panel + (optional) gallery -->
+    <section class="center">
+      <section class="stage">
+        <div class="stage-frame">
+          <img class="stage-img" id="stageImg" alt="" />
+          <div class="stage-shade" aria-hidden="true"></div>
+        </div>
+
+        <section class="panel" aria-live="polite">
+          <div class="panel-header">
+            <div class="panel-title" id="panelTitle"></div>
+            <div class="panel-meta" id="panelMeta"></div>
+          </div>
+
+          <div class="panel-body" id="panelBody"></div>
+
+          <div class="panel-actions" id="panelActions"></div>
+        </section>
+      </section>
+
+      <!-- Scroll-down gallery (only shown on FILMS route) -->
+      <section class="gallery" id="gallery" aria-label="Gallery">
+        <div class="gallery-head">
+          <div class="gallery-title">GALLERY</div>
+          <div class="gallery-sub">stills / frames / artifacts</div>
+        </div>
+        <div class="gallery-grid" id="galleryGrid"></div>
+      </section>
+    </section>
+
+    <!-- Right rail -->
+    <aside class="rail rail-right" aria-label="Right still rail">
+      <div class="rail-inner" id="railRight"></div>
+      <div class="rail-shade" aria-hidden="true"></div>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner" id="footerLine"></div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
