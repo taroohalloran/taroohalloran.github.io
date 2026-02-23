@@ -1,6 +1,6 @@
 const $ = (s) => document.querySelector(s);
 
-const siteTitle = $("#siteTitle");
+const homeLink = $("#homeLink");
 const siteSubtitle = $("#siteSubtitle");
 const footerLine = $("#footerLine");
 
@@ -10,21 +10,37 @@ const panelMeta = $("#panelMeta");
 const panelBody = $("#panelBody");
 const panelActions = $("#panelActions");
 
+const galleryGrid = $("#galleryGrid");
+const galleryScroll = $("#galleryScroll");
+
 const railLeft = $("#railLeft");
 const railRight = $("#railRight");
-
-const gallery = $("#gallery");
-const galleryGrid = $("#galleryGrid");
-
 const navButtons = Array.from(document.querySelectorAll(".nav-btn"));
 
 let DATA = null;
-let currentRoute = "films";
 
-function setNav(route) {
+function setNavActive(route) {
   navButtons.forEach(btn => {
-    const isActive = btn.dataset.route === route;
-    btn.setAttribute("aria-current", isActive ? "page" : "false");
+    const on = btn.dataset.route === route;
+    btn.setAttribute("aria-current", on ? "page" : "false");
+  });
+}
+
+function renderActions(actions = []) {
+  panelActions.innerHTML = "";
+  actions.forEach(a => {
+    const el = document.createElement("a");
+    el.className = "action";
+    el.href = a.href;
+
+    const isMail = a.href.startsWith("mailto:");
+    const isHash = a.href.startsWith("#");
+    if (!isMail && !isHash) {
+      el.target = "_blank";
+      el.rel = "noreferrer";
+    }
+    el.textContent = a.label;
+    panelActions.appendChild(el);
   });
 }
 
@@ -37,148 +53,78 @@ function setHero(hero) {
   renderActions(hero.actions || []);
 }
 
-function renderActions(actions) {
-  panelActions.innerHTML = "";
-  actions.forEach(a => {
-    const el = document.createElement("a");
-    el.className = "action";
-    el.href = a.href;
-
-    // internal anchor or mailto stays same tab; external opens new tab
-    const isMail = a.href.startsWith("mailto:");
-    const isHash = a.href.startsWith("#");
-    if (!isMail && !isHash) {
-      el.target = "_blank";
-      el.rel = "noreferrer";
-    }
-
-    el.textContent = a.label;
-    panelActions.appendChild(el);
-  });
-}
-
-function renderGallery(route) {
-  const r = DATA.routes[route];
-  const items = r?.gallery || [];
-
-  // only show gallery on FILMS route
-  if (route !== "films" || items.length === 0) {
-    gallery.style.display = "none";
-    galleryGrid.innerHTML = "";
-    return;
-  }
-
-  gallery.style.display = "block";
+function renderGallery(items = []) {
   galleryGrid.innerHTML = "";
-
   items.forEach(it => {
     const cell = document.createElement("div");
     cell.className = "gal-item";
     cell.innerHTML = `<img src="${it.image}" alt="" loading="lazy">`;
     galleryGrid.appendChild(cell);
   });
+  // reset scroll to top when route changes
+  galleryScroll.scrollTop = 0;
 }
 
-function renderRoute(route) {
-  const r = DATA.routes[route];
-  if (!r) return;
-
-  currentRoute = route;
-  setNav(route);
-
-  setHero(r.hero);
-  renderGallery(route);
-
-  // update hash for deep linking
-  history.pushState(null, "", `#${route}`);
+function renderHome() {
+  setNavActive(""); // none selected on home
+  const h = DATA.home.hero;
+  setHero(h);
+  renderGallery(DATA.home.gallery || []);
+  history.replaceState(null, "", "#home");
 }
 
-function makeThumb(item) {
-  const d = document.createElement("div");
-  d.className = "thumb";
-  d.title = item.title || "";
-  d.innerHTML = `<img src="${item.image}" alt="${item.title || "thumbnail"}" loading="lazy">`;
-
-  d.addEventListener("click", () => {
-    // 1) Jump to a route
-    if (item.goRoute) {
-      renderRoute(item.goRoute);
-      return;
-    }
-
-    // 2) Use hero from a route (e.g. films)
-    if (item.setHeroFromRoute) {
-      const r = DATA.routes[item.setHeroFromRoute];
-      if (r?.hero) {
-        setNav(item.setHeroFromRoute);
-        setHero(r.hero);
-        renderGallery(item.setHeroFromRoute);
-        history.pushState(null, "", `#${item.setHeroFromRoute}`);
-      }
-      return;
-    }
-
-    // 3) Custom hero (TLURA preview etc.)
-    if (item.customHero) {
-      setNav(currentRoute);
-      setHero(item.customHero);
-      // keep gallery state based on current route
-      renderGallery(currentRoute);
-      return;
-    }
-  });
-
-  return d;
-}
-
-function renderRails() {
+function initRails() {
+  // Minimal placeholder rails: duplicate gallery items into rails if you want.
+  // You can customize these later to swap hero content.
   railLeft.innerHTML = "";
   railRight.innerHTML = "";
 
-  (DATA.rails?.left || []).forEach(it => railLeft.appendChild(makeThumb(it)));
-  (DATA.rails?.right || []).forEach(it => railRight.appendChild(makeThumb(it)));
-}
-
-function parseHash() {
-  const raw = (location.hash || "").replace("#", "").trim();
-  if (!raw) return "films";
-  if (DATA.routes[raw]) return raw;
-  return "films";
+  const items = (DATA.home.gallery || []).slice(0, 4);
+  items.forEach((it, idx) => {
+    const d = document.createElement("div");
+    d.className = "thumb";
+    d.title = `thumb ${idx+1}`;
+    d.innerHTML = `<img src="${it.image}" alt="" loading="lazy">`;
+    d.addEventListener("click", () => {
+      // On click, swap hero image to the clicked still (keeps title/meta)
+      stageImg.src = it.image;
+    });
+    (idx % 2 === 0 ? railLeft : railRight).appendChild(d);
+  });
 }
 
 async function init() {
   const res = await fetch("data/site.json", { cache: "no-store" });
   DATA = await res.json();
 
-  siteTitle.textContent = DATA.site?.title || "Taro O’Halloran";
   siteSubtitle.textContent = DATA.site?.subtitle || "";
   footerLine.textContent = DATA.site?.footer || "";
 
-  renderRails();
+  initRails();
 
-  // nav clicks
+  // Name always returns home
+  homeLink.addEventListener("click", renderHome);
+
+  // Tabs for now just route hashes; you’ll expand to full routes later
   navButtons.forEach(btn => {
-    btn.addEventListener("click", () => renderRoute(btn.dataset.route));
+    btn.addEventListener("click", () => {
+      const route = btn.dataset.route;
+      setNavActive(route);
+      // For now: just change the panel content so you can see the interaction
+      panelTitle.textContent = route.toUpperCase();
+      panelMeta.textContent = "";
+      panelBody.textContent = "Hook this route to its data next.";
+      panelActions.innerHTML = "";
+      history.pushState(null, "", `#${route}`);
+      galleryScroll.scrollTop = 0;
+    });
   });
 
-  // initial
-  const route = parseHash();
-  renderRoute(route);
-
-  // back/forward
-  window.addEventListener("popstate", () => {
-    const r = parseHash();
-    // popstate shouldn't push a new hash
-    const routeObj = DATA.routes[r];
-    if (!routeObj) return;
-    currentRoute = r;
-    setNav(r);
-    setHero(routeObj.hero);
-    renderGallery(r);
-  });
+  // Start at home
+  renderHome();
 }
 
 init().catch(err => {
-  panelTitle.textContent = "Error loading site";
+  panelTitle.textContent = "Error";
   panelBody.textContent = String(err);
 });
