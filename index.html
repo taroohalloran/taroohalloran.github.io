@@ -16,7 +16,6 @@
 
   <header class="header" id="header">
     <div class="title-block">
-      <!-- Big bright red name always visible; click returns Home -->
       <button class="title home-link" id="homeLink" type="button" aria-label="Go to Home">
         Taro O’Halloran
       </button>
@@ -31,16 +30,16 @@
   </header>
 
   <main class="layout">
-    <!-- Left rail (always present, obscured by vignette) -->
+    <!-- Left rail -->
     <aside class="rail" aria-label="Left still rail">
       <div class="rail-inner" id="railLeft"></div>
       <div class="rail-shade" aria-hidden="true"></div>
     </aside>
 
-    <!-- Center content crossfades between routes -->
+    <!-- Center: views crossfade -->
     <section class="center">
       <div class="views" id="views">
-        <!-- HOME: stage + textless photo block -->
+        <!-- HOME: looks like mock system + textless photo block -->
         <section class="view is-active" data-route="home" id="view-home">
           <div class="stage-frame">
             <img class="stage-img" id="homeStageImg" alt="" />
@@ -50,7 +49,7 @@
           <div class="home-mosaic" id="homeMosaic" aria-label="Home photo block"></div>
         </section>
 
-        <!-- FILMS: list on left + stage + details -->
+        <!-- FILMS: list newest→oldest + detail -->
         <section class="view" data-route="films" id="view-films" hidden>
           <div class="filmsLayout">
             <aside class="filmList" aria-label="Film list">
@@ -94,7 +93,7 @@
           </div>
         </section>
 
-        <!-- CONTACT: very direct -->
+        <!-- CONTACT: direct + socials -->
         <section class="view" data-route="contact" id="view-contact" hidden>
           <section class="panel contactPanel">
             <div class="panel-header">
@@ -104,6 +103,17 @@
 
             <div class="panel-body" id="contactBody"></div>
             <div class="contactLinks" id="contactLinks"></div>
+          </section>
+        </section>
+
+        <!-- Error overlay region -->
+        <section class="view" data-route="error" id="view-error" hidden>
+          <section class="panel">
+            <div class="panel-header">
+              <div class="panel-title">ERROR</div>
+              <div class="panel-meta">Site failed to load data</div>
+            </div>
+            <div class="panel-body" id="errorBody"></div>
           </section>
         </section>
       </div>
