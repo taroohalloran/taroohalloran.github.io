@@ -1,22 +1,17 @@
-/* ---- Hard rule: the PAGE never scrolls ---- */
+* { box-sizing: border-box; }
 html, body { height: 100%; }
-body {
-  margin: 0;
-  background: #050505;
-  color: #eaeaea;
-  overflow: hidden; /* <-- locks the page */
+body{
+  margin:0;
+  background:#050505;
+  color:#eaeaea;
+  overflow-x:hidden;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Helvetica Neue", sans-serif;
 }
 
-/* ---- Overlays for gnarl ---- */
-.overlay{
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 3;
-}
+/* VHS overlays */
+.overlay{ position:fixed; inset:0; pointer-events:none; z-index:2; }
 .overlay-scanlines{
-  opacity: .12;
+  opacity:.12;
   background: repeating-linear-gradient(
     to bottom,
     rgba(255,255,255,0.06),
@@ -27,7 +22,7 @@ body {
   mix-blend-mode: overlay;
 }
 .overlay-grain{
-  opacity: .10;
+  opacity:.10;
   background-image:
     radial-gradient(rgba(255,255,255,0.16) 1px, transparent 1px),
     radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
@@ -37,16 +32,17 @@ body {
   mix-blend-mode: overlay;
 }
 .overlay-vignette{
-  opacity: .60;
+  opacity:.60;
   background: radial-gradient(circle at center, rgba(0,0,0,0) 40%, rgba(0,0,0,0.90) 100%);
 }
 
-/* ---- Header ---- */
+/* Header (compresses on non-home) */
 .header{
   position: relative;
   z-index: 5;
-  padding: 22px 14px 10px;
+  padding: 26px 14px 10px;
   text-align: center;
+  transition: padding 240ms ease, transform 240ms ease;
 }
 
 .title{
@@ -55,10 +51,11 @@ body {
   letter-spacing: .02em;
   color: #ff2b2b;
   text-shadow: 0 2px 0 rgba(0,0,0,0.65), 0 14px 35px rgba(0,0,0,0.65);
+  transition: font-size 240ms ease, transform 240ms ease;
 }
-.subtitle{ margin-top: 6px; opacity: .86; font-size: 16px; }
 
-/* clickable name that doesn't look like a button */
+.subtitle{ margin-top:6px; opacity:.86; font-size:16px; transition: opacity 240ms ease; }
+
 .home-link{
   all: unset;
   cursor: pointer;
@@ -72,10 +69,10 @@ body {
 
 .nav{
   margin-top: 16px;
-  display: flex;
-  justify-content: center;
+  display:flex;
+  justify-content:center;
   gap: 16px;
-  flex-wrap: wrap;
+  flex-wrap:wrap;
 }
 .nav-btn{
   border: 2px solid rgba(255,48,48,0.65);
@@ -85,8 +82,8 @@ body {
   border-radius: 999px;
   letter-spacing: .35em;
   font-weight: 800;
-  cursor: pointer;
-  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+  cursor:pointer;
+  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease, opacity 200ms ease;
 }
 .nav-btn:hover{ transform: translateY(-1px); background: rgba(255,48,48,0.08); }
 .nav-btn[aria-current="page"]{
@@ -94,47 +91,63 @@ body {
   border-color: rgba(255,48,48,0.95);
 }
 
-/* ---- Layout: fixed viewport UI ---- */
+/* Header compressed state (when not home) */
+body:not(.route-home) .header{
+  padding: 14px 14px 6px;
+  transform: translateY(-6px);
+}
+body:not(.route-home) .title{
+  font-size: clamp(28px, 4vw, 52px);
+}
+body:not(.route-home) .subtitle{
+  opacity: .65;
+}
+body:not(.route-home) .nav-btn{
+  opacity: .95;
+}
+
+/* Layout */
 .layout{
   position: relative;
   z-index: 5;
-  height: calc(100vh - 160px); /* header+footer-ish space */
-  display: grid;
-  grid-template-columns: 190px minmax(0, 1fr) 190px;
+  display:grid;
+  grid-template-columns: 190px minmax(0,1fr) 190px;
   gap: 14px;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 10px 14px 14px;
+  padding: 10px 14px 18px;
 }
 
-/* ---- Rails with vignette ---- */
+/* Rails */
 .rail{
-  position: relative;
-  overflow: hidden;
+  position:relative;
+  overflow:hidden;
   border: 1px solid rgba(255,255,255,0.14);
   background: rgba(0,0,0,0.25);
 }
 .rail-inner{
-  display: grid;
+  display:grid;
   gap: 10px;
   padding: 12px;
-  align-content: start;
+  align-content:start;
 }
 .thumb{
+  position:relative;
   border: 1px solid rgba(255,255,255,0.16);
   background: rgba(0,0,0,0.35);
-  overflow: hidden;
+  overflow:hidden;
   aspect-ratio: 4/3;
-  cursor: pointer;
-  position: relative;
+  cursor:pointer;
 }
 .thumb img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: .82;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:.82;
   filter: contrast(1.08) saturate(1.10);
+  transition: opacity 120ms ease, transform 120ms ease;
 }
+.thumb:hover img{ opacity:.98; transform: scale(1.01); }
 .thumb::after{
   content:"";
   position:absolute;
@@ -142,6 +155,7 @@ body {
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 -35px 70px rgba(0,0,0,0.55);
 }
 
+/* Rail vignette / obscured edges (your mock vibe) */
 .rail-shade{
   position:absolute;
   inset:-30px;
@@ -161,32 +175,45 @@ body {
   opacity: .95;
 }
 
-/* ---- Center split: top fixed, bottom scrollable (internal only) ---- */
-.center{
-  display: grid;
-  grid-template-rows: auto 1fr; /* topstack height + remaining space */
-  gap: 12px;
-  min-height: 0; /* critical for nested scroll */
-}
-
-.topstack{
-  display: grid;
-  gap: 12px;
-}
-
-/* 16:9 stage */
-.stage-frame{
+/* Center + view crossfade */
+.center{ min-height: 0; }
+.views{
   position: relative;
+  min-height: 520px; /* prevents jump during fade */
+}
+.view{
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+  transition: opacity 260ms ease, transform 260ms ease, filter 260ms ease;
+  filter: blur(0px);
+}
+.view.is-active{
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.view.is-fading-out{
+  opacity: 0;
+  transform: translateY(-6px);
+  filter: blur(2px);
+}
+
+/* Shared stage */
+.stage-frame{
+  position:relative;
   border: 1px solid rgba(255,255,255,0.16);
   background: rgba(0,0,0,0.25);
-  overflow: hidden;
+  overflow:hidden;
   aspect-ratio: 16/9;
 }
 .stage-img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: .92;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:.92;
   filter: contrast(1.15) saturate(1.15);
 }
 .stage-shade{
@@ -195,22 +222,51 @@ body {
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), inset 0 -70px 140px rgba(0,0,0,0.58);
 }
 
-/* info panel */
+/* HOME mosaic under the stage, no text */
+#view-home{
+  display:grid;
+  gap: 12px;
+}
+.home-mosaic{
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.18);
+  padding: 12px;
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 10px;
+}
+.mosaic-item{
+  position:relative;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.35);
+  overflow:hidden;
+  aspect-ratio: 4/3;
+}
+.mosaic-item img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:.88;
+  filter: contrast(1.08) saturate(1.10);
+}
+.mosaic-item::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 -30px 60px rgba(0,0,0,0.55);
+}
+
+/* Panel */
 .panel{
   border: 1px solid rgba(255,255,255,0.14);
   background: rgba(0,0,0,0.25);
   padding: 14px 14px 16px;
 }
+.panel-header{ display:grid; gap:4px; margin-bottom:10px; }
 .panel-title{ font-weight: 900; letter-spacing: .10em; text-transform: uppercase; }
-.panel-meta{ opacity: .8; font-size: 14px; margin-top: 4px; }
-.panel-body{ opacity: .95; font-size: 15px; line-height: 1.55; margin-top: 10px; }
-
-.panel-actions{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-top: 12px;
-}
+.panel-meta{ opacity:.8; font-size: 14px; }
+.panel-body{ opacity:.95; font-size: 15px; line-height: 1.55; }
+.panel-actions{ display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
 .action{
   border: 1px solid rgba(255,255,255,0.20);
   background: rgba(0,0,0,0.35);
@@ -223,123 +279,154 @@ body {
   font-size: 12px;
 }
 
-/* ---- Scrollable gallery area (ONLY this scrolls) ---- */
-.galleryShell{
-  position: relative;
+/* FILMS layout */
+.filmsLayout{
+  display:grid;
+  grid-template-columns: 260px minmax(0,1fr);
+  gap: 12px;
+  height: 100%;
+}
+.filmList{
   border: 1px solid rgba(255,255,255,0.14);
   background: rgba(0,0,0,0.18);
-  min-height: 0; /* critical */
-  overflow: hidden; /* so fade overlay looks clean */
-}
-
-/* The top fade that makes items "disappear into shadow" as they reach top */
-.galleryFadeTop{
-  position: absolute;
-  left: 0; right: 0; top: 0;
-  height: 90px;
-  z-index: 4;
-  pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    rgba(0,0,0,0.92),
-    rgba(0,0,0,0.55) 55%,
-    rgba(0,0,0,0) 100%
-  );
-}
-
-/* actual scroll container */
-.galleryScroll{
-  height: 100%;
-  overflow-y: auto;
-  overscroll-behavior: contain;
   padding: 12px;
+  overflow:auto;
 }
-
-/* nice scroll feel */
-.galleryScroll::-webkit-scrollbar{ width: 10px; }
-.galleryScroll::-webkit-scrollbar-thumb{
-  background: rgba(255,255,255,0.10);
-  border-radius: 999px;
+.filmListHead{
+  font-weight: 900;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  opacity: .9;
 }
-
-.galleryGrid{
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0,1fr));
+.filmCard{
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.25);
+  padding: 10px;
+  cursor:pointer;
+  display:grid;
+  grid-template-columns: 54px minmax(0,1fr);
   gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.filmCard img{
+  width:54px; height:72px; object-fit:cover;
+  border: 1px solid rgba(255,255,255,0.14);
+  opacity:.9;
+}
+.filmCardTitle{
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+.filmCardMeta{
+  opacity: .75;
+  font-size: 12px;
+  margin-top: 4px;
+}
+.filmCard[aria-selected="true"]{
+  outline: 2px solid rgba(255,48,48,0.55);
+  outline-offset: 2px;
+}
+.filmMain{
+  display:grid;
+  gap: 12px;
 }
 
-.gal-item{
+/* ABOUT layout */
+.aboutLayout{
+  display:grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 12px;
+  height: 100%;
+}
+.aboutPhotoFrame{
   position: relative;
   border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(0,0,0,0.35);
-  overflow: hidden;
-  aspect-ratio: 4/3;
+  background: rgba(0,0,0,0.25);
+  overflow:hidden;
+  min-height: 360px;
 }
-.gal-item img{
+.aboutPhotoFrame img{
   width:100%;
   height:100%;
-  object-fit:cover;
-  opacity: .88;
-  filter: contrast(1.08) saturate(1.10);
+  object-fit: cover;
+  opacity:.92;
+  filter: contrast(1.12) saturate(1.10);
 }
-.gal-item::after{
-  content:"";
+.aboutShade{
   position:absolute;
   inset:0;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 -30px 60px rgba(0,0,0,0.55);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 -80px 160px rgba(0,0,0,0.60);
 }
 
-/* small padding at bottom so last row doesn't feel cramped */
-.galleryPad{ height: 18px; }
-
-/* ---- Footer ---- */
-.footer{
-  position: relative;
-  z-index: 5;
-  padding: 0 14px 14px;
+/* Contact links */
+.contactLinks{
+  display:grid;
+  gap: 10px;
+  margin-top: 12px;
 }
+.contactLink{
+  display:flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.25);
+  text-decoration:none;
+  color:#eee;
+  font-weight: 800;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+.contactLink span:last-child{
+  opacity:.75;
+  letter-spacing: .04em;
+  text-transform:none;
+  font-weight: 600;
+}
+
+/* Footer */
+.footer{ position:relative; z-index:5; padding: 0 14px 16px; }
 .footer-inner{
-  max-width: 1280px;
-  margin: 0 auto;
-  opacity: .65;
+  max-width:1280px;
+  margin:0 auto;
+  opacity:.65;
   font-size: 12px;
   letter-spacing: .10em;
   text-transform: uppercase;
 }
 
-/* ---- Mobile: full-bleed, rails become horizontal strips; gallery 2 columns ---- */
+/* Mobile: full-bleed, rails become horizontal */
 @media (max-width: 900px){
   .layout{
-    max-width: none;
-    margin: 0;
-    padding: 10px 0 12px;  /* full-bleed */
+    max-width:none;
+    margin:0;
+    padding: 10px 0 12px; /* full-bleed */
     grid-template-columns: 1fr;
     gap: 10px;
-    height: calc(100vh - 170px);
   }
 
-  .rail{
-    border-left: 0;
-    border-right: 0;
-  }
-
+  .rail{ border-left:0; border-right:0; }
   .rail-inner{
     grid-auto-flow: column;
     grid-auto-columns: 160px;
     grid-template-columns: none;
-    overflow-x: auto;
+    overflow-x:auto;
     padding: 10px 12px;
     gap: 10px;
     scroll-snap-type: x mandatory;
   }
   .thumb{ scroll-snap-align: start; }
 
-  .stage-frame, .panel, .galleryShell{
-    border-left: 0;
-    border-right: 0;
-  }
+  .home-mosaic{ grid-template-columns: repeat(2, minmax(0,1fr)); border-left:0; border-right:0; }
+  .stage-frame{ border-left:0; border-right:0; }
+  .panel{ border-left:0; border-right:0; }
 
-  .galleryGrid{
-    grid-template-columns: repeat(2, minmax(0,1fr));
-  }
+  .filmsLayout{ grid-template-columns: 1fr; }
+  .filmList{ max-height: 240px; }
+  .aboutLayout{ grid-template-columns: 1fr; }
 }
