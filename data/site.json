@@ -1,86 +1,24 @@
 {
   "site": {
-    "title": "Taro O’Halloran",
     "subtitle": "( writer , director , producer )",
     "footer": "Taro O’Halloran — director page"
   },
-
-  "routes": {
-    "films": {
-      "hero": {
-        "image": "assets/stills/hero-humanzee.jpg",
-        "title": "HUMANZEE",
-        "meta": "Short film — now streaming",
-        "body": "Replace this with a tight 2–4 sentence description of Humanzee.",
-        "actions": [
-          { "label": "Watch", "href": "https://www.youtube.com/watch?v=YOUR_LINK" },
-          { "label": "Trailer", "href": "https://www.youtube.com/watch?v=YOUR_TRAILER_LINK" }
-        ]
-      },
-      "gallery": [
-        { "image": "assets/stills/gal-01.jpg" },
-        { "image": "assets/stills/gal-02.jpg" },
-        { "image": "assets/stills/gal-03.jpg" },
-        { "image": "assets/stills/gal-04.jpg" }
+  "home": {
+    "hero": {
+      "image": "assets/stills/home-hero.jpg",
+      "title": "HUMANZEE",
+      "meta": "Now streaming",
+      "body": "Blunt 1–3 line home blurb goes here.",
+      "actions": [
+        { "label": "Watch", "href": "https://www.youtube.com/watch?v=YOUR_LINK" },
+        { "label": "Films", "href": "#films" }
       ]
     },
-
-    "about": {
-      "hero": {
-        "image": "assets/stills/about-hero.jpg",
-        "title": "ABOUT",
-        "meta": "Writer / Director / Producer",
-        "body": "Write a short factual bio here. Director of HUMANZEE. Currently developing THE LIVING UNDEAD RETURN AGAIN.",
-        "actions": [
-          { "label": "TLURA (In Dev)", "href": "#tlura" }
-        ]
-      }
-    },
-
-    "contact": {
-      "hero": {
-        "image": "assets/stills/contact-hero.jpg",
-        "title": "CONTACT",
-        "meta": "",
-        "body": "For inquiries: YOUR_EMAIL@DOMAIN.COM",
-        "actions": [
-          { "label": "Email", "href": "mailto:YOUR_EMAIL@DOMAIN.COM" },
-          { "label": "Instagram", "href": "https://instagram.com/YOUR_HANDLE" }
-        ]
-      }
-    }
-  },
-
-  "rails": {
-    "left": [
-      {
-        "image": "assets/stills/rail-01.jpg",
-        "title": "Humanzee",
-        "setHeroFromRoute": "films"
-      },
-      {
-        "image": "assets/stills/rail-02.jpg",
-        "title": "TLURA",
-        "customHero": {
-          "image": "assets/stills/tlura-hero.jpg",
-          "title": "THE LIVING UNDEAD RETURN AGAIN",
-          "meta": "Feature — in development",
-          "body": "One paragraph: tone + status. Keep it grounded.",
-          "actions": []
-        }
-      }
-    ],
-    "right": [
-      {
-        "image": "assets/stills/rail-03.jpg",
-        "title": "About",
-        "goRoute": "about"
-      },
-      {
-        "image": "assets/stills/rail-04.jpg",
-        "title": "Contact",
-        "goRoute": "contact"
-      }
+    "gallery": [
+      { "image": "assets/stills/gal-01.jpg" },
+      { "image": "assets/stills/gal-02.jpg" },
+      { "image": "assets/stills/gal-03.jpg" },
+      { "image": "assets/stills/gal-04.jpg" }
     ]
   }
 }
