@@ -4,24 +4,26 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Taro O’Halloran</title>
-  <meta name="description" content="Taro O’Halloran — writer, director, producer. Films, screenings, and contact." />
+  <meta name="description" content="Taro O’Halloran — writer, director, producer." />
   <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
-  <!-- Texture / CRT overlays -->
+  <!-- Global texture -->
   <div class="overlay overlay-grain" aria-hidden="true"></div>
   <div class="overlay overlay-scanlines" aria-hidden="true"></div>
   <div class="overlay overlay-vignette" aria-hidden="true"></div>
 
   <header class="header">
     <div class="title-block">
-      <div class="title" id="siteTitle">Taro O’Halloran</div>
+      <button class="title home-link" id="homeLink" type="button" aria-label="Go to Home">
+        Taro O’Halloran
+      </button>
       <div class="subtitle" id="siteSubtitle">( writer , director , producer )</div>
     </div>
 
     <nav class="nav" aria-label="Primary">
-      <button class="nav-btn" data-route="films" aria-current="page">FILMS</button>
+      <button class="nav-btn" data-route="films">FILMS</button>
       <button class="nav-btn" data-route="about">ABOUT</button>
       <button class="nav-btn" data-route="contact">CONTACT</button>
     </nav>
@@ -29,14 +31,15 @@
 
   <main class="layout">
     <!-- Left rail -->
-    <aside class="rail rail-left" aria-label="Left still rail">
+    <aside class="rail" aria-label="Left still rail">
       <div class="rail-inner" id="railLeft"></div>
       <div class="rail-shade" aria-hidden="true"></div>
     </aside>
 
-    <!-- Stage + panel + (optional) gallery -->
+    <!-- Center -->
     <section class="center">
-      <section class="stage">
+      <!-- Fixed top stack (does NOT scroll) -->
+      <section class="topstack" id="topstack">
         <div class="stage-frame">
           <img class="stage-img" id="stageImg" alt="" />
           <div class="stage-shade" aria-hidden="true"></div>
@@ -47,25 +50,26 @@
             <div class="panel-title" id="panelTitle"></div>
             <div class="panel-meta" id="panelMeta"></div>
           </div>
-
           <div class="panel-body" id="panelBody"></div>
-
           <div class="panel-actions" id="panelActions"></div>
         </section>
       </section>
 
-      <!-- Scroll-down gallery (only shown on FILMS route) -->
-      <section class="gallery" id="gallery" aria-label="Gallery">
-        <div class="gallery-head">
-          <div class="gallery-title">GALLERY</div>
-          <div class="gallery-sub">stills / frames / artifacts</div>
+      <!-- Scrollable gallery area (ONLY this scrolls) -->
+      <section class="galleryShell" aria-label="Home gallery">
+        <!-- This is the "fade into shadow" mask at the top of the scroll area -->
+        <div class="galleryFadeTop" aria-hidden="true"></div>
+
+        <!-- The actual scroll container -->
+        <div class="galleryScroll" id="galleryScroll">
+          <div class="galleryGrid" id="galleryGrid"></div>
+          <div class="galleryPad" aria-hidden="true"></div>
         </div>
-        <div class="gallery-grid" id="galleryGrid"></div>
       </section>
     </section>
 
     <!-- Right rail -->
-    <aside class="rail rail-right" aria-label="Right still rail">
+    <aside class="rail" aria-label="Right still rail">
       <div class="rail-inner" id="railRight"></div>
       <div class="rail-shade" aria-hidden="true"></div>
     </aside>
