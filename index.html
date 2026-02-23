@@ -8,14 +8,15 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 
-<body>
-  <!-- Global texture -->
+<body class="route-home">
+  <!-- VHS texture overlays -->
   <div class="overlay overlay-grain" aria-hidden="true"></div>
   <div class="overlay overlay-scanlines" aria-hidden="true"></div>
   <div class="overlay overlay-vignette" aria-hidden="true"></div>
 
-  <header class="header">
+  <header class="header" id="header">
     <div class="title-block">
+      <!-- Big bright red name always visible; click returns Home -->
       <button class="title home-link" id="homeLink" type="button" aria-label="Go to Home">
         Taro O’Halloran
       </button>
@@ -30,42 +31,82 @@
   </header>
 
   <main class="layout">
-    <!-- Left rail -->
+    <!-- Left rail (always present, obscured by vignette) -->
     <aside class="rail" aria-label="Left still rail">
       <div class="rail-inner" id="railLeft"></div>
       <div class="rail-shade" aria-hidden="true"></div>
     </aside>
 
-    <!-- Center -->
+    <!-- Center content crossfades between routes -->
     <section class="center">
-      <!-- Fixed top stack (does NOT scroll) -->
-      <section class="topstack" id="topstack">
-        <div class="stage-frame">
-          <img class="stage-img" id="stageImg" alt="" />
-          <div class="stage-shade" aria-hidden="true"></div>
-        </div>
-
-        <section class="panel" aria-live="polite">
-          <div class="panel-header">
-            <div class="panel-title" id="panelTitle"></div>
-            <div class="panel-meta" id="panelMeta"></div>
+      <div class="views" id="views">
+        <!-- HOME: stage + textless photo block -->
+        <section class="view is-active" data-route="home" id="view-home">
+          <div class="stage-frame">
+            <img class="stage-img" id="homeStageImg" alt="" />
+            <div class="stage-shade" aria-hidden="true"></div>
           </div>
-          <div class="panel-body" id="panelBody"></div>
-          <div class="panel-actions" id="panelActions"></div>
+
+          <div class="home-mosaic" id="homeMosaic" aria-label="Home photo block"></div>
         </section>
-      </section>
 
-      <!-- Scrollable gallery area (ONLY this scrolls) -->
-      <section class="galleryShell" aria-label="Home gallery">
-        <!-- This is the "fade into shadow" mask at the top of the scroll area -->
-        <div class="galleryFadeTop" aria-hidden="true"></div>
+        <!-- FILMS: list on left + stage + details -->
+        <section class="view" data-route="films" id="view-films" hidden>
+          <div class="filmsLayout">
+            <aside class="filmList" aria-label="Film list">
+              <div class="filmListHead">FILMS</div>
+              <div class="filmListItems" id="filmList"></div>
+            </aside>
 
-        <!-- The actual scroll container -->
-        <div class="galleryScroll" id="galleryScroll">
-          <div class="galleryGrid" id="galleryGrid"></div>
-          <div class="galleryPad" aria-hidden="true"></div>
-        </div>
-      </section>
+            <div class="filmMain">
+              <div class="stage-frame">
+                <img class="stage-img" id="filmStageImg" alt="" />
+                <div class="stage-shade" aria-hidden="true"></div>
+              </div>
+
+              <section class="panel">
+                <div class="panel-header">
+                  <div class="panel-title" id="filmTitle"></div>
+                  <div class="panel-meta" id="filmMeta"></div>
+                </div>
+                <div class="panel-body" id="filmBody"></div>
+                <div class="panel-actions" id="filmActions"></div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <!-- ABOUT: photo left + bio right -->
+        <section class="view" data-route="about" id="view-about" hidden>
+          <div class="aboutLayout">
+            <div class="aboutPhotoFrame">
+              <img id="aboutPhoto" alt="Portrait of Taro O’Halloran" />
+              <div class="aboutShade" aria-hidden="true"></div>
+            </div>
+
+            <section class="panel aboutPanel">
+              <div class="panel-header">
+                <div class="panel-title">ABOUT</div>
+                <div class="panel-meta" id="aboutMeta"></div>
+              </div>
+              <div class="panel-body" id="aboutBody"></div>
+            </section>
+          </div>
+        </section>
+
+        <!-- CONTACT: very direct -->
+        <section class="view" data-route="contact" id="view-contact" hidden>
+          <section class="panel contactPanel">
+            <div class="panel-header">
+              <div class="panel-title">CONTACT</div>
+              <div class="panel-meta" id="contactMeta"></div>
+            </div>
+
+            <div class="panel-body" id="contactBody"></div>
+            <div class="contactLinks" id="contactLinks"></div>
+          </section>
+        </section>
+      </div>
     </section>
 
     <!-- Right rail -->
