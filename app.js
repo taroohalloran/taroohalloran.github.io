@@ -1,6 +1,27 @@
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
 
+function esc(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+/**
+ * GitHub Pages-safe: resolves correctly for both
+ * - https://user.github.io/ (root)
+ * - https://user.github.io/repo/ (project)
+ */
+async function fetchJson(relPath) {
+  const url = new URL(relPath, window.location.href);
+  const res = await fetch(url.toString(), { cache: "no-store" });
+  if (!res.ok) throw new Error(`Fetch failed: ${url} → ${res.status} ${res.statusText}`);
+  return res.json();
+}
+
 const homeLink = $("#homeLink");
 const siteSubtitle = $("#siteSubtitle");
 const footerLine = $("#footerLine");
@@ -8,13 +29,14 @@ const footerLine = $("#footerLine");
 const railLeft = $("#railLeft");
 const railRight = $("#railRight");
 
-const views = $("#views");
+const navButtons = $$(".nav-btn");
+
 const viewHome = $("#view-home");
 const viewFilms = $("#view-films");
 const viewAbout = $("#view-about");
 const viewContact = $("#view-contact");
-
-const navButtons = $$(".nav-btn");
+const viewError = $("#view-error");
+const errorBody = $("#errorBody");
 
 const homeStageImg = $("#homeStageImg");
 const homeMosaic = $("#homeMosaic");
@@ -47,70 +69,68 @@ function setNav(route) {
     const on = btn.dataset.route === route;
     btn.setAttribute("aria-current", on ? "page" : "false");
   });
-  // On home, none highlighted
   if (route === "home") navButtons.forEach(btn => btn.setAttribute("aria-current", "false"));
 }
 
-function showView(route) {
-  const all = [viewHome, viewFilms, viewAbout, viewContact];
-  const target =
-    route === "home" ? viewHome :
-    route === "films" ? viewFilms :
-    route === "about" ? viewAbout :
-    viewContact;
-
-  all.forEach(v => {
-    const active = v === target;
-    v.hidden = false; // keep in DOM for transitions
-    v.classList.toggle("is-active", active);
+function showOnly(route) {
+  const map = {
+    home: viewHome,
+    films: viewFilms,
+    about: viewAbout,
+    contact: viewContact,
+    error: viewError
+  };
+  Object.entries(map).forEach(([key, el]) => {
+    const active = key === route;
+    el.hidden = !active;
+    el.classList.toggle("is-active", active);
   });
-
-  // Hide non-active after transition ends to prevent tabbing into them
-  window.setTimeout(() => {
-    all.forEach(v => { if (!v.classList.contains("is-active")) v.hidden = true; });
-  }, 280);
 }
 
 async function transitionTo(route) {
   if (route === currentRoute) return;
 
-  const currentView = document.querySelector(`.view.is-active`);
-  if (currentView) currentView.classList.add("is-fading-out");
+  const current = document.querySelector(".view.is-active");
+  if (current) current.classList.add("is-fading-out");
 
-  // Let fade-out start
   await new Promise(r => setTimeout(r, 140));
 
   currentRoute = route;
   setBodyRoute(route);
   setNav(route);
+  showOnly(route);
 
-  // Swap active view
-  if (currentView) currentView.classList.remove("is-active");
-  if (currentView) currentView.classList.remove("is-fading-out");
+  setTimeout(() => {
+    if (current) current.classList.remove("is-fading-out");
+  }, 320);
+}
 
-  showView(route);
+function routeFromHash() {
+  const raw = (location.hash || "").replace("#", "").trim();
+  if (["home","films","about","contact"].includes(raw)) return raw;
+  return "home";
 }
 
 function renderRails() {
   railLeft.innerHTML = "";
   railRight.innerHTML = "";
 
-  const makeThumb = (src) => {
+  const make = (src) => {
     const d = document.createElement("div");
     d.className = "thumb";
     d.innerHTML = `<img src="${src}" alt="" loading="lazy">`;
     return d;
   };
 
-  (DATA.rails?.left || []).forEach(src => railLeft.appendChild(makeThumb(src)));
-  (DATA.rails?.right || []).forEach(src => railRight.appendChild(makeThumb(src)));
+  (DATA.rails?.left || []).forEach(src => railLeft.appendChild(make(src)));
+  (DATA.rails?.right || []).forEach(src => railRight.appendChild(make(src)));
 }
 
 function renderHome() {
-  homeStageImg.src = DATA.home.stageImage;
+  homeStageImg.src = DATA.home.stageImage || "";
   homeStageImg.alt = "";
-
   homeMosaic.innerHTML = "";
+
   (DATA.home.mosaic || []).forEach(src => {
     const cell = document.createElement("div");
     cell.className = "mosaic-item";
@@ -120,11 +140,12 @@ function renderHome() {
 }
 
 function renderFilmDetail(filmId) {
-  const f = DATA.films.find(x => x.id === filmId) || DATA.films[0];
-  currentFilmId = f.id;
+  const f = (DATA.films || []).find(x => x.id === filmId) || (DATA.films || [])[0];
+  if (!f) return;
 
-  filmStageImg.src = f.stageImage || f.poster;
-  filmStageImg.alt = f.title;
+  currentFilmId = f.id;
+  filmStageImg.src = f.stageImage || f.poster || "";
+  filmStageImg.alt = f.title || "";
 
   filmTitle.textContent = (f.title || "").toUpperCase();
   filmMeta.textContent = [f.year, f.meta].filter(Boolean).join(" — ");
@@ -143,7 +164,6 @@ function renderFilmDetail(filmId) {
     filmActions.appendChild(el);
   });
 
-  // highlight selected
   $$(".filmCard").forEach(card => {
     card.setAttribute("aria-selected", card.dataset.filmId === f.id ? "true" : "false");
   });
@@ -151,7 +171,8 @@ function renderFilmDetail(filmId) {
 
 function renderFilms() {
   filmList.innerHTML = "";
-  DATA.films.forEach(f => {
+
+  (DATA.films || []).forEach(f => {
     const card = document.createElement("div");
     card.className = "filmCard";
     card.dataset.filmId = f.id;
@@ -159,10 +180,10 @@ function renderFilms() {
     card.setAttribute("tabindex", "0");
     card.setAttribute("aria-selected", "false");
     card.innerHTML = `
-      <img src="${f.poster}" alt="" loading="lazy">
+      <img src="${f.poster || ""}" alt="" loading="lazy">
       <div>
-        <div class="filmCardTitle">${escapeHtml(f.title).toUpperCase()}</div>
-        <div class="filmCardMeta">${escapeHtml([f.year, f.meta].filter(Boolean).join(" — "))}</div>
+        <div class="filmCardTitle">${esc(f.title).toUpperCase()}</div>
+        <div class="filmCardMeta">${esc([f.year, f.meta].filter(Boolean).join(" — "))}</div>
       </div>
     `;
     const open = () => renderFilmDetail(f.id);
@@ -171,52 +192,50 @@ function renderFilms() {
     filmList.appendChild(card);
   });
 
-  renderFilmDetail(currentFilmId || DATA.films[0]?.id);
+  renderFilmDetail(currentFilmId || (DATA.films || [])[0]?.id);
 }
 
 function renderAbout() {
-  aboutPhoto.src = DATA.about.photo;
-  aboutMeta.textContent = DATA.about.meta || "";
-  aboutBody.textContent = DATA.about.body || "";
+  aboutPhoto.src = DATA.about?.photo || "";
+  aboutMeta.textContent = DATA.about?.meta || "";
+  aboutBody.textContent = DATA.about?.body || "";
 }
 
 function renderContact() {
-  contactMeta.textContent = DATA.contact.meta || "";
-  contactBody.textContent = DATA.contact.body || "";
+  contactMeta.textContent = DATA.contact?.meta || "";
+  contactBody.textContent = DATA.contact?.body || "";
 
   contactLinks.innerHTML = "";
-  (DATA.contact.items || []).forEach(it => {
+  (DATA.contact?.items || []).forEach(it => {
     const a = document.createElement("a");
     a.className = "contactLink";
-    a.href = it.href;
-    if (!it.href.startsWith("mailto:")) { a.target = "_blank"; a.rel = "noreferrer"; }
-    a.innerHTML = `<span>${escapeHtml(it.label)}</span><span>${escapeHtml(it.value)}</span>`;
+    a.href = it.href || "#";
+    if (!a.href.startsWith("mailto:")) { a.target = "_blank"; a.rel = "noreferrer"; }
+    a.innerHTML = `<span>${esc(it.label)}</span><span>${esc(it.value)}</span>`;
     contactLinks.appendChild(a);
   });
 }
 
-function escapeHtml(str) {
-  return String(str)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function routeFromHash() {
-  const raw = (location.hash || "").replace("#", "").trim();
-  if (!raw) return "home";
-  if (["home","films","about","contact"].includes(raw)) return raw;
-  return "home";
-}
-
 async function init() {
-  const res = await fetch("data/site.json", { cache: "no-store" });
-  DATA = await res.json();
+  try {
+    DATA = await fetchJson("data/site.json");
+  } catch (err) {
+    // show a readable error view (no silent failures)
+    setBodyRoute("error");
+    setNav("error");
+    showOnly("error");
+    errorBody.textContent =
+      `Could not load data/site.json.\n\n` +
+      String(err) + `\n\n` +
+      `Fix:\n` +
+      `• Ensure the repo contains: data/site.json (lowercase)\n` +
+      `• Ensure GitHub Pages is deploying from main/(root)\n` +
+      `• Ensure file/folder case matches exactly (data ≠ Data)\n`;
+    return;
+  }
 
-  siteSubtitle.textContent = DATA.site.subtitle || "";
-  footerLine.textContent = DATA.site.footer || "";
+  siteSubtitle.textContent = DATA.site?.subtitle || "";
+  footerLine.textContent = DATA.site?.footer || "";
 
   renderRails();
   renderHome();
@@ -224,13 +243,13 @@ async function init() {
   renderAbout();
   renderContact();
 
-  // Home link
+  // name → home
   homeLink.addEventListener("click", async () => {
     history.pushState(null, "", "#home");
     await transitionTo("home");
   });
 
-  // Nav
+  // tabs
   navButtons.forEach(btn => {
     btn.addEventListener("click", async () => {
       const route = btn.dataset.route;
@@ -239,20 +258,16 @@ async function init() {
     });
   });
 
-  // Initial route
+  // initial
   const start = routeFromHash();
   currentRoute = start;
   setBodyRoute(start);
   setNav(start);
-  showView(start);
+  showOnly(start);
 
-  // Back/forward
   window.addEventListener("popstate", async () => {
-    const r = routeFromHash();
-    await transitionTo(r);
+    await transitionTo(routeFromHash());
   });
 }
 
-init().catch(err => {
-  console.error(err);
-});
+init();
