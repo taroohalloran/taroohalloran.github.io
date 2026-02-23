@@ -18,7 +18,7 @@
 
   "rails": {
     "left": ["assets/stills/rail-01.jpg","assets/stills/rail-02.jpg","assets/stills/rail-03.jpg","assets/stills/rail-04.jpg"],
-    "right": ["assets/stills/rail-02.jpg","assets/stills/rail-01.jpg","assets/stills/rail-04.jpg","assets/stills/rail-03.jpg"]
+    "right": ["assets/stills/rail-04.jpg","assets/stills/rail-03.jpg","assets/stills/rail-02.jpg","assets/stills/rail-01.jpg"]
   },
 
   "films": [
@@ -69,7 +69,7 @@
   "about": {
     "photo": "assets/stills/about-photo.jpg",
     "meta": "",
-    "body": "Write your bio here. Keep it factual and punchy. Director of HUMANZEE. Developing THE LIVING UNDEAD RETURN AGAIN."
+    "body": "Write your bio here. Keep it factual and punchy."
   },
 
   "contact": {
