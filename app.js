@@ -1,8 +1,8 @@
 /* =========================================================
    TARO SITE ROUTER + UI (FULL)
-   - fixes broken pages
-   - uses PNG nav button assets from assets/ui/
-   - hover grain stays clipped to element (no square boxes)
+   - hash routing: #home #films #about #contact #film/<slug>
+   - PNG nav button assets from assets/ui/
+   - hover grain clipped to hovered element only
 ========================================================= */
 
 const $ = (sel, root=document) => root.querySelector(sel);
@@ -34,7 +34,6 @@ const UI = {
   }
 };
 
-/* If any of these filenames differ, they must match exactly. */
 const FILMS = [
   {
     slug: "humanzee",
@@ -45,9 +44,7 @@ const FILMS = [
     logo: "assets/films/humanzee-logo.png",
     hero: "assets/films/humanzee-hero.jpg",
     desc: "Replace this with your Humanzee description.",
-    links: [
-      // { label: "Watch", href: "#" },
-    ],
+    links: [],
     feature: true
   },
   {
@@ -59,7 +56,8 @@ const FILMS = [
     logo: "assets/films/rendezvous-logo.png",
     hero: "assets/films/rendezvous-hero.jpg",
     desc: "Replace this with your Rendezvous description.",
-    links: []
+    links: [],
+    feature: false
   },
   {
     slug: "uap",
@@ -70,7 +68,8 @@ const FILMS = [
     logo: "assets/films/uap-logo.png",
     hero: "assets/films/uap-hero.jpg",
     desc: "Replace this with your description.",
-    links: []
+    links: [],
+    feature: false
   },
   {
     slug: "whispers",
@@ -81,11 +80,12 @@ const FILMS = [
     logo: "assets/films/the-whispers-of-the-aspens-logo.png",
     hero: "assets/films/the-whispers-of-the-aspens-hero.jpg",
     desc: "Replace this with your description.",
-    links: []
+    links: [],
+    feature: false
   }
 ];
 
-/* Home images (placeholders; safe if missing) */
+/* Home images (safe if missing) */
 const HOME = {
   hero: "assets/backgrounds/home-hero.jpg",
   left: [
@@ -107,13 +107,8 @@ const ABOUT = {
 };
 
 const CONTACT = {
-  body: `
-    <p>Replace this with your contact copy.</p>
-  `,
-  links: [
-    // { label: "Email", href: "mailto:you@example.com" },
-    // { label: "Instagram", href: "https://instagram.com/..." },
-  ]
+  body: `<p>Replace this with your contact copy.</p>`,
+  links: []
 };
 
 /* -----------------------------
@@ -150,10 +145,9 @@ const errorText = $("#errorText");
 
 /* Nav buttons */
 const navButtons = $$(".navBtn");
-const navImgs = $$(".navBtnImg");
 
 /* -----------------------------
-   PRELOAD (avoids “nothing shows” feel)
+   PRELOAD (avoids “nothing shows”)
 ------------------------------ */
 function preload(srcs = []) {
   srcs.forEach(src => {
@@ -207,8 +201,7 @@ function showOnly(which) {
 }
 
 /* -----------------------------
-   ROUTING
-   Uses hash routes: #home, #films, #about, #contact, #film/<slug>
+   ROUTING (hash)
 ------------------------------ */
 function parseRoute() {
   const raw = (location.hash || "#home").replace(/^#/, "");
@@ -225,32 +218,15 @@ function parseRoute() {
 }
 
 function setBodyRouteClass(page) {
-  document.body.classList.remove("route-home","route-films","route-about","route-contact","route-film","route-error");
+  document.body.classList.remove(
+    "route-home","route-films","route-about","route-contact","route-film","route-error"
+  );
   document.body.classList.add(`route-${page}`);
 }
 
 /* -----------------------------
    RENDERERS
 ------------------------------ */
-function renderHome() {
-  setBodyRouteClass("home");
-  showOnly("home");
-
-  // hero
-  if (homeHeroImg) homeHeroImg.src = HOME.hero;
-
-  // side stacks (only build once)
-  if (leftStack && leftStack.childElementCount === 0) {
-    HOME.left.forEach(src => leftStack.appendChild(makeSideBox(src)));
-  }
-  if (rightStack && rightStack.childElementCount === 0) {
-    HOME.right.forEach(src => rightStack.appendChild(makeSideBox(src)));
-  }
-
-  // nav state (no tab "selected" on home)
-  ["films","about","contact"].forEach(key => setNavImage(key, { selected:false, hovered:false }));
-}
-
 function makeSideBox(src) {
   const wrap = document.createElement("div");
   wrap.className = "sideBox";
@@ -261,6 +237,23 @@ function makeSideBox(src) {
   return wrap;
 }
 
+function renderHome() {
+  setBodyRouteClass("home");
+  showOnly("home");
+
+  if (homeHeroImg) homeHeroImg.src = HOME.hero;
+
+  if (leftStack && leftStack.childElementCount === 0) {
+    HOME.left.forEach(src => leftStack.appendChild(makeSideBox(src)));
+  }
+  if (rightStack && rightStack.childElementCount === 0) {
+    HOME.right.forEach(src => rightStack.appendChild(makeSideBox(src)));
+  }
+
+  // Home: no selected tab
+  ["films","about","contact"].forEach(key => setNavImage(key, { selected:false, hovered:false }));
+}
+
 function renderFilms() {
   setBodyRouteClass("films");
   showOnly("films");
@@ -269,9 +262,12 @@ function renderFilms() {
   if (!filmsGrid) return;
   filmsGrid.innerHTML = "";
 
-  const sorted = [...FILMS].sort((a,b) => (b.feature ? 1 : 0) - (a.feature ? 1 : 0));
+  const feature = FILMS.find(f => f.feature) || FILMS[0];
+  const rest = FILMS.filter(f => f !== feature);
 
-  sorted.forEach(f => {
+  const ordered = [feature, ...rest];
+
+  ordered.forEach((f, idx) => {
     const card = document.createElement("article");
     card.className = "filmCard grainHover" + (f.feature ? " is-feature" : "");
     card.dataset.slug = f.slug;
@@ -343,14 +339,12 @@ function renderContact() {
 function renderFilm(slug) {
   setBodyRouteClass("film");
   showOnly("film");
-  // keep nav in a sane state: films selected when in film detail
+
+  // Film detail = “Films” selected
   syncNavImages("films");
 
   const f = FILMS.find(x => x.slug === slug);
-  if (!f) {
-    renderError(`Film not found: ${slug}`);
-    return;
-  }
+  if (!f) return renderError(`Film not found: ${slug}`);
 
   if (filmHeroImg) filmHeroImg.src = f.hero;
   if (filmTitle) filmTitle.textContent = f.title;
@@ -372,6 +366,7 @@ function renderFilm(slug) {
       a.style.borderRadius = "999px";
       a.style.color = "rgba(255,255,255,0.85)";
       a.style.textDecoration = "none";
+      a.classList.add("grainHover"); // hover grain on the action pill itself
       filmActions.appendChild(a);
     });
   }
@@ -381,7 +376,6 @@ function renderError(msg) {
   setBodyRouteClass("error");
   showOnly("error");
   if (errorText) errorText.textContent = msg || "Something went wrong.";
-  // nav state: none selected
   ["films","about","contact"].forEach(key => setNavImage(key, { selected:false, hovered:false }));
 }
 
@@ -397,25 +391,25 @@ function goToFilm(slug) {
 }
 
 function wireNav() {
-  // Name logo returns home
   const homeLink = $("#homeLink");
   if (homeLink) homeLink.addEventListener("click", () => go("#home"));
 
-  // Route buttons
   navButtons.forEach(btn => {
     const route = btn.getAttribute("data-route");
     btn.addEventListener("click", () => go(`#${route}`));
   });
 
-  // Hover swapping for button assets (selected/notselected + hover)
+  // Hover swapping for PNG states
   navButtons.forEach(btn => {
     const route = btn.getAttribute("data-route"); // films/about/contact
+
     btn.addEventListener("pointerenter", () => {
       const current = parseRoute();
       const active = (current.page === "film") ? "films" : current.page;
       const selected = (active === route);
       setNavImage(route, { selected, hovered: true });
     });
+
     btn.addEventListener("pointerleave", () => {
       const current = parseRoute();
       const active = (current.page === "film") ? "films" : current.page;
@@ -424,8 +418,7 @@ function wireNav() {
     });
   });
 
-  // Ensure images exist immediately (prevents “still nothing”)
-  // default home: all not-selected standard
+  // Initial state on load
   ["films","about","contact"].forEach(k => setNavImage(k, { selected:false, hovered:false }));
 }
 
@@ -435,8 +428,6 @@ function wireNav() {
 function renderFromRoute() {
   const r = parseRoute();
 
-  // This prevents “buttons disappear / page dead” regressions:
-  // Always keep nav images in sync after view render.
   if (r.page === "home") return renderHome();
   if (r.page === "films") return renderFilms();
   if (r.page === "about") return renderAbout();
