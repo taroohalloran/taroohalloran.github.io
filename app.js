@@ -1,21 +1,39 @@
 (() => {
-  // ---------------- ROUTING ----------------
-  function getRouteFromHash() {
-    const raw = (location.hash || "#home").replace("#", "").trim();
-    if (!raw) return "home";
-    return raw;
+  const $ = (s) => document.querySelector(s);
+
+  // ---- Views (your existing structure) ----
+  const viewHome = $("#view-home");
+  const viewFilms = $("#view-films");
+  const viewAbout = $("#view-about");
+  const viewContact = $("#view-contact");
+  const viewFilm = $("#view-film");     // optional
+  const viewError = $("#view-error");   // optional
+
+  function showOnly(viewEl) {
+    const all = [viewHome, viewFilms, viewAbout, viewContact, viewFilm, viewError].filter(Boolean);
+    all.forEach(v => {
+      v.hidden = v !== viewEl;
+      v.classList.toggle("is-active", v === viewEl);
+    });
   }
 
-  function navigate(hash) {
-    if (!hash.startsWith("#")) hash = `#${hash}`;
-    if (location.hash === hash) {
-      render(getRouteFromHash());
-      return;
-    }
-    location.hash = hash;
+  // ---- Route parsing ----
+  function getRoute() {
+    const h = (location.hash || "#home").replace("#", "").trim();
+    return h || "home";
   }
 
-  // ---------------- TAB BUTTON IMAGES ----------------
+  function setRouteClass(route) {
+    document.body.classList.remove("route-home", "route-films", "route-about", "route-contact", "route-film");
+
+    if (route === "home") document.body.classList.add("route-home");
+    else if (route === "films") document.body.classList.add("route-films");
+    else if (route === "about") document.body.classList.add("route-about");
+    else if (route === "contact") document.body.classList.add("route-contact");
+    else if (route.startsWith("film/")) document.body.classList.add("route-film");
+  }
+
+  // ---- Button image swapping (4 states) ----
   function tabSrc(base, selected, hover) {
     const sel = selected ? "selected" : "notselected";
     const hov = hover ? "hover" : "standard";
@@ -23,7 +41,7 @@
   }
 
   function setTabImage(btn, hover = false) {
-    const img = btn.querySelector("img");
+    const img = btn.querySelector("img.tabImg");
     if (!img) return;
 
     const base = img.dataset.base;
@@ -34,225 +52,135 @@
   }
 
   function syncAllTabImages() {
-    document.querySelectorAll(".tabImgBtn").forEach((btn) => setTabImage(btn, false));
+    document.querySelectorAll(".tabImgBtn").forEach(btn => setTabImage(btn, false));
   }
 
   function preloadTabImages() {
-    const bases = Array.from(document.querySelectorAll(".tabImg"))
-      .map((img) => img.dataset.base)
-      .filter(Boolean);
+    const imgs = Array.from(document.querySelectorAll("img.tabImg"));
+    const bases = [...new Set(imgs.map(i => i.dataset.base).filter(Boolean))];
 
-    const uniq = [...new Set(bases)];
     const states = [
-      ["notselected", "standard"],
-      ["notselected", "hover"],
-      ["selected", "standard"],
-      ["selected", "hover"],
+      ["notselected","standard"],
+      ["notselected","hover"],
+      ["selected","standard"],
+      ["selected","hover"],
     ];
 
-    uniq.forEach((base) => {
+    bases.forEach(base => {
       states.forEach(([sel, hov]) => {
-        const i = new Image();
-        i.src = `${base}-${sel}-${hov}.png`;
+        const im = new Image();
+        im.src = `${base}-${sel}-${hov}.png`;
       });
     });
   }
 
   function setTabs(route) {
-    document.querySelectorAll(".tabImgBtn").forEach((btn) => {
-      const isActive = btn.dataset.route === route;
-      btn.setAttribute("aria-current", isActive ? "page" : "false");
+    // highlight exact match (films/about/contact)
+    document.querySelectorAll(".tabImgBtn").forEach(btn => {
+      const active = btn.dataset.route === route;
+      btn.setAttribute("aria-current", active ? "page" : "false");
     });
 
-    // No tab selected on home or film detail pages
+    // home + film detail pages: no tab active
     if (route === "home" || route.startsWith("film/")) {
-      document.querySelectorAll(".tabImgBtn").forEach((btn) =>
-        btn.setAttribute("aria-current", "false")
-      );
+      document.querySelectorAll(".tabImgBtn").forEach(btn => btn.setAttribute("aria-current","false"));
     }
 
     syncAllTabImages();
   }
 
-  // ---------------- HEADER STATE ----------------
-  function setHeaderState(route) {
-    document.body.classList.remove(
-      "route-home",
-      "route-films",
-      "route-about",
-      "route-contact",
-      "route-film"
-    );
-
-    if (route === "home") document.body.classList.add("route-home");
-    else if (route === "films") document.body.classList.add("route-films");
-    else if (route === "about") document.body.classList.add("route-about");
-    else if (route === "contact") document.body.classList.add("route-contact");
-    else if (route.startsWith("film/")) document.body.classList.add("route-film");
-  }
-
-  // ---------------- PAGES ----------------
-  function pageHome() {
-    return `
-      <section class="page pageHome" data-page="home">
-        <div class="homeFrame">
-          <!-- Your homepage image layout lives in HTML/CSS -->
-        </div>
-      </section>
-    `;
-  }
-
-  function pageFilms() {
-    return `
-      <section class="page pageFilms" data-page="films">
-        <div class="filmsGrid">
-          <a class="filmCard" href="#film/humanzee">
-            <img class="filmLogo filmLogo--humanzee" src="logos/Humanzee.png" alt="Humanzee" />
-          </a>
-
-          <a class="filmCard" href="#film/rendezvous">
-            <img class="filmLogo" src="logos/Rendezvous.png" alt="Rendezvous" />
-          </a>
-
-          <a class="filmCard" href="#film/uap">
-            <img class="filmLogo" src="logos/UAP.png" alt="UAP" />
-          </a>
-
-          <a class="filmCard" href="#film/do-dragons-sleep">
-            <img class="filmLogo" src="logos/Do-Dragons-Sleep-in-Fictitious-Caves.png" alt="Do Dragons Sleep in Fictitious Caves?" />
-          </a>
-
-          <a class="filmCard" href="#film/whispers-of-the-aspens">
-            <img class="filmLogo filmLogo--aspens" src="logos/The-Whispers-of-the-Aspens.png" alt="The Whispers of the Aspens" />
-          </a>
-        </div>
-      </section>
-    `;
-  }
-
-  function pageAbout() {
-    return `
-      <section class="page pageAbout" data-page="about">
-        <div class="aboutWrap">
-          <div class="aboutPhoto">
-            <img src="about/taro.jpg" alt="Taro O’Halloran" />
-          </div>
-          <div class="aboutText">
-            <h2>About</h2>
-            <p>Replace this with your bio text.</p>
-          </div>
-        </div>
-      </section>
-    `;
-  }
-
-  function pageContact() {
-    return `
-      <section class="page pageContact" data-page="contact">
-        <div class="contactWrap">
-          <h2>Contact</h2>
-          <p>Email: <a href="mailto:you@example.com">you@example.com</a></p>
-          <p>Instagram: <a href="https://instagram.com/" target="_blank">@handle</a></p>
-          <p>YouTube: <a href="https://youtube.com/" target="_blank">Channel</a></p>
-        </div>
-      </section>
-    `;
-  }
-
-  function pageFilmDetail(slug) {
-    const titleMap = {
-      "humanzee": "Humanzee",
-      "rendezvous": "Rendezvous",
-      "uap": "UAP",
-      "do-dragons-sleep": "Do Dragons Sleep in Fictitious Caves?",
-      "whispers-of-the-aspens": "The Whispers of the Aspens",
-    };
-    const title = titleMap[slug] || "Film";
-
-    return `
-      <section class="page pageFilmDetail" data-page="film">
-        <div class="filmDetailWrap">
-          <h2>${title}</h2>
-          <p>Film detail page content goes here.</p>
-          <p><a href="#films">← Back to Films</a></p>
-        </div>
-      </section>
-    `;
-  }
-
-  function resolvePage(route) {
-    if (route === "home") return pageHome();
-    if (route === "films") return pageFilms();
-    if (route === "about") return pageAbout();
-    if (route === "contact") return pageContact();
-    if (route.startsWith("film/")) {
-      const slug = route.split("/")[1] || "";
-      return pageFilmDetail(slug);
+  // ---- Navigation ----
+  function navigate(hash) {
+    if (!hash.startsWith("#")) hash = `#${hash}`;
+    if (location.hash === hash) {
+      handleRoute();
+      return;
     }
-    return pageHome();
+    location.hash = hash;
   }
 
-  // ---------------- RENDER ----------------
-  function render(route) {
-    setHeaderState(route);
+  function handleRoute() {
+    const route = getRoute();
+    setRouteClass(route);
     setTabs(route);
 
-    const app = document.getElementById("app");
-    if (!app) return;
+    if (route === "home") { showOnly(viewHome); return; }
+    if (route === "films") { showOnly(viewFilms); return; }
+    if (route === "about") { showOnly(viewAbout); return; }
+    if (route === "contact") { showOnly(viewContact); return; }
 
-    app.classList.add("appFading");
-    setTimeout(() => {
-      app.innerHTML = resolvePage(route);
-      bindInternalLinks(app);
-
-      requestAnimationFrame(() => {
-        app.classList.remove("appFading");
-      });
-    }, 120);
-  }
-
-  // ---------------- EVENTS ----------------
-  function bindHeaderEvents(root = document) {
-    const title = root.getElementById("siteTitle");
-    if (title) {
-      title.addEventListener("click", (e) => {
-        e.preventDefault();
-        navigate("#home");
-      });
+    if (route.startsWith("film/") && viewFilm) {
+      showOnly(viewFilm);
+      return;
     }
 
-    root.querySelectorAll(".tabImgBtn").forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        e.preventDefault();
-        navigate(`#${btn.dataset.route}`);
-      });
+    // fallback
+    if (viewError) {
+      showOnly(viewError);
+    } else {
+      showOnly(viewHome);
+    }
+  }
 
+  // ---- Hover behavior for tabs (swap to hover assets) ----
+  function bindTabHoverSwap() {
+    document.querySelectorAll(".tabImgBtn").forEach(btn => {
       btn.addEventListener("mouseenter", () => setTabImage(btn, true));
       btn.addEventListener("mouseleave", () => setTabImage(btn, false));
+      // keyboard focus support
+      btn.addEventListener("focus", () => setTabImage(btn, true));
+      btn.addEventListener("blur", () => setTabImage(btn, false));
     });
   }
 
-  function bindInternalLinks(scope = document) {
-    scope.querySelectorAll('a[href^="#"]').forEach((a) => {
-      a.addEventListener("click", (e) => {
+  // ---- Click handling (event delegation = robust when clicking images) ----
+  function bindClicks() {
+    document.addEventListener("click", (e) => {
+      const tabBtn = e.target.closest(".tabImgBtn");
+      if (tabBtn) {
         e.preventDefault();
-        navigate(a.getAttribute("href"));
-      });
+        navigate(`#${tabBtn.dataset.route}`);
+        return;
+      }
+
+      const homeLink = e.target.closest("#homeLink");
+      if (homeLink) {
+        e.preventDefault();
+        navigate("#home");
+        return;
+      }
+
+      // allow film tiles to work if they are links like <a href="#film/humanzee">
+      const hashLink = e.target.closest('a[href^="#"]');
+      if (hashLink) {
+        const href = hashLink.getAttribute("href");
+        if (href) {
+          e.preventDefault();
+          navigate(href);
+          return;
+        }
+      }
     });
   }
 
-  // ---------------- INIT ----------------
+  // ---- Init ----
   function init() {
+    // If the <img> has no src initially, set it to notselected-standard
+    document.querySelectorAll(".tabImgBtn img.tabImg").forEach(img => {
+      if (!img.getAttribute("src")) {
+        const base = img.dataset.base;
+        if (base) img.src = `${base}-notselected-standard.png`;
+      }
+    });
+
     preloadTabImages();
     syncAllTabImages();
-    bindHeaderEvents(document);
-    bindInternalLinks(document);
+    bindTabHoverSwap();
+    bindClicks();
 
-    window.addEventListener("hashchange", () => {
-      render(getRouteFromHash());
-    });
-
-    render(getRouteFromHash());
+    if (!location.hash) history.replaceState(null, "", "#home");
+    handleRoute();
+    window.addEventListener("hashchange", handleRoute);
   }
 
   document.addEventListener("DOMContentLoaded", init);
