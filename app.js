@@ -1,107 +1,25 @@
-// app.js — FULL FILE (matches your index.html exactly)
+/* =========================================================
+   TARO SITE — stable hash router + PNG tab states + hover grain per-element
+   ========================================================= */
 
-const $ = (s) => document.querySelector(s);
+const $ = (sel) => document.querySelector(sel);
 
-const SITE = {
-  home: {
-    hero: "assets/stills/home-center.jpg",
-    left: ["assets/stills/home-left-1.jpg", "assets/stills/home-left-2.jpg"],
-    right: ["assets/stills/home-right-1.jpg", "assets/stills/home-right-2.jpg"]
-  },
-
-  about: {
-    photo: "assets/stills/about-photo.jpg",
-    bio: "Write your bio here."
-  },
-
-  contact: {
-    body: "For inquiries:",
-    links: [
-      { label: "Email", value: "YOUR_EMAIL@DOMAIN.COM", href: "mailto:YOUR_EMAIL@DOMAIN.COM" },
-      { label: "Instagram", value: "@YOUR_HANDLE", href: "https://instagram.com/YOUR_HANDLE" }
-    ]
-  },
-
-  films: [
-    {
-      id: "humanzee",
-      title: "Humanzee",
-      year: "2024",
-      runtime: "23 min.",
-      genres: "Horror/Drama",
-      tile: "assets/stills/tile-humanzee.jpg",
-      hero: "assets/stills/tile-humanzee.jpg",
-      logo: "assets/films/humanzee/humanzee-logo.png",
-      desc: "",
-      actions: []
-    },
-    {
-      id: "rendezvous",
-      title: "Rendezvous",
-      year: "2023",
-      runtime: "16 min.",
-      genres: "Crime/Comedy",
-      tile: "assets/stills/tile-rendezvous.jpg",
-      hero: "assets/stills/tile-rendezvous.jpg",
-      logo: "assets/films/rendezvous/rendezvous-logo.png",
-      desc: "",
-      actions: []
-    },
-    {
-      id: "uap",
-      title: "UAP",
-      year: "2022",
-      runtime: "12 min.",
-      genres: "Comedy/Drama/Sci-Fi",
-      tile: "assets/stills/tile-uap.jpg",
-      hero: "assets/stills/tile-uap.jpg",
-      logo: "assets/films/uap/uap-logo.png",
-      desc: "",
-      actions: []
-    },
-    {
-      id: "dragons",
-      title: "Do Dragons Sleep in Fictitious Caves?",
-      year: "2022",
-      runtime: "4 min.",
-      genres: "Horror/Drama",
-      tile: "assets/stills/tile-dragons.jpg",
-      hero: "assets/stills/tile-dragons.jpg",
-      logo: "assets/films/dragons/do-dragons-sleep-in-fictitious-caves-logo.png",
-      desc: "",
-      actions: []
-    },
-    {
-      id: "aspens",
-      title: "The Whispers of the Aspens",
-      year: "2022",
-      runtime: "1 min.",
-      genres: "Horror",
-      tile: "assets/stills/tile-aspens.jpg",
-      hero: "assets/stills/tile-aspens.jpg",
-      logo: "assets/films/aspens/the-whispers-of-the-aspens-logo.png",
-      desc: "",
-      actions: []
-    }
-  ]
+const views = {
+  home: $("#view-home"),
+  films: $("#view-films"),
+  about: $("#view-about"),
+  contact: $("#view-contact"),
+  film: $("#view-film"),
+  error: $("#view-error"),
 };
 
-// ===== DOM refs =====
-const viewHome = $("#view-home");
-const viewFilms = $("#view-films");
-const viewAbout = $("#view-about");
-const viewContact = $("#view-contact");
-const viewFilm = $("#view-film");
-const viewError = $("#view-error");
-
 const homeHero = $("#homeHero");
-const leftStack = $("#homeLeftStack");
-const rightStack = $("#homeRightStack");
-const filmsGrid = $("#filmsGrid");
+const homeLeftStack = $("#homeLeftStack");
+const homeRightStack = $("#homeRightStack");
 
+const filmsGrid = $("#filmsGrid");
 const aboutImg = $("#aboutImg");
 const aboutBody = $("#aboutBody");
-
 const contactBody = $("#contactBody");
 const contactLinks = $("#contactLinks");
 
@@ -110,273 +28,431 @@ const filmTitle = $("#filmTitle");
 const filmMeta = $("#filmMeta");
 const filmDesc = $("#filmDesc");
 const filmActions = $("#filmActions");
-const errorText = $("#errorText");
 
-function showOnly(viewEl) {
-  const all = [viewHome, viewFilms, viewAbout, viewContact, viewFilm, viewError].filter(Boolean);
-  all.forEach(v => {
-    v.hidden = v !== viewEl;
-    v.classList.toggle("is-active", v === viewEl);
+const homeLink = $("#homeLink");
+
+const tabs = [
+  { key: "films", btn: $("#tab-films"), img: $("#tabImg-films") },
+  { key: "about", btn: $("#tab-about"), img: $("#tabImg-about") },
+  { key: "contact", btn: $("#tab-contact"), img: $("#tabImg-contact") },
+];
+
+/* ====== IMPORTANT: Your new button assets live here ======
+   You said: "I put the pngs in the ui folder"
+   So we use: assets/ui/<name>.png
+*/
+const TAB_ASSETS = {
+  films: {
+    notselected: {
+      standard: "assets/ui/films-button-notselected-standard.png",
+      hover: "assets/ui/films-button-notselected-hover.png",
+    },
+    selected: {
+      standard: "assets/ui/films-button-selected-standard.png",
+      hover: "assets/ui/films-button-selected-hover.png",
+    },
+  },
+  about: {
+    notselected: {
+      standard: "assets/ui/about-button-notselected-standard.png",
+      hover: "assets/ui/about-button-notselected-hover.png",
+    },
+    selected: {
+      standard: "assets/ui/about-button-selected-standard.png",
+      hover: "assets/ui/about-button-selected-hover.png",
+    },
+  },
+  contact: {
+    notselected: {
+      standard: "assets/ui/contact-button-notselected-standard.png",
+      hover: "assets/ui/contact-button-notselected-hover.png",
+    },
+    selected: {
+      standard: "assets/ui/contact-button-selected-standard.png",
+      hover: "assets/ui/contact-button-selected-hover.png",
+    },
+  },
+};
+
+/* ====== Content ====== */
+const FILMS = [
+  {
+    slug: "humanzee",
+    title: "Humanzee",
+    year: "2024",
+    runtime: "23 min.",
+    genre: "Horror/Drama",
+    logo: "assets/films/humanzee/logo-humanzee.png",
+    hero: "assets/films/humanzee/hero.jpg",
+    desc: "",
+    links: [
+      // { label: "Watch", href: "https://..." },
+    ],
+  },
+  {
+    slug: "rendezvous",
+    title: "Rendezvous",
+    year: "2023",
+    runtime: "16 min.",
+    genre: "Crime/Comedy",
+    logo: "assets/films/rendezvous/logo-rendezvous.png",
+    hero: "assets/films/rendezvous/hero.jpg",
+    desc: "",
+    links: [],
+  },
+  {
+    slug: "uap",
+    title: "UAP",
+    year: "2022",
+    runtime: "12 min.",
+    genre: "Comedy/Drama/Sci Fi",
+    logo: "assets/films/uap/logo-uap.png",
+    hero: "assets/films/uap/hero.jpg",
+    desc: "",
+    links: [],
+  },
+  {
+    slug: "do-dragons-sleep-in-fictitious-caves",
+    title: "Do Dragons Sleep in Fictitious Caves?",
+    year: "2022",
+    runtime: "4 min.",
+    genre: "Horror/Drama",
+    logo: "assets/films/do-dragons-sleep-in-fictitious-caves/logo-do-dragons-sleep-in-fictitious-caves.png",
+    hero: "assets/films/do-dragons-sleep-in-fictitious-caves/hero.jpg",
+    desc: "",
+    links: [],
+  },
+  {
+    slug: "the-whispers-of-the-aspens",
+    title: "The Whispers of the Aspens",
+    year: "2022",
+    runtime: "1 min.",
+    genre: "Horror",
+    logo: "assets/films/the-whispers-of-the-aspens/logo-the-whispers-of-the-aspens.png",
+    hero: "assets/films/the-whispers-of-the-aspens/hero.jpg",
+    desc: "",
+    links: [],
+  },
+];
+
+const HOME = {
+  hero: "assets/home/home-hero.jpg",
+  left: [
+    "assets/home/side-left-1.jpg",
+    "assets/home/side-left-2.jpg",
+  ],
+  right: [
+    "assets/home/side-right-1.jpg",
+    "assets/home/side-right-2.jpg",
+  ],
+};
+
+const ABOUT = {
+  photo: "assets/about/taro.jpg",
+  bodyHtml: `
+    <p><b>Taro O’Halloran</b> is a writer/director/producer based in Massachusetts, working in horror and genre with a handmade, grindhouse-forward sensibility.</p>
+    <p>Replace this with your bio copy.</p>
+  `,
+};
+
+const CONTACT = {
+  bodyHtml: `
+    <div style="font-size:15px; line-height:1.7;">
+      <p><b>Contact</b></p>
+      <p>Email: <span id="contactEmail">you@email.com</span></p>
+    </div>
+  `,
+  linksHtml: `
+    <div style="margin-top:10px; display:flex; gap:14px; flex-wrap:wrap;">
+      <a href="#" target="_blank" rel="noreferrer">Instagram</a>
+      <a href="#" target="_blank" rel="noreferrer">YouTube</a>
+      <a href="#" target="_blank" rel="noreferrer">IMDb</a>
+    </div>
+  `,
+};
+
+/* ====== Router ====== */
+function parseHash() {
+  const raw = (location.hash || "#home").replace(/^#/, "");
+  if (!raw || raw === "/") return { route: "home" };
+
+  // allow "#film/humanzee"
+  const parts = raw.split("/").filter(Boolean);
+  if (parts[0] === "film" && parts[1]) return { route: "film", slug: parts[1] };
+
+  // allow "#home", "#films", ...
+  return { route: parts[0] };
+}
+
+function setHash(route) {
+  if (route === "home") location.hash = "#home";
+  else location.hash = `#${route}`;
+}
+
+function setFilmHash(slug) {
+  location.hash = `#film/${slug}`;
+}
+
+function showView(which) {
+  Object.entries(views).forEach(([k, el]) => {
+    if (!el) return;
+    const active = (k === which);
+    if (active) {
+      el.hidden = false;
+      requestAnimationFrame(() => {
+        el.classList.add("is-active");
+      });
+    } else {
+      el.classList.remove("is-active");
+      // delay hide to let fade finish
+      setTimeout(() => { el.hidden = true; }, 220);
+    }
   });
 }
 
-// ===== ROUTE CLASS (drives vignette/header animation) =====
-function setRouteClass(route){
-  document.body.classList.remove("route-home","route-films","route-about","route-contact","route-film");
-  if(route === "home") document.body.classList.add("route-home");
-  else if(route === "films") document.body.classList.add("route-films");
-  else if(route === "about") document.body.classList.add("route-about");
-  else if(route === "contact") document.body.classList.add("route-contact");
-  else if(route.startsWith("film/")) document.body.classList.add("route-film");
+function applyRouteClasses(route) {
+  document.body.classList.remove("route-home","route-films","route-about","route-contact","route-film","route-error");
+  document.body.classList.add(`route-${route}`);
+
+  // Header compact on non-home
+  if (route === "home") document.body.classList.remove("header-compact");
+  else document.body.classList.add("header-compact");
 }
 
-// ===== PNG TAB BUTTONS (4-state) =====
-function tabSrc(base, selected, hover){
-  const sel = selected ? "selected" : "notselected";
-  const hov = hover ? "hover" : "standard";
-  return `${base}-${sel}-${hov}.png`;
+/* ====== TAB PNG STATE MACHINE ======
+   States depend on:
+   - selected vs notselected (based on current route)
+   - hover vs standard (based on pointer hover)
+*/
+function tabIsSelected(tabKey, currentRoute) {
+  if (currentRoute === "film") return tabKey === "films"; // film detail counts as films selected
+  return tabKey === currentRoute;
 }
 
-function setTabImage(btn, hover=false){
-  const img = btn.querySelector("img.tabImg");
-  if(!img) return;
-  const base = img.dataset.base;
-  if(!base) return;
-  const selected = btn.getAttribute("aria-current") === "page";
-  img.src = tabSrc(base, selected, hover);
+function tabSrc(tabKey, selected, hovered) {
+  const group = TAB_ASSETS[tabKey];
+  if (!group) return "";
+  const selKey = selected ? "selected" : "notselected";
+  const hovKey = hovered ? "hover" : "standard";
+  return group[selKey][hovKey];
 }
 
-function syncAllTabImages(){
-  document.querySelectorAll(".tabImgBtn").forEach(btn => setTabImage(btn, false));
-}
+function wireTabs() {
+  tabs.forEach(({ key, btn, img }) => {
+    if (!btn || !img) return;
 
-function preloadTabImages(){
-  const bases = [...new Set(
-    Array.from(document.querySelectorAll("img.tabImg"))
-      .map(i => i.dataset.base)
-      .filter(Boolean)
-  )];
+    // Click routing
+    btn.addEventListener("click", () => setHash(key));
 
-  const states = [
-    ["notselected","standard"],
-    ["notselected","hover"],
-    ["selected","standard"],
-    ["selected","hover"],
-  ];
+    // Hover swapping
+    btn.addEventListener("mouseenter", () => refreshTabs({ hoverKey: key, hoverOn: true }));
+    btn.addEventListener("mouseleave", () => refreshTabs({ hoverKey: key, hoverOn: false }));
 
-  bases.forEach(base=>{
-    states.forEach(([sel, hov])=>{
-      const im = new Image();
-      im.src = `${base}-${sel}-${hov}.png`;
-    });
+    // Preload all assets so swapping never flashes
+    const a = TAB_ASSETS[key];
+    if (a) {
+      [a.notselected.standard, a.notselected.hover, a.selected.standard, a.selected.hover]
+        .forEach(src => { const im = new Image(); im.src = src; });
+    }
   });
 }
 
-function setTabs(route){
-  document.querySelectorAll(".tabImgBtn").forEach(btn=>{
-    const active = btn.dataset.route === route;
-    btn.setAttribute("aria-current", active ? "page" : "false");
+let lastHover = { key: null, on: false };
+
+function refreshTabs(opts = null) {
+  if (opts && "hoverKey" in opts) lastHover = { key: opts.hoverKey, on: opts.hoverOn };
+
+  const { route } = parseHash();
+  tabs.forEach(({ key, img }) => {
+    const selected = tabIsSelected(key, route);
+    const hovered = (lastHover.on && lastHover.key === key);
+    img.src = tabSrc(key, selected, hovered);
+  });
+}
+
+/* ====== HOME ====== */
+function renderHome() {
+  // hero
+  homeHero.src = HOME.hero;
+
+  // side stacks (only visible on home via CSS)
+  homeLeftStack.innerHTML = "";
+  HOME.left.forEach((src) => {
+    const wrap = document.createElement("div");
+    wrap.className = "sideThumb";
+    const im = document.createElement("img");
+    im.src = src;
+    im.alt = "";
+    wrap.appendChild(im);
+    homeLeftStack.appendChild(wrap);
   });
 
-  // home & film pages: none selected
-  if(route === "home" || route.startsWith("film/")){
-    document.querySelectorAll(".tabImgBtn").forEach(btn=>btn.setAttribute("aria-current","false"));
-  }
-
-  syncAllTabImages();
+  homeRightStack.innerHTML = "";
+  HOME.right.forEach((src) => {
+    const wrap = document.createElement("div");
+    wrap.className = "sideThumb";
+    const im = document.createElement("img");
+    im.src = src;
+    im.alt = "";
+    wrap.appendChild(im);
+    homeRightStack.appendChild(wrap);
+    homeRightStack.appendChild(wrap);
+  });
 }
 
-// ===== NAVIGATION =====
-function navigate(hash){
-  history.pushState(null, "", hash);
-  handleRoute();
-}
-
-// ===== RENDER HOME SIDE STACKS =====
-function makeSideTile(src){
-  const d = document.createElement("div");
-  d.className = "sideTile";
-  d.innerHTML = `<img src="${src}" alt="">`;
-  return d;
-}
-
-function renderHome(){
-  if(homeHero) homeHero.src = SITE.home.hero;
-
-  if(leftStack) leftStack.innerHTML = "";
-  if(rightStack) rightStack.innerHTML = "";
-
-  (SITE.home.left || []).forEach(src => leftStack && leftStack.appendChild(makeSideTile(src)));
-  (SITE.home.right || []).forEach(src => rightStack && rightStack.appendChild(makeSideTile(src)));
-}
-
-// ===== FILMS GRID =====
-function renderFilms(){
-  if(!filmsGrid) return;
+/* ====== FILMS ====== */
+function renderFilms() {
   filmsGrid.innerHTML = "";
 
-  SITE.films.slice(0,5).forEach(f=>{
+  // newest to oldest is already ordered above
+  FILMS.forEach((f) => {
     const tile = document.createElement("div");
-    tile.className = "tile grainHover"; // <- per-element hover grain
-    tile.dataset.film = f.id;
+    tile.className = "filmTile grainHover";
+    tile.dataset.slug = f.slug;
 
-    tile.innerHTML = `
-      <img class="tileImg" src="${f.tile}" alt="">
-      <div class="tileInfo">
-        ${f.logo ? `<img class="tileLogo" src="${f.logo}" alt="">` : ""}
-        <div class="tileMeta">${f.year} • ${f.runtime} • ${f.genres}</div>
-      </div>
-    `;
+    // background (optional: if you add posters later, set tile bg image)
+    const bg = document.createElement("div");
+    bg.className = "filmBg";
+    // leave blank by default; you can set posters later:
+    // bg.style.backgroundImage = `url("${f.hero}")`;
+    tile.appendChild(bg);
 
-    tile.addEventListener("click", () => navigate(`#film/${f.id}`));
+    const logoWrap = document.createElement("div");
+    logoWrap.className = "filmLogo";
+    const logo = document.createElement("img");
+    logo.src = f.logo;
+    logo.alt = `${f.title} logo`;
+    logoWrap.appendChild(logo);
+    tile.appendChild(logoWrap);
+
+    const info = document.createElement("div");
+    info.className = "filmInfo";
+    const infoText = document.createElement("div");
+    infoText.className = "filmInfoText";
+    infoText.innerHTML = `${f.year} · ${f.runtime} · ${f.genre}`;
+    info.appendChild(infoText);
+    tile.appendChild(info);
+
+    tile.addEventListener("click", () => setFilmHash(f.slug));
     filmsGrid.appendChild(tile);
   });
 }
 
-// ===== ABOUT / CONTACT =====
-function renderAbout(){
-  if(aboutImg) aboutImg.src = SITE.about.photo;
-  if(aboutBody) aboutBody.textContent = SITE.about.bio;
+/* ====== ABOUT / CONTACT ====== */
+function renderAbout() {
+  aboutImg.src = ABOUT.photo;
+  aboutBody.innerHTML = ABOUT.bodyHtml;
 }
 
-function renderContact(){
-  if(contactBody) contactBody.textContent = SITE.contact.body;
-  if(!contactLinks) return;
+function renderContact() {
+  contactBody.innerHTML = CONTACT.bodyHtml;
+  contactLinks.innerHTML = CONTACT.linksHtml;
+}
 
-  contactLinks.innerHTML = "";
-  (SITE.contact.links || []).forEach(l=>{
-    const a = document.createElement("a");
-    a.href = l.href;
-    a.textContent = `${l.label}: ${l.value}`;
-    a.className = "grainHoverLink";
-    a.style.display = "block";
-    a.style.marginTop = "10px";
-    if(!l.href.startsWith("mailto:")){
+/* ====== FILM DETAIL ====== */
+function renderFilmDetail(slug) {
+  const f = FILMS.find(x => x.slug === slug);
+  if (!f) {
+    showError(`Film not found: ${slug}`);
+    return;
+  }
+
+  filmHeroImg.src = f.hero || "";
+  filmTitle.textContent = f.title;
+  filmMeta.textContent = `${f.year} · ${f.runtime} · ${f.genre}`;
+  filmDesc.textContent = f.desc || "";
+
+  filmActions.innerHTML = "";
+  if (Array.isArray(f.links) && f.links.length) {
+    const wrap = document.createElement("div");
+    wrap.style.display = "flex";
+    wrap.style.gap = "12px";
+    wrap.style.flexWrap = "wrap";
+    wrap.style.marginTop = "10px";
+
+    f.links.forEach((l) => {
+      const a = document.createElement("a");
+      a.href = l.href;
       a.target = "_blank";
       a.rel = "noreferrer";
-    }
-    contactLinks.appendChild(a);
-  });
+      a.textContent = l.label;
+      a.style.color = "var(--red)";
+      a.style.textDecoration = "none";
+      a.addEventListener("mouseenter", () => (a.style.textDecoration = "underline"));
+      a.addEventListener("mouseleave", () => (a.style.textDecoration = "none"));
+      wrap.appendChild(a);
+    });
+
+    filmActions.appendChild(wrap);
+  }
 }
 
-// ===== FILM DETAIL =====
-function renderFilmPage(f){
-  if(filmHeroImg) filmHeroImg.src = f.hero || f.tile;
-  if(filmTitle) filmTitle.textContent = f.title;
-  if(filmMeta) filmMeta.textContent = `${f.year} — ${f.runtime} — ${f.genres}`;
-  if(filmDesc) filmDesc.textContent = f.desc || "";
-
-  if(!filmActions) return;
-  filmActions.innerHTML = "";
-  (f.actions || []).forEach(a=>{
-    const el = document.createElement("a");
-    el.href = a.href;
-    el.textContent = a.label;
-    el.className = "grainHoverLink";
-    el.style.display = "inline-block";
-    el.style.marginTop = "12px";
-    el.style.marginRight = "10px";
-    if(!a.href.startsWith("mailto:") && !a.href.startsWith("#")){
-      el.target = "_blank";
-      el.rel = "noreferrer";
-    }
-    filmActions.appendChild(el);
-  });
+function showError(msg) {
+  $("#errorText").textContent = msg;
+  applyRouteClasses("error");
+  refreshTabs();
+  showView("error");
 }
 
-// ===== ROUTER =====
-function handleRoute(){
-  const h = (location.hash || "#home").replace("#","");
-  const route = h || "home";
+/* ====== MAIN ROUTE HANDLER ====== */
+function handleRoute() {
+  const parsed = parseHash();
+  const route = parsed.route || "home";
 
-  setRouteClass(route);
-  setTabs(route);
+  // Keep home stable as default fallback
+  const allowed = new Set(["home","films","about","contact","film"]);
+  const safeRoute = allowed.has(route) ? route : "home";
 
-  if(route === "home"){
-    showOnly(viewHome);
-    return;
-  }
-  if(route === "films"){
-    showOnly(viewFilms);
-    return;
-  }
-  if(route === "about"){
-    showOnly(viewAbout);
-    return;
-  }
-  if(route === "contact"){
-    showOnly(viewContact);
+  applyRouteClasses(safeRoute);
+  refreshTabs();
+
+  if (safeRoute === "home") {
+    renderHome();
+    showView("home");
     return;
   }
 
-  if(route.startsWith("film/")){
-    const id = route.split("/")[1];
-    const film = SITE.films.find(f => f.id === id);
-    if(!film){
-      if(errorText) errorText.textContent = `Film not found: ${id}`;
-      showOnly(viewError);
-      return;
-    }
-    renderFilmPage(film);
-    showOnly(viewFilm);
+  if (safeRoute === "films") {
+    renderFilms();
+    showView("films");
     return;
   }
 
-  showOnly(viewHome);
+  if (safeRoute === "about") {
+    renderAbout();
+    showView("about");
+    return;
+  }
+
+  if (safeRoute === "contact") {
+    renderContact();
+    showView("contact");
+    return;
+  }
+
+  if (safeRoute === "film") {
+    renderFilmDetail(parsed.slug);
+    showView("film");
+    return;
+  }
 }
 
-// ===== EVENTS =====
-function bindEvents(){
-  // PNG tab hover swap + keyboard focus
-  document.querySelectorAll(".tabImgBtn").forEach(btn=>{
-    btn.addEventListener("mouseenter", ()=>setTabImage(btn,true));
-    btn.addEventListener("mouseleave", ()=>setTabImage(btn,false));
-    btn.addEventListener("focus", ()=>setTabImage(btn,true));
-    btn.addEventListener("blur", ()=>setTabImage(btn,false));
-  });
+/* ====== INIT ====== */
+function init() {
+  // Home name click returns home
+  homeLink.addEventListener("click", () => setHash("home"));
 
-  // delegated click: tabs + homeLink
-  document.addEventListener("click",(e)=>{
-    const tab = e.target.closest(".tabImgBtn");
-    if(tab){
-      e.preventDefault();
-      navigate(`#${tab.dataset.route}`);
-      return;
-    }
+  // Tabs
+  wireTabs();
 
-    const home = e.target.closest("#homeLink");
-    if(home){
-      e.preventDefault();
-      navigate("#home");
-      return;
-    }
-  });
+  // Initial tab art (prevents blank images before first hover)
+  refreshTabs();
 
-  window.addEventListener("popstate", handleRoute);
-}
+  // Route updates
+  window.addEventListener("hashchange", handleRoute);
 
-// ===== INIT =====
-function init(){
-  // if any tab <img> has no src yet, set default so it appears immediately
-  document.querySelectorAll("img.tabImg").forEach(img=>{
-    if(!img.getAttribute("src")){
-      const base = img.dataset.base;
-      if(base) img.src = `${base}-notselected-standard.png`;
-    }
-  });
-
-  preloadTabImages();
-  syncAllTabImages();
-
-  renderHome();
-  renderFilms();
-  renderAbout();
-  renderContact();
-
-  bindEvents();
-
-  if(!location.hash) history.replaceState(null,"","#home");
+  // First load
   handleRoute();
 }
 
-document.addEventListener("DOMContentLoaded", init);
+init();
