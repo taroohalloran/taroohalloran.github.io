@@ -8,22 +8,15 @@
 </head>
 
 <body class="route-home">
-  <!-- GLOBAL TEXTURE OVERLAYS (top of everything) -->
-  <!-- Concrete below VHS -->
+  <!-- TEXTURE OVERLAYS (order matters: concrete -> grain -> vhs) -->
   <div class="texture texture-concrete" aria-hidden="true"></div>
+  <div class="texture texture-grain" aria-hidden="true"></div>
   <div class="texture texture-vhs" aria-hidden="true"></div>
 
   <header class="hdr" id="hdr">
-    <!-- OPTION A (TEXT NAME): keep this if you want text -->
-    <!--
-    <button class="nameText" id="homeLink" type="button" aria-label="Home">TARO O’HALLORAN</button>
-    -->
-
-    <!-- OPTION B (IMAGE NAME): use this if you want your PNG -->
     <button class="nameImgBtn" id="homeLink" type="button" aria-label="Home">
       <img class="nameImg" src="assets/branding/taro-name.png" alt="Taro O’Halloran">
     </button>
-
     <div class="sub">( writer , director , producer )</div>
 
     <nav class="tabs" aria-label="Site">
@@ -34,15 +27,14 @@
   </header>
 
   <main class="frame" id="frame">
-    <!-- System layout: left strip + center + right strip -->
     <section class="system">
-      <aside class="side side-left" aria-label="Left strip">
+      <aside class="side side-left">
         <div class="sideMask" aria-hidden="true"></div>
         <div class="sideStack" id="homeLeftStack"></div>
       </aside>
 
       <section class="center">
-        <!-- HOME view -->
+        <!-- HOME -->
         <section class="view is-active" data-route="home" id="view-home">
           <div class="heroClip">
             <div class="heroMask" aria-hidden="true"></div>
@@ -50,12 +42,12 @@
           </div>
         </section>
 
-        <!-- FILMS view -->
+        <!-- FILMS -->
         <section class="view" data-route="films" id="view-films" hidden>
           <div class="filmsGrid" id="filmsGrid"></div>
         </section>
 
-        <!-- ABOUT view -->
+        <!-- ABOUT -->
         <section class="view" data-route="about" id="view-about" hidden>
           <div class="aboutWrap">
             <div class="aboutPhoto">
@@ -69,7 +61,7 @@
           </div>
         </section>
 
-        <!-- CONTACT view -->
+        <!-- CONTACT -->
         <section class="view" data-route="contact" id="view-contact" hidden>
           <div class="contactWrap">
             <div class="panelTitle">CONTACT</div>
@@ -78,14 +70,13 @@
           </div>
         </section>
 
-        <!-- FILM DETAIL view -->
+        <!-- FILM DETAIL -->
         <section class="view" data-route="film" id="view-film" hidden>
           <div class="filmPage">
             <div class="filmHero">
               <img id="filmHeroImg" alt="" />
               <div class="filmHeroShade" aria-hidden="true"></div>
             </div>
-
             <div class="filmInfo">
               <div class="panelTitle" id="filmTitle"></div>
               <div class="panelMeta" id="filmMeta"></div>
@@ -95,7 +86,7 @@
           </div>
         </section>
 
-        <!-- ERROR view -->
+        <!-- ERROR -->
         <section class="view" data-route="error" id="view-error" hidden>
           <div class="contactWrap">
             <div class="panelTitle">ERROR</div>
@@ -104,7 +95,7 @@
         </section>
       </section>
 
-      <aside class="side side-right" aria-label="Right strip">
+      <aside class="side side-right">
         <div class="sideMask" aria-hidden="true"></div>
         <div class="sideStack" id="homeRightStack"></div>
       </aside>
