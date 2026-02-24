@@ -1,282 +1,259 @@
-// app.js — full file (grain boost hover + stable router)
-
-const $ = (s) => document.querySelector(s);
-
-const SITE = {
-  home: {
-    hero: "assets/stills/home-center.jpg",
-    left: ["assets/stills/home-left-1.jpg", "assets/stills/home-left-2.jpg"],
-    right: ["assets/stills/home-right-1.jpg", "assets/stills/home-right-2.jpg"]
-  },
-
-  about: {
-    photo: "assets/stills/about-photo.jpg",
-    bio: "Write your bio here."
-  },
-
-  contact: {
-    body: "For inquiries:",
-    links: [
-      { label: "Email", value: "YOUR_EMAIL@DOMAIN.COM", href: "mailto:YOUR_EMAIL@DOMAIN.COM" },
-      { label: "Instagram", value: "@YOUR_HANDLE", href: "https://instagram.com/YOUR_HANDLE" }
-    ]
-  },
-
-  films: [
-    { id:"humanzee", title:"Humanzee", year:"2024", runtime:"23 min.", genres:"Horror/Drama",
-      tile:"assets/stills/tile-humanzee.jpg", hero:"assets/stills/tile-humanzee.jpg",
-      logo:"assets/films/humanzee/humanzee-logo.png", desc:"", actions:[] },
-
-    { id:"rendezvous", title:"Rendezvous", year:"2023", runtime:"16 min.", genres:"Crime/Comedy",
-      tile:"assets/stills/tile-rendezvous.jpg", hero:"assets/stills/tile-rendezvous.jpg",
-      logo:"assets/films/rendezvous/rendezvous-logo.png", desc:"", actions:[] },
-
-    { id:"uap", title:"UAP", year:"2022", runtime:"12 min.", genres:"Comedy/Drama/Sci-Fi",
-      tile:"assets/stills/tile-uap.jpg", hero:"assets/stills/tile-uap.jpg",
-      logo:"assets/films/uap/uap-logo.png", desc:"", actions:[] },
-
-    { id:"dragons", title:"Do Dragons Sleep in Fictitious Caves?", year:"2022", runtime:"4 min.", genres:"Horror/Drama",
-      tile:"assets/stills/tile-dragons.jpg", hero:"assets/stills/tile-dragons.jpg",
-      logo:"assets/films/dragons/do-dragons-sleep-in-fictitious-caves-logo.png", desc:"", actions:[] },
-
-    { id:"aspens", title:"The Whispers of the Aspens", year:"2022", runtime:"1 min.", genres:"Horror",
-      tile:"assets/stills/tile-aspens.jpg", hero:"assets/stills/tile-aspens.jpg",
-      logo:"assets/films/aspens/the-whispers-of-the-aspens-logo.png", desc:"", actions:[] }
-  ]
-};
-
-// ===== DOM refs =====
-const viewHome = $("#view-home");
-const viewFilms = $("#view-films");
-const viewAbout = $("#view-about");
-const viewContact = $("#view-contact");
-const viewFilm = $("#view-film");
-const viewError = $("#view-error");
-
-const homeHero = $("#homeHero");
-const leftStack = $("#homeLeftStack");
-const rightStack = $("#homeRightStack");
-const filmsGrid = $("#filmsGrid");
-
-const aboutImg = $("#aboutImg");
-const aboutBody = $("#aboutBody");
-
-const contactBody = $("#contactBody");
-const contactLinks = $("#contactLinks");
-
-const filmHeroImg = $("#filmHeroImg");
-const filmTitle = $("#filmTitle");
-const filmMeta = $("#filmMeta");
-const filmDesc = $("#filmDesc");
-const filmActions = $("#filmActions");
-const errorText = $("#errorText");
-
-function showOnly(viewEl) {
-  const all = [viewHome, viewFilms, viewAbout, viewContact, viewFilm, viewError];
-  all.forEach(v => {
-    if (!v) return;
-    v.hidden = v !== viewEl;
-    v.classList.toggle("is-active", v === viewEl);
-  });
-}
-
-function setRouteHome(isHome){
-  document.body.classList.toggle("route-home", isHome);
-}
-
-function setTabs(route){
-  document.querySelectorAll(".tab").forEach(btn => {
-    btn.setAttribute("aria-current", btn.dataset.route === route ? "page" : "false");
-  });
-  if(route === "home" || route.startsWith("film/")){
-    document.querySelectorAll(".tab").forEach(btn => btn.setAttribute("aria-current","false"));
+(() => {
+  // ---------------- ROUTING ----------------
+  function getRouteFromHash() {
+    const raw = (location.hash || "#home").replace("#", "").trim();
+    if (!raw) return "home";
+    return raw;
   }
-}
 
-function navigate(hash){
-  history.pushState(null, "", hash);
-  handleRoute();
-}
+  function navigate(hash) {
+    if (!hash.startsWith("#")) hash = `#${hash}`;
+    if (location.hash === hash) {
+      render(getRouteFromHash());
+      return;
+    }
+    location.hash = hash;
+  }
 
-function makeSideTile(src){
-  const d = document.createElement("div");
-  d.className = "sideTile";
-  d.innerHTML = `<img src="${src}" alt="">`;
-  return d;
-}
+  // ---------------- TAB BUTTON IMAGES ----------------
+  function tabSrc(base, selected, hover) {
+    const sel = selected ? "selected" : "notselected";
+    const hov = hover ? "hover" : "standard";
+    return `${base}-${sel}-${hov}.png`;
+  }
 
-function renderHome(){
-  if (homeHero) homeHero.src = SITE.home.hero;
+  function setTabImage(btn, hover = false) {
+    const img = btn.querySelector("img");
+    if (!img) return;
 
-  if (leftStack) leftStack.innerHTML = "";
-  if (rightStack) rightStack.innerHTML = "";
+    const base = img.dataset.base;
+    if (!base) return;
 
-  (SITE.home.left || []).forEach(src => leftStack && leftStack.appendChild(makeSideTile(src)));
-  (SITE.home.right || []).forEach(src => rightStack && rightStack.appendChild(makeSideTile(src)));
-}
+    const selected = btn.getAttribute("aria-current") === "page";
+    img.src = tabSrc(base, selected, hover);
+  }
 
-function renderFilms(){
-  if(!filmsGrid) return;
-  filmsGrid.innerHTML = "";
+  function syncAllTabImages() {
+    document.querySelectorAll(".tabImgBtn").forEach((btn) => setTabImage(btn, false));
+  }
 
-  SITE.films.slice(0,5).forEach(f=>{
-    const tile = document.createElement("div");
-    tile.className = "tile";
-    tile.dataset.film = f.id;
+  function preloadTabImages() {
+    const bases = Array.from(document.querySelectorAll(".tabImg"))
+      .map((img) => img.dataset.base)
+      .filter(Boolean);
 
-    tile.innerHTML = `
-      <img class="tileImg" src="${f.tile}" alt="">
-      <div class="tileInfo">
-        ${f.logo ? `<img class="tileLogo" src="${f.logo}" alt="">` : ""}
-        <div class="tileMeta">${f.year} • ${f.runtime} • ${f.genres}</div>
-      </div>
+    const uniq = [...new Set(bases)];
+    const states = [
+      ["notselected", "standard"],
+      ["notselected", "hover"],
+      ["selected", "standard"],
+      ["selected", "hover"],
+    ];
+
+    uniq.forEach((base) => {
+      states.forEach(([sel, hov]) => {
+        const i = new Image();
+        i.src = `${base}-${sel}-${hov}.png`;
+      });
+    });
+  }
+
+  function setTabs(route) {
+    document.querySelectorAll(".tabImgBtn").forEach((btn) => {
+      const isActive = btn.dataset.route === route;
+      btn.setAttribute("aria-current", isActive ? "page" : "false");
+    });
+
+    // No tab selected on home or film detail pages
+    if (route === "home" || route.startsWith("film/")) {
+      document.querySelectorAll(".tabImgBtn").forEach((btn) =>
+        btn.setAttribute("aria-current", "false")
+      );
+    }
+
+    syncAllTabImages();
+  }
+
+  // ---------------- HEADER STATE ----------------
+  function setHeaderState(route) {
+    document.body.classList.remove(
+      "route-home",
+      "route-films",
+      "route-about",
+      "route-contact",
+      "route-film"
+    );
+
+    if (route === "home") document.body.classList.add("route-home");
+    else if (route === "films") document.body.classList.add("route-films");
+    else if (route === "about") document.body.classList.add("route-about");
+    else if (route === "contact") document.body.classList.add("route-contact");
+    else if (route.startsWith("film/")) document.body.classList.add("route-film");
+  }
+
+  // ---------------- PAGES ----------------
+  function pageHome() {
+    return `
+      <section class="page pageHome" data-page="home">
+        <div class="homeFrame">
+          <!-- Your homepage image layout lives in HTML/CSS -->
+        </div>
+      </section>
     `;
-
-    tile.addEventListener("click", () => navigate(`#film/${f.id}`));
-    filmsGrid.appendChild(tile);
-  });
-}
-
-function renderAbout(){
-  if (aboutImg) aboutImg.src = SITE.about.photo;
-  if (aboutBody) aboutBody.textContent = SITE.about.bio;
-}
-
-function renderContact(){
-  if (contactBody) contactBody.textContent = SITE.contact.body;
-  if (!contactLinks) return;
-
-  contactLinks.innerHTML = "";
-  (SITE.contact.links || []).forEach(l=>{
-    const a = document.createElement("a");
-    a.href = l.href;
-    a.textContent = `${l.label}: ${l.value}`;
-    a.style.display = "block";
-    a.style.marginTop = "10px";
-    if (!l.href.startsWith("mailto:")) {
-      a.target = "_blank";
-      a.rel = "noreferrer";
-    }
-    contactLinks.appendChild(a);
-  });
-}
-
-function renderFilmPage(f){
-  if (filmHeroImg) filmHeroImg.src = f.hero || f.tile;
-  if (filmTitle) filmTitle.textContent = f.title;
-  if (filmMeta) filmMeta.textContent = `${f.year} — ${f.runtime} — ${f.genres}`;
-  if (filmDesc) filmDesc.textContent = f.desc || "";
-
-  if (!filmActions) return;
-  filmActions.innerHTML = "";
-  (f.actions || []).forEach(a=>{
-    const el = document.createElement("a");
-    el.href = a.href;
-    el.textContent = a.label;
-    el.style.display = "inline-block";
-    el.style.marginTop = "12px";
-    el.style.marginRight = "10px";
-    if (!a.href.startsWith("mailto:") && !a.href.startsWith("#")) {
-      el.target = "_blank";
-      el.rel = "noreferrer";
-    }
-    filmActions.appendChild(el);
-  });
-}
-
-function handleRoute(){
-  const h = (location.hash || "#home").replace("#","");
-
-  if (!h || h === "home"){
-    setRouteHome(true);
-    setTabs("home");
-    showOnly(viewHome);
-    return;
   }
 
-  setRouteHome(false);
+  function pageFilms() {
+    return `
+      <section class="page pageFilms" data-page="films">
+        <div class="filmsGrid">
+          <a class="filmCard" href="#film/humanzee">
+            <img class="filmLogo filmLogo--humanzee" src="logos/Humanzee.png" alt="Humanzee" />
+          </a>
 
-  if (h === "films"){
-    setTabs("films");
-    showOnly(viewFilms);
-    return;
+          <a class="filmCard" href="#film/rendezvous">
+            <img class="filmLogo" src="logos/Rendezvous.png" alt="Rendezvous" />
+          </a>
+
+          <a class="filmCard" href="#film/uap">
+            <img class="filmLogo" src="logos/UAP.png" alt="UAP" />
+          </a>
+
+          <a class="filmCard" href="#film/do-dragons-sleep">
+            <img class="filmLogo" src="logos/Do-Dragons-Sleep-in-Fictitious-Caves.png" alt="Do Dragons Sleep in Fictitious Caves?" />
+          </a>
+
+          <a class="filmCard" href="#film/whispers-of-the-aspens">
+            <img class="filmLogo filmLogo--aspens" src="logos/The-Whispers-of-the-Aspens.png" alt="The Whispers of the Aspens" />
+          </a>
+        </div>
+      </section>
+    `;
   }
 
-  if (h === "about"){
-    setTabs("about");
-    showOnly(viewAbout);
-    return;
+  function pageAbout() {
+    return `
+      <section class="page pageAbout" data-page="about">
+        <div class="aboutWrap">
+          <div class="aboutPhoto">
+            <img src="about/taro.jpg" alt="Taro O’Halloran" />
+          </div>
+          <div class="aboutText">
+            <h2>About</h2>
+            <p>Replace this with your bio text.</p>
+          </div>
+        </div>
+      </section>
+    `;
   }
 
-  if (h === "contact"){
-    setTabs("contact");
-    showOnly(viewContact);
-    return;
+  function pageContact() {
+    return `
+      <section class="page pageContact" data-page="contact">
+        <div class="contactWrap">
+          <h2>Contact</h2>
+          <p>Email: <a href="mailto:you@example.com">you@example.com</a></p>
+          <p>Instagram: <a href="https://instagram.com/" target="_blank">@handle</a></p>
+          <p>YouTube: <a href="https://youtube.com/" target="_blank">Channel</a></p>
+        </div>
+      </section>
+    `;
   }
 
-  if (h.startsWith("film/")){
-    const id = h.split("/")[1];
-    const film = SITE.films.find(f => f.id === id);
-    if (!film){
-      if (errorText) errorText.textContent = `Film not found: ${id}`;
-      showOnly(viewError);
-      return;
+  function pageFilmDetail(slug) {
+    const titleMap = {
+      "humanzee": "Humanzee",
+      "rendezvous": "Rendezvous",
+      "uap": "UAP",
+      "do-dragons-sleep": "Do Dragons Sleep in Fictitious Caves?",
+      "whispers-of-the-aspens": "The Whispers of the Aspens",
+    };
+    const title = titleMap[slug] || "Film";
+
+    return `
+      <section class="page pageFilmDetail" data-page="film">
+        <div class="filmDetailWrap">
+          <h2>${title}</h2>
+          <p>Film detail page content goes here.</p>
+          <p><a href="#films">← Back to Films</a></p>
+        </div>
+      </section>
+    `;
+  }
+
+  function resolvePage(route) {
+    if (route === "home") return pageHome();
+    if (route === "films") return pageFilms();
+    if (route === "about") return pageAbout();
+    if (route === "contact") return pageContact();
+    if (route.startsWith("film/")) {
+      const slug = route.split("/")[1] || "";
+      return pageFilmDetail(slug);
     }
-    renderFilmPage(film);
-    setTabs("film/");
-    showOnly(viewFilm);
-    return;
+    return pageHome();
   }
 
-  setRouteHome(true);
-  showOnly(viewHome);
-}
+  // ---------------- RENDER ----------------
+  function render(route) {
+    setHeaderState(route);
+    setTabs(route);
 
-/* ===== Grain boost on hover targets ===== */
-function enableGrainBoost(){ document.body.classList.add("grain-boost"); }
-function disableGrainBoost(){ document.body.classList.remove("grain-boost"); }
+    const app = document.getElementById("app");
+    if (!app) return;
 
-function initGrainHover(){
-  document.querySelectorAll(".tab").forEach(btn=>{
-    btn.addEventListener("mouseenter", enableGrainBoost);
-    btn.addEventListener("mouseleave", disableGrainBoost);
-  });
+    app.classList.add("appFading");
+    setTimeout(() => {
+      app.innerHTML = resolvePage(route);
+      bindInternalLinks(app);
 
-  document.addEventListener("mouseenter", (e)=>{
-    if(e.target.closest(".tile")) enableGrainBoost();
-  }, true);
+      requestAnimationFrame(() => {
+        app.classList.remove("appFading");
+      });
+    }, 120);
+  }
 
-  document.addEventListener("mouseleave", (e)=>{
-    if(e.target.closest(".tile")) disableGrainBoost();
-  }, true);
-}
-
-function init(){
-  renderHome();
-  renderFilms();
-  renderAbout();
-  renderContact();
-
-  initGrainHover();
-
-  document.addEventListener("click",(e)=>{
-    const tab = e.target.closest(".tab");
-    if(tab){
-      e.preventDefault();
-      navigate(`#${tab.dataset.route}`);
-      return;
+  // ---------------- EVENTS ----------------
+  function bindHeaderEvents(root = document) {
+    const title = root.getElementById("siteTitle");
+    if (title) {
+      title.addEventListener("click", (e) => {
+        e.preventDefault();
+        navigate("#home");
+      });
     }
-    const home = e.target.closest("#homeLink");
-    if(home){
-      e.preventDefault();
-      navigate("#home");
-      return;
-    }
-  });
 
-  if(!location.hash) history.replaceState(null,"","#home");
-  handleRoute();
-  window.addEventListener("popstate", handleRoute);
-}
+    root.querySelectorAll(".tabImgBtn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        navigate(`#${btn.dataset.route}`);
+      });
 
-init();
+      btn.addEventListener("mouseenter", () => setTabImage(btn, true));
+      btn.addEventListener("mouseleave", () => setTabImage(btn, false));
+    });
+  }
+
+  function bindInternalLinks(scope = document) {
+    scope.querySelectorAll('a[href^="#"]').forEach((a) => {
+      a.addEventListener("click", (e) => {
+        e.preventDefault();
+        navigate(a.getAttribute("href"));
+      });
+    });
+  }
+
+  // ---------------- INIT ----------------
+  function init() {
+    preloadTabImages();
+    syncAllTabImages();
+    bindHeaderEvents(document);
+    bindInternalLinks(document);
+
+    window.addEventListener("hashchange", () => {
+      render(getRouteFromHash());
+    });
+
+    render(getRouteFromHash());
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+})();
