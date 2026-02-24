@@ -9,21 +9,30 @@
 
 <body class="route-home">
 
-  <!-- TEXTURE OVERLAYS -->
+  <!-- TEXTURE OVERLAYS (LOCKED) -->
   <div class="texture texture-concrete" aria-hidden="true"></div>
-  <div class="texture texture-grain" aria-hidden="true"></div>
   <div class="texture texture-vhs" aria-hidden="true"></div>
 
   <header class="hdr">
     <button class="nameImgBtn" id="homeLink" type="button" aria-label="Home">
       <img class="nameImg" src="assets/branding/taro-name.png" alt="Taro O’Halloran">
     </button>
+
     <div class="sub">( writer , director , producer )</div>
 
-    <nav class="tabs">
-      <button class="tab" data-route="films">FILMS</button>
-      <button class="tab" data-route="about">ABOUT</button>
-      <button class="tab" data-route="contact">CONTACT</button>
+    <!-- PNG TAB BUTTONS -->
+    <nav class="tabs" aria-label="Primary">
+      <button class="tabImgBtn grainHover" data-route="films" aria-current="false" type="button" aria-label="Films">
+        <img class="tabImg" data-base="ui/films-button" alt="Films">
+      </button>
+
+      <button class="tabImgBtn grainHover" data-route="about" aria-current="false" type="button" aria-label="About">
+        <img class="tabImg" data-base="ui/about-button" alt="About">
+      </button>
+
+      <button class="tabImgBtn grainHover" data-route="contact" aria-current="false" type="button" aria-label="Contact">
+        <img class="tabImg" data-base="ui/contact-button" alt="Contact">
+      </button>
     </nav>
   </header>
 
@@ -90,6 +99,9 @@
 
     </section>
   </main>
+
+  <!-- SUBTLE GLOBAL GRAIN -->
+  <div class="globalGrain" aria-hidden="true"></div>
 
   <script src="app.js"></script>
 </body>
