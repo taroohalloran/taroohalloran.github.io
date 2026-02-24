@@ -1,4 +1,4 @@
-// app.js — full file (stable router + films hover content)
+// app.js — full file (adds grain boost hover + stable router)
 
 const $ = (s) => document.querySelector(s);
 
@@ -23,66 +23,25 @@ const SITE = {
   },
 
   films: [
-    {
-      id: "humanzee",
-      title: "Humanzee",
-      year: "2024",
-      runtime: "23 min.",
-      genres: "Horror/Drama",
-      tile: "assets/stills/tile-humanzee.jpg",
-      hero: "assets/stills/tile-humanzee.jpg",
-      logo: "assets/films/humanzee/humanzee-logo.png",
-      desc: "",
-      actions: []
-    },
-    {
-      id: "rendezvous",
-      title: "Rendezvous",
-      year: "2023",
-      runtime: "16 min.",
-      genres: "Crime/Comedy",
-      tile: "assets/stills/tile-rendezvous.jpg",
-      hero: "assets/stills/tile-rendezvous.jpg",
-      logo: "assets/films/rendezvous/rendezvous-logo.png",
-      desc: "",
-      actions: []
-    },
-    {
-      id: "uap",
-      title: "UAP",
-      year: "2022",
-      runtime: "12 min.",
-      genres: "Comedy/Drama/Sci-Fi",
-      tile: "assets/stills/tile-uap.jpg",
-      hero: "assets/stills/tile-uap.jpg",
-      logo: "assets/films/uap/uap-logo.png",
-      desc: "",
-      actions: []
-    },
-    {
-      id: "dragons",
-      title: "Do Dragons Sleep in Fictitious Caves?",
-      year: "2022",
-      runtime: "4 min.",
-      genres: "Horror/Drama",
-      tile: "assets/stills/tile-dragons.jpg",
-      hero: "assets/stills/tile-dragons.jpg",
-      logo: "assets/films/dragons/do-dragons-sleep-in-fictitious-caves-logo.png",
-      desc: "",
-      actions: []
-    },
-    {
-      id: "aspens",
-      title: "The Whispers of the Aspens",
-      year: "2022",
-      runtime: "1 min.",
-      genres: "Horror",
-      tile: "assets/stills/tile-aspens.jpg",
-      hero: "assets/stills/tile-aspens.jpg",
-      logo: "assets/films/aspens/the-whispers-of-the-aspens-logo.png",
-      desc: "",
-      actions: []
-    }
+    { id:"humanzee", title:"Humanzee", year:"2024", runtime:"23 min.", genres:"Horror/Drama",
+      tile:"assets/stills/tile-humanzee.jpg", hero:"assets/stills/tile-humanzee.jpg",
+      logo:"assets/films/humanzee/humanzee-logo.png", desc:"", actions:[] },
+
+    { id:"rendezvous", title:"Rendezvous", year:"2023", runtime:"16 min.", genres:"Crime/Comedy",
+      tile:"assets/stills/tile-rendezvous.jpg", hero:"assets/stills/tile-rendezvous.jpg",
+      logo:"assets/films/rendezvous/rendezvous-logo.png", desc:"", actions:[] },
+
+    { id:"uap", title:"UAP", year:"2022", runtime:"12 min.", genres:"Comedy/Drama/Sci-Fi",
+      tile:"assets/stills/tile-uap.jpg", hero:"assets/stills/tile-uap.jpg",
+      logo:"assets/films/uap/uap-logo.png", desc:"", actions:[] },
+
+    { id:"dragons", title:"Do Dragons Sleep in Fictitious Caves?", year:"2022", runtime:"4 min.", genres:"Horror/Drama",
+      tile:"assets/stills/tile-dragons.jpg", hero:"assets/stills/tile-dragons.jpg",
+      logo:"assets/films/dragons/do-dragons-sleep-in-fictitious-caves-logo.png", desc:"", actions:[] },
+
+    { id:"aspens", title:"The Whispers of the Aspens", year:"2022", runtime:"1 min.", genres:"Horror",
+      tile:"assets/stills/tile-aspens.jpg", hero:"assets/stills/tile-aspens.jpg",
+      logo:"assets/films/aspens/the-whispers-of-the-aspens-logo.png", desc:"", actions:[] }
   ]
 };
 
@@ -163,7 +122,7 @@ function renderFilms(){
   SITE.films.slice(0,5).forEach(f=>{
     const tile = document.createElement("div");
     tile.className = "tile";
-    tile.dataset.film = f.id; // <-- for Humanzee logo sizing etc.
+    tile.dataset.film = f.id;
 
     tile.innerHTML = `
       <img class="tileImg" src="${f.tile}" alt="">
@@ -269,9 +228,33 @@ function handleRoute(){
     return;
   }
 
-  // fallback
   setRouteHome(true);
   showOnly(viewHome);
+}
+
+/* ===== Grain boost on hover targets ===== */
+function enableGrainBoost(){
+  document.body.classList.add("grain-boost");
+}
+function disableGrainBoost(){
+  document.body.classList.remove("grain-boost");
+}
+
+function initGrainHover(){
+  // tabs
+  document.querySelectorAll(".tab").forEach(btn=>{
+    btn.addEventListener("mouseenter", enableGrainBoost);
+    btn.addEventListener("mouseleave", disableGrainBoost);
+  });
+
+  // films tiles (created dynamically)
+  document.addEventListener("mouseenter", (e)=>{
+    if(e.target.closest(".tile")) enableGrainBoost();
+  }, true);
+
+  document.addEventListener("mouseleave", (e)=>{
+    if(e.target.closest(".tile")) disableGrainBoost();
+  }, true);
 }
 
 function init(){
@@ -279,6 +262,8 @@ function init(){
   renderFilms();
   renderAbout();
   renderContact();
+
+  initGrainHover();
 
   document.addEventListener("click",(e)=>{
     const tab = e.target.closest(".tab");
