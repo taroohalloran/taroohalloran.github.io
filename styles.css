@@ -18,7 +18,6 @@ body{
 
 /* =========================
    LOCKED TEXTURE STACK
-   (concrete -> grain -> vhs)
 ========================= */
 .texture{
   position: fixed;
@@ -40,32 +39,39 @@ body{
   .texture-concrete{ mix-blend-mode: color-dodge; }
 }
 
-/* Grain MIDDLE (VISIBLY ANIMATED) */
+/* ===== GRAIN (make it obviously animated) =====
+   Two tiled layers + large background-position jumps.
+   If you STILL see nothing, it is almost always:
+   - wrong path/case to film-grain.png on GitHub Pages
+   - OS/browser "Reduce motion" setting disabling animations
+*/
 .texture-grain{
   z-index: 9998;
-  opacity: 0.22;                 /* set to 0.16 if you want subtler */
-  mix-blend-mode: soft-light;    /* better with your non-transparent grain */
-  filter: contrast(1.15) brightness(1.05);
+  pointer-events:none;
 
-  /* layer 1 + layer 2 to avoid "static wallpaper" feel */
+  opacity: 0.26;               /* once you see it moving, dial to 0.16–0.20 */
+  mix-blend-mode: overlay;
+  filter: contrast(1.35) brightness(1.10);
+
   background-image:
     url("assets/textures/film-grain.png"),
     url("assets/textures/film-grain.png");
   background-repeat: repeat, repeat;
-  background-size: 620px 620px, 980px 980px; /* different scales */
-  background-position: 0 0, 120px 80px;
+  background-size: 420px 420px, 760px 760px;
+  background-position: 0 0, 240px 160px;
 
-  animation: grainJitter 0.22s steps(2) infinite;
+  animation: grainStep 0.18s steps(1) infinite;
   will-change: background-position;
+  transform: translateZ(0);
 }
 
-/* This makes it UNMISTAKABLY moving */
-@keyframes grainJitter{
-  0%   { background-position: 0 0, 120px 80px; }
-  25%  { background-position: -18px 12px, 146px 62px; }
-  50%  { background-position: 14px -16px, 102px 108px; }
-  75%  { background-position: -10px -8px, 164px 92px; }
-  100% { background-position: 0 0, 120px 80px; }
+@keyframes grainStep{
+  0%   { background-position: 0 0, 240px 160px; }
+  20%  { background-position: -34px 18px, 280px 120px; }
+  40%  { background-position: 22px -28px, 212px 194px; }
+  60%  { background-position: -18px -14px, 298px 178px; }
+  80%  { background-position: 30px 26px, 226px 132px; }
+  100% { background-position: 0 0, 240px 160px; }
 }
 
 /* VHS TOP */
@@ -79,7 +85,7 @@ body{
 }
 
 /* =========================
-   HEADER + COMPRESS ANIMATION
+   HEADER + COMPRESS
 ========================= */
 .hdr{
   position: relative;
@@ -95,14 +101,13 @@ body{
     background 320ms ease;
 }
 
-/* Name button: CONSTANT micro jitter (extremely subtle) */
+/* Constant micro jitter */
 .nameImgBtn{
   all: unset;
   cursor: pointer;
   display: inline-block;
   user-select: none;
   line-height: 0;
-
   animation: vhsMicroJitter 1.2s steps(2) infinite;
   will-change: transform;
 }
@@ -139,7 +144,6 @@ body{
   flex-wrap:wrap;
 }
 
-/* Button style */
 .tab{
   border: 2px solid rgba(255,48,48,0.75);
   color: rgba(255,48,48,0.95);
@@ -168,13 +172,14 @@ body:not(.route-home) .hdr{
   background: rgba(0,0,0,0.62);
 }
 body:not(.route-home) .nameImg{
-  max-height: 62px;                 /* smaller */
-  transform: translateY(6px);       /* lowered so it isn't jammed at top */
+  max-height: 62px;
+  transform: translateY(6px);
 }
 body:not(.route-home) .sub{ opacity:.65; }
 
 /* =========================
-   LAYOUT (HOME vignette kept)
+   FRAME + GLOBAL VIGNETTE
+   (THIS is what makes every page look like your "first pic")
 ========================= */
 .frame{
   position: relative;
@@ -184,20 +189,45 @@ body:not(.route-home) .sub{ opacity:.65; }
   padding: 10px 14px 22px;
 }
 
+/* Global vignette that applies to ALL pages */
+.frame::before{
+  content:"";
+  position:absolute;
+  inset: -16px;                 /* push vignette slightly beyond frame edge */
+  pointer-events:none;
+  z-index: 30;                  /* above content, below header (header is 50) */
+  background:
+    radial-gradient(circle at center,
+      rgba(0,0,0,0) 52%,
+      rgba(0,0,0,0.55) 78%,
+      rgba(0,0,0,0.92) 100%),
+    linear-gradient(to right,
+      rgba(0,0,0,0.85),
+      rgba(0,0,0,0) 22%,
+      rgba(0,0,0,0) 78%,
+      rgba(0,0,0,0.85));
+  mix-blend-mode: multiply;
+  opacity: 0.98;
+}
+
+/* =========================
+   SYSTEM LAYOUT
+========================= */
 .system{
+  position: relative;
+  z-index: 5;
   display:grid;
   grid-template-columns: 200px minmax(0,1fr) 200px;
   gap: 14px;
 }
 
+/* Side strips are ONLY for home layout */
 .side{
   position:relative;
   border: 1px solid rgba(255,255,255,0.14);
   background: rgba(0,0,0,0.22);
   overflow:hidden;
 }
-
-/* vignette fade */
 .sideMask{
   position:absolute;
   inset:-60px;
@@ -216,13 +246,11 @@ body:not(.route-home) .sub{ opacity:.65; }
   mix-blend-mode: multiply;
   opacity: .96;
 }
-
 .sideStack{
   display:grid;
   gap: 10px;
   padding: 12px;
 }
-
 .sideTile{
   border: 1px solid rgba(255,255,255,0.14);
   aspect-ratio: 4/3;
@@ -235,7 +263,7 @@ body:not(.route-home) .sub{ opacity:.65; }
   opacity:.75;
 }
 
-/* Only show side strips on Home */
+/* Hide side strips off home */
 body:not(.route-home) .side{ display:none; }
 body:not(.route-home) .system{ grid-template-columns: 1fr; }
 
@@ -247,7 +275,6 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   min-height: 620px;
 }
 
-/* views are full-size layers */
 .view{
   position:absolute;
   inset:0;
@@ -277,7 +304,7 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
 }
 
 /* =========================
-   FILMS GRID (restored)
+   FILMS GRID
 ========================= */
 .filmsGrid{
   height:100%;
@@ -335,19 +362,19 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   object-fit:contain;
 }
 
-.tileTitle{
-  font-weight: 900;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+/* Humanzee logo bigger */
+.tile[data-film="humanzee"] .tileLogo{
+  max-width: 86%;
+  max-height: 170px;
 }
 
 .tileMeta{
-  opacity:.85;
+  opacity:.88;
   font-size: 14px;
 }
 
 /* =========================
-   SIMPLE PAGES (about/contact/film)
+   SIMPLE PAGES
 ========================= */
 .aboutWrap, .contactWrap, .filmPage{
   height:100%;
