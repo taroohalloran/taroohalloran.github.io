@@ -1,4 +1,4 @@
-// app.js — full file (adds grain boost hover + stable router)
+// app.js — full file (grain boost hover + stable router)
 
 const $ = (s) => document.querySelector(s);
 
@@ -233,21 +233,15 @@ function handleRoute(){
 }
 
 /* ===== Grain boost on hover targets ===== */
-function enableGrainBoost(){
-  document.body.classList.add("grain-boost");
-}
-function disableGrainBoost(){
-  document.body.classList.remove("grain-boost");
-}
+function enableGrainBoost(){ document.body.classList.add("grain-boost"); }
+function disableGrainBoost(){ document.body.classList.remove("grain-boost"); }
 
 function initGrainHover(){
-  // tabs
   document.querySelectorAll(".tab").forEach(btn=>{
     btn.addEventListener("mouseenter", enableGrainBoost);
     btn.addEventListener("mouseleave", disableGrainBoost);
   });
 
-  // films tiles (created dynamically)
   document.addEventListener("mouseenter", (e)=>{
     if(e.target.closest(".tile")) enableGrainBoost();
   }, true);
