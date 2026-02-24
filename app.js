@@ -1,4 +1,4 @@
-// app.js — full file (stable router + films + film pages)
+// app.js — full file (stable router + films hover content)
 
 const $ = (s) => document.querySelector(s);
 
@@ -18,8 +18,7 @@ const SITE = {
     body: "For inquiries:",
     links: [
       { label: "Email", value: "YOUR_EMAIL@DOMAIN.COM", href: "mailto:YOUR_EMAIL@DOMAIN.COM" },
-      { label: "Instagram", value: "@YOUR_HANDLE", href: "https://instagram.com/YOUR_HANDLE" },
-      { label: "IMDb", value: "Taro O’Halloran", href: "https://www.imdb.com/" }
+      { label: "Instagram", value: "@YOUR_HANDLE", href: "https://instagram.com/YOUR_HANDLE" }
     ]
   },
 
@@ -33,7 +32,7 @@ const SITE = {
       tile: "assets/stills/tile-humanzee.jpg",
       hero: "assets/stills/tile-humanzee.jpg",
       logo: "assets/films/humanzee/humanzee-logo.png",
-      desc: "Replace with a short description of HUMANZEE.",
+      desc: "",
       actions: []
     },
     {
@@ -45,7 +44,7 @@ const SITE = {
       tile: "assets/stills/tile-rendezvous.jpg",
       hero: "assets/stills/tile-rendezvous.jpg",
       logo: "assets/films/rendezvous/rendezvous-logo.png",
-      desc: "Replace with a short description of RENDEZVOUS.",
+      desc: "",
       actions: []
     },
     {
@@ -57,7 +56,7 @@ const SITE = {
       tile: "assets/stills/tile-uap.jpg",
       hero: "assets/stills/tile-uap.jpg",
       logo: "assets/films/uap/uap-logo.png",
-      desc: "Replace with a short description of UAP.",
+      desc: "",
       actions: []
     },
     {
@@ -69,7 +68,7 @@ const SITE = {
       tile: "assets/stills/tile-dragons.jpg",
       hero: "assets/stills/tile-dragons.jpg",
       logo: "assets/films/dragons/do-dragons-sleep-in-fictitious-caves-logo.png",
-      desc: "Replace with a short description of DO DRAGONS SLEEP…",
+      desc: "",
       actions: []
     },
     {
@@ -81,7 +80,7 @@ const SITE = {
       tile: "assets/stills/tile-aspens.jpg",
       hero: "assets/stills/tile-aspens.jpg",
       logo: "assets/films/aspens/the-whispers-of-the-aspens-logo.png",
-      desc: "Replace with a short description of THE WHISPERS OF THE ASPENS.",
+      desc: "",
       actions: []
     }
   ]
@@ -94,8 +93,6 @@ const viewAbout = $("#view-about");
 const viewContact = $("#view-contact");
 const viewFilm = $("#view-film");
 const viewError = $("#view-error");
-
-const errorText = $("#errorText");
 
 const homeHero = $("#homeHero");
 const leftStack = $("#homeLeftStack");
@@ -113,6 +110,7 @@ const filmTitle = $("#filmTitle");
 const filmMeta = $("#filmMeta");
 const filmDesc = $("#filmDesc");
 const filmActions = $("#filmActions");
+const errorText = $("#errorText");
 
 function showOnly(viewEl) {
   const all = [viewHome, viewFilms, viewAbout, viewContact, viewFilm, viewError];
@@ -150,8 +148,10 @@ function makeSideTile(src){
 
 function renderHome(){
   if (homeHero) homeHero.src = SITE.home.hero;
+
   if (leftStack) leftStack.innerHTML = "";
   if (rightStack) rightStack.innerHTML = "";
+
   (SITE.home.left || []).forEach(src => leftStack && leftStack.appendChild(makeSideTile(src)));
   (SITE.home.right || []).forEach(src => rightStack && rightStack.appendChild(makeSideTile(src)));
 }
@@ -163,12 +163,12 @@ function renderFilms(){
   SITE.films.slice(0,5).forEach(f=>{
     const tile = document.createElement("div");
     tile.className = "tile";
+    tile.dataset.film = f.id; // <-- for Humanzee logo sizing etc.
 
     tile.innerHTML = `
       <img class="tileImg" src="${f.tile}" alt="">
       <div class="tileInfo">
         ${f.logo ? `<img class="tileLogo" src="${f.logo}" alt="">` : ""}
-        <div class="tileTitle">${f.title}</div>
         <div class="tileMeta">${f.year} • ${f.runtime} • ${f.genres}</div>
       </div>
     `;
