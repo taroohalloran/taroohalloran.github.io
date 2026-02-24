@@ -9,29 +9,30 @@
 
 <body class="route-home">
 
-  <!-- TEXTURE OVERLAYS (LOCKED) -->
+  <!-- LOCKED TEXTURE OVERLAYS -->
   <div class="texture texture-concrete" aria-hidden="true"></div>
+  <div class="texture texture-grain" aria-hidden="true"></div>
   <div class="texture texture-vhs" aria-hidden="true"></div>
 
-  <header class="hdr">
+  <header class="hdr" id="hdr">
     <button class="nameImgBtn" id="homeLink" type="button" aria-label="Home">
       <img class="nameImg" src="assets/branding/taro-name.png" alt="Taro O’Halloran">
     </button>
 
     <div class="sub">( writer , director , producer )</div>
 
-    <!-- PNG TAB BUTTONS -->
-    <nav class="tabs" aria-label="Primary">
-      <button class="tabImgBtn grainHover" data-route="films" aria-current="false" type="button" aria-label="Films">
-        <img class="tabImg" data-base="ui/films-button" alt="Films">
+    <nav class="tabs" aria-label="Site navigation">
+      <!-- Each button uses an <img> so we can swap PNG states reliably -->
+      <button class="tabBtn grainHover" id="tab-films" type="button" data-route="films" aria-label="Films">
+        <img class="tabImg" id="tabImg-films" alt="Films">
       </button>
 
-      <button class="tabImgBtn grainHover" data-route="about" aria-current="false" type="button" aria-label="About">
-        <img class="tabImg" data-base="ui/about-button" alt="About">
+      <button class="tabBtn grainHover" id="tab-about" type="button" data-route="about" aria-label="About">
+        <img class="tabImg" id="tabImg-about" alt="About">
       </button>
 
-      <button class="tabImgBtn grainHover" data-route="contact" aria-current="false" type="button" aria-label="Contact">
-        <img class="tabImg" data-base="ui/contact-button" alt="Contact">
+      <button class="tabBtn grainHover" id="tab-contact" type="button" data-route="contact" aria-label="Contact">
+        <img class="tabImg" id="tabImg-contact" alt="Contact">
       </button>
     </nav>
   </header>
@@ -39,7 +40,7 @@
   <main class="frame">
     <section class="system">
 
-      <aside class="side side-left">
+      <aside class="side side-left" aria-hidden="true">
         <div class="sideMask"></div>
         <div class="sideStack" id="homeLeftStack"></div>
       </aside>
@@ -92,16 +93,13 @@
 
       </section>
 
-      <aside class="side side-right">
+      <aside class="side side-right" aria-hidden="true">
         <div class="sideMask"></div>
         <div class="sideStack" id="homeRightStack"></div>
       </aside>
 
     </section>
   </main>
-
-  <!-- SUBTLE GLOBAL GRAIN -->
-  <div class="globalGrain" aria-hidden="true"></div>
 
   <script src="app.js"></script>
 </body>
