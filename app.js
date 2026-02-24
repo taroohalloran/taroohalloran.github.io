@@ -1,9 +1,19 @@
+// app.js — full file (drop-in replacement)
+
 const $ = (s) => document.querySelector(s);
-const $$ = (s) => Array.from(document.querySelectorAll(s));
 
 /**
- * Data is embedded to avoid GitHub Pages 404 problems.
- * Replace text/links/images anytime.
+ * All data is embedded to avoid GitHub Pages path/JSON issues.
+ * Paths are case-sensitive on GitHub Pages.
+ *
+ * Expected files (examples):
+ * - assets/branding/taro-name.png
+ * - assets/films/humanzee/humanzee-logo.png
+ * - assets/films/rendezvous/rendezvous-logo.png
+ * - assets/films/uap/uap-logo.png
+ * - assets/films/dragons/do-dragons-sleep-in-fictitious-caves-logo.png
+ * - assets/films/aspens/the-whispers-of-the-aspens-logo.png
+ * - assets/stills/tile-*.jpg
  */
 const SITE = {
   home: {
@@ -11,11 +21,13 @@ const SITE = {
     left: ["assets/stills/home-left-1.jpg", "assets/stills/home-left-2.jpg"],
     right: ["assets/stills/home-right-1.jpg", "assets/stills/home-right-2.jpg"]
   },
+
   about: {
     photo: "assets/stills/about-photo.jpg",
     bio:
       "Write your bio here. Keep it factual and punchy. Director of HUMANZEE. Developing THE LIVING UNDEAD RETURN AGAIN."
   },
+
   contact: {
     body: "For inquiries:",
     links: [
@@ -24,72 +36,74 @@ const SITE = {
       { label: "IMDb", value: "Taro O’Halloran", href: "https://www.imdb.com/" }
     ]
   },
+
+  // Order matters: this also controls how tiles are placed into the 5-tile grid.
   films: [
-  {
-    id: "humanzee",
-    title: "Humanzee",
-    year: "2024",
-    runtime: "23 min.",
-    genres: "Horror / Drama",
-    tile: "assets/stills/tile-humanzee.jpg",
-    hero: "assets/stills/tile-humanzee.jpg",
-    logo: "assets/films/humanzee/humanzee-logo.png",
-    desc: "Replace with a tight description of HUMANZEE.",
-    actions: [{ label: "Watch", href: "https://www.youtube.com/watch?v=YOUR_LINK" }]
-  },
-  {
-    id: "rendezvous",
-    title: "Rendezvous",
-    year: "2023",
-    runtime: "16 min.",
-    genres: "Crime / Comedy",
-    tile: "assets/stills/tile-rendezvous.jpg",
-    hero: "assets/stills/tile-rendezvous.jpg",
-    logo: "assets/films/rendezvous/rendezvous-logo.png",
-    desc: "Replace with a tight description of RENDEZVOUS.",
-    actions: []
-  },
-  {
-    id: "uap",
-    title: "UAP",
-    year: "2022",
-    runtime: "12 min.",
-    genres: "Comedy / Drama / Sci-Fi",
-    tile: "assets/stills/tile-uap.jpg",
-    hero: "assets/stills/tile-uap.jpg",
-    logo: "assets/films/uap/uap-logo.png",
-    desc: "Replace with a tight description of UAP.",
-    actions: []
-  },
-  {
-    id: "dragons",
-    title: "Do Dragons Sleep in Fictitious Caves?",
-    year: "2022",
-    runtime: "4 min.",
-    genres: "Horror / Drama",
-    tile: "assets/stills/tile-dragons.jpg",
-    hero: "assets/stills/tile-dragons.jpg",
-    logo: "assets/films/dragons/do-dragons-sleep-in-fictitious-caves-logo.png",
-    desc: "Replace with a tight description of DO DRAGONS SLEEP IN FICTITIOUS CAVES?.",
-    actions: []
-  },
-  {
-    id: "aspens",
-    title: "The Whispers of the Aspens",
-    year: "2022",
-    runtime: "1 min.",
-    genres: "Horror",
-    tile: "assets/stills/tile-aspens.jpg",
-    hero: "assets/stills/tile-aspens.jpg",
-    logo: "assets/films/aspens/the-whispers-of-the-aspens-logo.png",
-    desc: "Replace with a tight description of THE WHISPERS OF THE ASPENS.",
-    actions: []
-  }
-]
+    {
+      id: "humanzee",
+      title: "Humanzee",
+      year: "2024",
+      runtime: "23 min.",
+      genres: "Horror / Drama",
+      tile: "assets/stills/tile-humanzee.jpg",
+      hero: "assets/stills/tile-humanzee.jpg",
+      logo: "assets/films/humanzee/humanzee-logo.png",
+      desc: "Replace with a tight description of HUMANZEE.",
+      actions: [{ label: "Watch", href: "https://www.youtube.com/watch?v=YOUR_LINK" }]
+    },
+    {
+      id: "rendezvous",
+      title: "Rendezvous",
+      year: "2023",
+      runtime: "16 min.",
+      genres: "Crime / Comedy",
+      tile: "assets/stills/tile-rendezvous.jpg",
+      hero: "assets/stills/tile-rendezvous.jpg",
+      logo: "assets/films/rendezvous/rendezvous-logo.png",
+      desc: "Replace with a tight description of RENDEZVOUS.",
+      actions: []
+    },
+    {
+      id: "uap",
+      title: "UAP",
+      year: "2022",
+      runtime: "12 min.",
+      genres: "Comedy / Drama / Sci-Fi",
+      tile: "assets/stills/tile-uap.jpg",
+      hero: "assets/stills/tile-uap.jpg",
+      logo: "assets/films/uap/uap-logo.png",
+      desc: "Replace with a tight description of UAP.",
+      actions: []
+    },
+    {
+      id: "dragons",
+      title: "Do Dragons Sleep in Fictitious Caves?",
+      year: "2022",
+      runtime: "4 min.",
+      genres: "Horror / Drama",
+      tile: "assets/stills/tile-dragons.jpg",
+      hero: "assets/stills/tile-dragons.jpg",
+      logo: "assets/films/dragons/do-dragons-sleep-in-fictitious-caves-logo.png",
+      desc: "Replace with a tight description of DO DRAGONS SLEEP IN FICTITIOUS CAVES?.",
+      actions: []
+    },
+    {
+      id: "aspens",
+      title: "The Whispers of the Aspens",
+      year: "2022",
+      runtime: "1 min.",
+      genres: "Horror",
+      tile: "assets/stills/tile-aspens.jpg",
+      hero: "assets/stills/tile-aspens.jpg",
+      logo: "assets/films/aspens/the-whispers-of-the-aspens-logo.png",
+      desc: "Replace with a tight description of THE WHISPERS OF THE ASPENS.",
+      actions: []
+    }
+  ]
 };
 
+// ===== DOM refs =====
 const homeLink = $("#homeLink");
-const tabs = $$(".tab");
 
 const viewHome = $("#view-home");
 const viewFilms = $("#view-films");
@@ -97,6 +111,7 @@ const viewAbout = $("#view-about");
 const viewContact = $("#view-contact");
 const viewFilm = $("#view-film");
 const viewError = $("#view-error");
+
 const errorText = $("#errorText");
 
 const homeHero = $("#homeHero");
@@ -119,17 +134,26 @@ const filmActions = $("#filmActions");
 
 let currentRoute = "home";
 
+// ===== helpers =====
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 function setHeaderState(route) {
   document.body.classList.toggle("route-home", route === "home");
 }
 
 function setTabs(route) {
-  tabs.forEach(btn => {
-    const on = btn.dataset.route === route;
-    btn.setAttribute("aria-current", on ? "page" : "false");
+  document.querySelectorAll(".tab").forEach(btn => {
+    btn.setAttribute("aria-current", btn.dataset.route === route ? "page" : "false");
   });
   if (route === "home" || route.startsWith("film:")) {
-    tabs.forEach(btn => btn.setAttribute("aria-current", "false"));
+    document.querySelectorAll(".tab").forEach(btn => btn.setAttribute("aria-current", "false"));
   }
 }
 
@@ -151,7 +175,6 @@ async function transitionTo(route) {
 
   currentRoute = route;
 
-  // Route switch
   if (route === "home") {
     setHeaderState("home");
     setTabs("home");
@@ -182,20 +205,18 @@ async function transitionTo(route) {
 }
 
 function navigate(hash) {
-  // hash like "#films" or "#film/uap"
   history.pushState(null, "", hash);
   handleRoute();
 }
 
 function handleRoute() {
   const h = (location.hash || "#home").replace("#", "");
-  if (!h || h === "home") return transitionTo("home");
 
+  if (!h || h === "home") return transitionTo("home");
   if (h === "films") return transitionTo("films");
   if (h === "about") return transitionTo("about");
   if (h === "contact") return transitionTo("contact");
 
-  // film pages: #film/uap
   if (h.startsWith("film/")) {
     const id = h.split("/")[1];
     const film = SITE.films.find(f => f.id === id);
@@ -210,12 +231,12 @@ function handleRoute() {
   return transitionTo("home");
 }
 
-/* ===== Render HOME exactly like the mock system ===== */
+// ===== renderers =====
 function renderHome() {
-  homeHero.src = SITE.home.hero;
+  if (homeHero) homeHero.src = SITE.home.hero;
 
-  leftStack.innerHTML = "";
-  rightStack.innerHTML = "";
+  if (leftStack) leftStack.innerHTML = "";
+  if (rightStack) rightStack.innerHTML = "";
 
   const mkSide = (src) => {
     const d = document.createElement("div");
@@ -224,27 +245,27 @@ function renderHome() {
     return d;
   };
 
-  SITE.home.left.forEach(src => leftStack.appendChild(mkSide(src)));
-  SITE.home.right.forEach(src => rightStack.appendChild(mkSide(src)));
+  (SITE.home.left || []).forEach(src => leftStack && leftStack.appendChild(mkSide(src)));
+  (SITE.home.right || []).forEach(src => rightStack && rightStack.appendChild(mkSide(src)));
 }
 
-/* ===== FILMS page with hover card behavior + click to unique pages ===== */
 function renderFilms() {
+  if (!filmsGrid) return;
   filmsGrid.innerHTML = "";
 
-  // This layout expects 5 tiles (big left + 4 around). We’ll include a “blank” tile if needed.
-  const films = [...SITE.films];
+  // Exactly 5 films expected for the grid composition.
+  // If fewer exist, we silently fill with blanks; if more exist, we only show first 5.
+  const films = [...(SITE.films || [])];
 
-  // If you only have 4 films, we add a 5th “ghost” tile so the grid matches the mock density.
-  // You can remove this if you add a 5th project later.
-  if (films.length < 5) {
+  while (films.length < 5) {
     films.push({
-      id: "ghost",
+      id: `blank-${films.length}`,
       title: "",
       year: "",
       runtime: "",
       genres: "",
-      tile: SITE.films[SITE.films.length - 1]?.tile || SITE.home.hero
+      tile: SITE.home.hero,
+      logo: ""
     });
   }
 
@@ -252,19 +273,23 @@ function renderFilms() {
     const tile = document.createElement("div");
     tile.className = "tile";
 
+    const titleOrLogo = f.logo
+      ? `<img class="tileLogo" src="${f.logo}" alt="${escapeHtml(f.title)} logo">`
+      : `<div class="tileTitle">${escapeHtml(f.title || "")}</div>`;
+
     tile.innerHTML = `
       <img class="tileImg" src="${f.tile}" alt="">
       <div class="tileInfo">
-        <div class="tileTitle">${escapeHtml(f.title || "")}</div>
+        ${titleOrLogo}
         <div class="tileMeta">${escapeHtml([f.year, f.runtime].filter(Boolean).join(", "))}</div>
         <div class="tileGenre">${escapeHtml(f.genres || "")}</div>
       </div>
     `;
 
-    // If it's the ghost tile, don't navigate
-    if (f.id !== "ghost") {
-      tile.addEventListener("click", () => navigate(`#film/${f.id}`));
-    } else {
+    // Only clickable if it’s a real film id (not blank)
+    const isBlank = String(f.id || "").startsWith("blank-") || !f.title;
+    if (!isBlank) tile.addEventListener("click", () => navigate(`#film/${f.id}`));
+    else {
       tile.style.opacity = "0.55";
       tile.style.cursor = "default";
     }
@@ -273,18 +298,17 @@ function renderFilms() {
   });
 }
 
-/* ===== ABOUT ===== */
 function renderAbout() {
-  aboutImg.src = SITE.about.photo;
-  aboutBody.textContent = SITE.about.bio;
+  if (aboutImg) aboutImg.src = SITE.about.photo;
+  if (aboutBody) aboutBody.textContent = SITE.about.bio;
 }
 
-/* ===== CONTACT ===== */
 function renderContact() {
-  contactBody.textContent = SITE.contact.body;
-  contactLinks.innerHTML = "";
+  if (contactBody) contactBody.textContent = SITE.contact.body;
+  if (!contactLinks) return;
 
-  SITE.contact.links.forEach(l => {
+  contactLinks.innerHTML = "";
+  (SITE.contact.links || []).forEach(l => {
     const a = document.createElement("a");
     a.className = "contactLink";
     a.href = l.href;
@@ -297,14 +321,25 @@ function renderContact() {
   });
 }
 
-/* ===== FILM DETAIL PAGE ===== */
 function renderFilmPage(f) {
-  filmHeroImg.src = f.hero || f.tile;
-  filmTitle.textContent = (f.title || "").toUpperCase();
-  filmMeta.textContent = [f.year, f.runtime, f.genres].filter(Boolean).join(" — ");
-  filmDesc.textContent = f.desc || "";
+  if (filmHeroImg) filmHeroImg.src = f.hero || f.tile;
 
+  // title area: prefer logo image
+  if (filmTitle) {
+    filmTitle.innerHTML = f.logo
+      ? `<img class="filmLogo" src="${f.logo}" alt="${escapeHtml(f.title)} logo">`
+      : escapeHtml((f.title || "").toUpperCase());
+  }
+
+  if (filmMeta) {
+    filmMeta.textContent = [f.year, f.runtime, f.genres].filter(Boolean).join(" — ");
+  }
+
+  if (filmDesc) filmDesc.textContent = f.desc || "";
+
+  if (!filmActions) return;
   filmActions.innerHTML = "";
+
   (f.actions || []).forEach(a => {
     const el = document.createElement("a");
     el.className = "action";
@@ -318,31 +353,34 @@ function renderFilmPage(f) {
   });
 }
 
-function escapeHtml(str) {
-  return String(str)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-/* ===== Wire UI ===== */
+// ===== init =====
 function init() {
+  // Render all static content once
   renderHome();
   renderFilms();
   renderAbout();
   renderContact();
 
-  // Home link (big red name)
-  homeLink.addEventListener("click", () => navigate("#home"));
+  // Event delegation: nav always works
+  document.addEventListener("click", (e) => {
+    const tab = e.target.closest(".tab");
+    if (tab) {
+      e.preventDefault();
+      navigate(`#${tab.dataset.route}`);
+      return;
+    }
 
-  // Tabs
-  tabs.forEach(btn => {
-    btn.addEventListener("click", () => navigate(`#${btn.dataset.route}`));
+    const home = e.target.closest("#homeLink");
+    if (home) {
+      e.preventDefault();
+      navigate("#home");
+      return;
+    }
   });
 
-  // Load route
+  // Default route
+  if (!location.hash) history.replaceState(null, "", "#home");
+
   setHeaderState("home");
   setTabs("home");
   showOnly(viewHome);
