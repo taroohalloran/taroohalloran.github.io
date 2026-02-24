@@ -8,13 +8,22 @@
 </head>
 
 <body class="route-home">
-  <!-- VHS overlays -->
-  <div class="overlay overlay-grain" aria-hidden="true"></div>
-  <div class="overlay overlay-scanlines" aria-hidden="true"></div>
-  <div class="overlay overlay-vignette" aria-hidden="true"></div>
+  <!-- GLOBAL TEXTURE OVERLAYS (top of everything) -->
+  <!-- Concrete below VHS -->
+  <div class="texture texture-concrete" aria-hidden="true"></div>
+  <div class="texture texture-vhs" aria-hidden="true"></div>
 
   <header class="hdr" id="hdr">
-    <button class="name" id="homeLink" type="button" aria-label="Home">TARO O’HALLORAN</button>
+    <!-- OPTION A (TEXT NAME): keep this if you want text -->
+    <!--
+    <button class="nameText" id="homeLink" type="button" aria-label="Home">TARO O’HALLORAN</button>
+    -->
+
+    <!-- OPTION B (IMAGE NAME): use this if you want your PNG -->
+    <button class="nameImgBtn" id="homeLink" type="button" aria-label="Home">
+      <img class="nameImg" src="assets/branding/taro-name.png" alt="Taro O’Halloran">
+    </button>
+
     <div class="sub">( writer , director , producer )</div>
 
     <nav class="tabs" aria-label="Site">
@@ -24,9 +33,8 @@
     </nav>
   </header>
 
-  <!-- FADE CONTAINER -->
   <main class="frame" id="frame">
-    <!-- SIDE RAILS + CENTER (matches home mock system) -->
+    <!-- System layout: left strip + center + right strip -->
     <section class="system">
       <aside class="side side-left" aria-label="Left strip">
         <div class="sideMask" aria-hidden="true"></div>
@@ -36,11 +44,9 @@
       <section class="center">
         <!-- HOME view -->
         <section class="view is-active" data-route="home" id="view-home">
-          <div class="heroRow">
-            <div class="heroClip">
-              <div class="heroMask" aria-hidden="true"></div>
-              <img class="heroImg" id="homeHero" alt="" />
-            </div>
+          <div class="heroClip">
+            <div class="heroMask" aria-hidden="true"></div>
+            <img class="heroImg" id="homeHero" alt="" />
           </div>
         </section>
 
@@ -72,13 +78,14 @@
           </div>
         </section>
 
-        <!-- FILM DETAIL view (generated) -->
+        <!-- FILM DETAIL view -->
         <section class="view" data-route="film" id="view-film" hidden>
           <div class="filmPage">
             <div class="filmHero">
               <img id="filmHeroImg" alt="" />
               <div class="filmHeroShade" aria-hidden="true"></div>
             </div>
+
             <div class="filmInfo">
               <div class="panelTitle" id="filmTitle"></div>
               <div class="panelMeta" id="filmMeta"></div>
@@ -88,7 +95,7 @@
           </div>
         </section>
 
-        <!-- Error view -->
+        <!-- ERROR view -->
         <section class="view" data-route="error" id="view-error" hidden>
           <div class="contactWrap">
             <div class="panelTitle">ERROR</div>
