@@ -4,131 +4,105 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Taro O’Halloran</title>
-  <meta name="description" content="Taro O’Halloran — writer, director, producer." />
   <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body class="route-home">
-  <!-- VHS texture overlays -->
+  <!-- VHS overlays -->
   <div class="overlay overlay-grain" aria-hidden="true"></div>
   <div class="overlay overlay-scanlines" aria-hidden="true"></div>
   <div class="overlay overlay-vignette" aria-hidden="true"></div>
 
-  <header class="header" id="header">
-    <div class="title-block">
-      <button class="title home-link" id="homeLink" type="button" aria-label="Go to Home">
-        Taro O’Halloran
-      </button>
-      <div class="subtitle" id="siteSubtitle">( writer , director , producer )</div>
-    </div>
+  <header class="hdr" id="hdr">
+    <button class="name" id="homeLink" type="button" aria-label="Home">TARO O’HALLORAN</button>
+    <div class="sub">( writer , director , producer )</div>
 
-    <nav class="nav" aria-label="Primary">
-      <button class="nav-btn" data-route="films">FILMS</button>
-      <button class="nav-btn" data-route="about">ABOUT</button>
-      <button class="nav-btn" data-route="contact">CONTACT</button>
+    <nav class="tabs" aria-label="Site">
+      <button class="tab" data-route="films">FILMS</button>
+      <button class="tab" data-route="about">ABOUT</button>
+      <button class="tab" data-route="contact">CONTACT</button>
     </nav>
   </header>
 
-  <main class="layout">
-    <!-- Left rail -->
-    <aside class="rail" aria-label="Left still rail">
-      <div class="rail-inner" id="railLeft"></div>
-      <div class="rail-shade" aria-hidden="true"></div>
-    </aside>
+  <!-- FADE CONTAINER -->
+  <main class="frame" id="frame">
+    <!-- SIDE RAILS + CENTER (matches home mock system) -->
+    <section class="system">
+      <aside class="side side-left" aria-label="Left strip">
+        <div class="sideMask" aria-hidden="true"></div>
+        <div class="sideStack" id="homeLeftStack"></div>
+      </aside>
 
-    <!-- Center: views crossfade -->
-    <section class="center">
-      <div class="views" id="views">
-        <!-- HOME: looks like mock system + textless photo block -->
+      <section class="center">
+        <!-- HOME view -->
         <section class="view is-active" data-route="home" id="view-home">
-          <div class="stage-frame">
-            <img class="stage-img" id="homeStageImg" alt="" />
-            <div class="stage-shade" aria-hidden="true"></div>
-          </div>
-
-          <div class="home-mosaic" id="homeMosaic" aria-label="Home photo block"></div>
-        </section>
-
-        <!-- FILMS: list newest→oldest + detail -->
-        <section class="view" data-route="films" id="view-films" hidden>
-          <div class="filmsLayout">
-            <aside class="filmList" aria-label="Film list">
-              <div class="filmListHead">FILMS</div>
-              <div class="filmListItems" id="filmList"></div>
-            </aside>
-
-            <div class="filmMain">
-              <div class="stage-frame">
-                <img class="stage-img" id="filmStageImg" alt="" />
-                <div class="stage-shade" aria-hidden="true"></div>
-              </div>
-
-              <section class="panel">
-                <div class="panel-header">
-                  <div class="panel-title" id="filmTitle"></div>
-                  <div class="panel-meta" id="filmMeta"></div>
-                </div>
-                <div class="panel-body" id="filmBody"></div>
-                <div class="panel-actions" id="filmActions"></div>
-              </section>
+          <div class="heroRow">
+            <div class="heroClip">
+              <div class="heroMask" aria-hidden="true"></div>
+              <img class="heroImg" id="homeHero" alt="" />
             </div>
           </div>
         </section>
 
-        <!-- ABOUT: photo left + bio right -->
+        <!-- FILMS view -->
+        <section class="view" data-route="films" id="view-films" hidden>
+          <div class="filmsGrid" id="filmsGrid"></div>
+        </section>
+
+        <!-- ABOUT view -->
         <section class="view" data-route="about" id="view-about" hidden>
-          <div class="aboutLayout">
-            <div class="aboutPhotoFrame">
-              <img id="aboutPhoto" alt="Portrait of Taro O’Halloran" />
+          <div class="aboutWrap">
+            <div class="aboutPhoto">
+              <img id="aboutImg" alt="Portrait" />
               <div class="aboutShade" aria-hidden="true"></div>
             </div>
-
-            <section class="panel aboutPanel">
-              <div class="panel-header">
-                <div class="panel-title">ABOUT</div>
-                <div class="panel-meta" id="aboutMeta"></div>
-              </div>
-              <div class="panel-body" id="aboutBody"></div>
-            </section>
+            <div class="aboutText">
+              <div class="panelTitle">BIO</div>
+              <div class="panelBody" id="aboutBody"></div>
+            </div>
           </div>
         </section>
 
-        <!-- CONTACT: direct + socials -->
+        <!-- CONTACT view -->
         <section class="view" data-route="contact" id="view-contact" hidden>
-          <section class="panel contactPanel">
-            <div class="panel-header">
-              <div class="panel-title">CONTACT</div>
-              <div class="panel-meta" id="contactMeta"></div>
-            </div>
-
-            <div class="panel-body" id="contactBody"></div>
+          <div class="contactWrap">
+            <div class="panelTitle">CONTACT</div>
+            <div class="panelBody" id="contactBody"></div>
             <div class="contactLinks" id="contactLinks"></div>
-          </section>
+          </div>
         </section>
 
-        <!-- Error overlay region -->
-        <section class="view" data-route="error" id="view-error" hidden>
-          <section class="panel">
-            <div class="panel-header">
-              <div class="panel-title">ERROR</div>
-              <div class="panel-meta">Site failed to load data</div>
+        <!-- FILM DETAIL view (generated) -->
+        <section class="view" data-route="film" id="view-film" hidden>
+          <div class="filmPage">
+            <div class="filmHero">
+              <img id="filmHeroImg" alt="" />
+              <div class="filmHeroShade" aria-hidden="true"></div>
             </div>
-            <div class="panel-body" id="errorBody"></div>
-          </section>
+            <div class="filmInfo">
+              <div class="panelTitle" id="filmTitle"></div>
+              <div class="panelMeta" id="filmMeta"></div>
+              <div class="panelBody" id="filmDesc"></div>
+              <div class="actions" id="filmActions"></div>
+            </div>
+          </div>
         </section>
-      </div>
+
+        <!-- Error view -->
+        <section class="view" data-route="error" id="view-error" hidden>
+          <div class="contactWrap">
+            <div class="panelTitle">ERROR</div>
+            <div class="panelBody" id="errorText"></div>
+          </div>
+        </section>
+      </section>
+
+      <aside class="side side-right" aria-label="Right strip">
+        <div class="sideMask" aria-hidden="true"></div>
+        <div class="sideStack" id="homeRightStack"></div>
+      </aside>
     </section>
-
-    <!-- Right rail -->
-    <aside class="rail" aria-label="Right still rail">
-      <div class="rail-inner" id="railRight"></div>
-      <div class="rail-shade" aria-hidden="true"></div>
-    </aside>
   </main>
-
-  <footer class="footer">
-    <div class="footer-inner" id="footerLine"></div>
-  </footer>
 
   <script src="app.js"></script>
 </body>
