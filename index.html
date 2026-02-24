@@ -8,45 +8,43 @@
 </head>
 
 <body class="route-home">
-
-  <!-- LOCKED TEXTURE OVERLAYS -->
+  <!-- TEXTURE OVERLAYS (LOCKED / FIXED) -->
   <div class="texture texture-concrete" aria-hidden="true"></div>
   <div class="texture texture-grain" aria-hidden="true"></div>
   <div class="texture texture-vhs" aria-hidden="true"></div>
 
-  <header class="hdr" id="hdr">
+  <!-- VIGNETTE (LOCKED / FIXED) -->
+  <div class="vignette" aria-hidden="true"></div>
+
+  <header class="hdr">
     <button class="nameImgBtn" id="homeLink" type="button" aria-label="Home">
       <img class="nameImg" src="assets/branding/taro-name.png" alt="Taro O’Halloran">
     </button>
 
     <div class="sub">( writer , director , producer )</div>
 
-    <nav class="tabs" aria-label="Site navigation">
-      <!-- Each button uses an <img> so we can swap PNG states reliably -->
-      <button class="tabBtn grainHover" id="tab-films" type="button" data-route="films" aria-label="Films">
-        <img class="tabImg" id="tabImg-films" alt="Films">
+    <nav class="tabs" aria-label="Primary">
+      <button class="navBtn grainHover" data-route="films" type="button" aria-label="Films">
+        <img class="navBtnImg" data-btn="films" alt="Films">
       </button>
 
-      <button class="tabBtn grainHover" id="tab-about" type="button" data-route="about" aria-label="About">
-        <img class="tabImg" id="tabImg-about" alt="About">
+      <button class="navBtn grainHover" data-route="about" type="button" aria-label="About">
+        <img class="navBtnImg" data-btn="about" alt="About">
       </button>
 
-      <button class="tabBtn grainHover" id="tab-contact" type="button" data-route="contact" aria-label="Contact">
-        <img class="tabImg" id="tabImg-contact" alt="Contact">
+      <button class="navBtn grainHover" data-route="contact" type="button" aria-label="Contact">
+        <img class="navBtnImg" data-btn="contact" alt="Contact">
       </button>
     </nav>
   </header>
 
   <main class="frame">
     <section class="system">
-
-      <aside class="side side-left" aria-hidden="true">
-        <div class="sideMask"></div>
+      <aside class="side side-left">
         <div class="sideStack" id="homeLeftStack"></div>
       </aside>
 
       <section class="center">
-
         <!-- HOME -->
         <section class="view is-active" id="view-home">
           <div class="heroClip">
@@ -90,14 +88,11 @@
         <section class="view" id="view-error" hidden>
           <div id="errorText"></div>
         </section>
-
       </section>
 
-      <aside class="side side-right" aria-hidden="true">
-        <div class="sideMask"></div>
+      <aside class="side side-right">
         <div class="sideStack" id="homeRightStack"></div>
       </aside>
-
     </section>
   </main>
 
