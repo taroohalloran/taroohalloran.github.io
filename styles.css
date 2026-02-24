@@ -1,9 +1,9 @@
 /* =========================
-   BASE + NO PAGE SCROLL (fix grain strip)
+   BASE + NO PAGE SCROLL
 ========================= */
 *{ box-sizing:border-box; }
 html, body { height:100%; }
-html, body{ overflow:hidden; } /* prevents the top/bottom scroll bounce artifact */
+html, body{ overflow:hidden; }
 body{
   margin:0;
   color:#eaeaea;
@@ -39,14 +39,17 @@ body{
   .texture-concrete{ mix-blend-mode: color-dodge; }
 }
 
-/* Grain MIDDLE */
+/* Grain MIDDLE
+   - Default: toned down, less “digital noise”
+   - Hover: bigger tile + more obvious “16mm” vibe
+*/
 .texture-grain{
   z-index: 9998;
 
-  /* base grain levels */
-  --grainOpacity: 0.24;
-  --grainContrast: 1.35;
-  --grainBrightness: 1.10;
+  /* default grain: subtle */
+  --grainOpacity: 0.12;
+  --grainContrast: 1.20;
+  --grainBrightness: 1.06;
 
   opacity: var(--grainOpacity);
   mix-blend-mode: overlay;
@@ -56,30 +59,34 @@ body{
     url("assets/textures/film-grain.png"),
     url("assets/textures/film-grain.png");
   background-repeat: repeat, repeat;
-  background-size: 420px 420px, 760px 760px;
-  background-position: 0 0, 240px 160px;
 
-  animation: grainStep 0.18s steps(1) infinite;
-  will-change: background-position, opacity, filter;
+  /* default tile sizes: slightly larger so it doesn’t look like “digital sand” */
+  background-size: 900px 900px, 1300px 1300px;
+  background-position: 0 0, 320px 210px;
+
+  animation: grainStep 0.22s steps(1) infinite;
+  will-change: background-position, opacity, filter, background-size;
   transform: translateZ(0);
-
-  transition: opacity 120ms ease, filter 120ms ease;
+  transition: opacity 120ms ease, filter 120ms ease, background-size 120ms ease;
 }
 
-/* Boost grain on hover targets */
+/* BIG OBVIOUS grain on hover */
 body.grain-boost .texture-grain{
-  --grainOpacity: 0.40;
-  --grainContrast: 1.65;
-  --grainBrightness: 1.18;
+  --grainOpacity: 0.30;
+  --grainContrast: 1.55;
+  --grainBrightness: 1.14;
+
+  /* make grain chunks visibly larger */
+  background-size: 1800px 1800px, 2600px 2600px;
 }
 
 @keyframes grainStep{
-  0%   { background-position: 0 0, 240px 160px; }
-  20%  { background-position: -34px 18px, 280px 120px; }
-  40%  { background-position: 22px -28px, 212px 194px; }
-  60%  { background-position: -18px -14px, 298px 178px; }
-  80%  { background-position: 30px 26px, 226px 132px; }
-  100% { background-position: 0 0, 240px 160px; }
+  0%   { background-position: 0 0, 320px 210px; }
+  20%  { background-position: -60px 34px, 420px 150px; }
+  40%  { background-position: 44px -52px, 300px 290px; }
+  60%  { background-position: -38px -22px, 470px 260px; }
+  80%  { background-position: 58px 48px, 330px 170px; }
+  100% { background-position: 0 0, 320px 210px; }
 }
 
 /* VHS TOP */
@@ -94,10 +101,9 @@ body.grain-boost .texture-grain{
 
 /* =========================
    GLOBAL VIGNETTE (fixed edge + animated depth)
-   - Lives on body so it starts at absolute viewport edges
 ========================= */
 body{
-  --vigInner: 52%;     /* home default: deep into the page */
+  --vigInner: 52%;
   --vigMid:   78%;
   --vigOuter: 100%;
   --vigSide:  22%;
@@ -107,12 +113,11 @@ body{
 body::before{
   content:"";
   position: fixed;
-  inset: 0;                      /* absolute edges */
+  inset: 0;
   pointer-events:none;
-  z-index: 40;                   /* above content, below header (50), below textures (9997+) */
+  z-index: 40;
   opacity: var(--vigOpacity);
   mix-blend-mode: multiply;
-
   background:
     radial-gradient(circle at center,
       rgba(0,0,0,0) var(--vigInner),
@@ -123,20 +128,14 @@ body::before{
       rgba(0,0,0,0) var(--vigSide),
       rgba(0,0,0,0) calc(100% - var(--vigSide)),
       rgba(0,0,0,0.85));
-
-  transition:
-    opacity 320ms ease,
-    background 320ms ease;
+  transition: opacity 320ms ease, background 320ms ease;
 }
 
-/* HOME: deeper vignette */
 body.route-home{
   --vigInner: 52%;
   --vigMid:   78%;
   --vigSide:  22%;
 }
-
-/* SUBPAGES: vignette pulls back (animated like header) */
 body:not(.route-home){
   --vigInner: 66%;
   --vigMid:   86%;
@@ -153,12 +152,11 @@ body:not(.route-home){
   text-align:center;
   padding: 28px 14px 12px;
   background: rgba(0,0,0,0.55);
-  border-bottom: 1px solid rgba(255,255,255,0.10);
 
-  transition:
-    padding 320ms ease,
-    transform 320ms ease,
-    background 320ms ease;
+  /* remove the thin divider line */
+  border-bottom: none;
+
+  transition: padding 320ms ease, transform 320ms ease, background 320ms ease;
 }
 
 .nameImgBtn{
@@ -221,7 +219,7 @@ body:not(.route-home){
   border-color: rgba(255,48,48,0.98);
 }
 
-/* SUBPAGES: compressed header */
+/* SUBPAGES */
 body:not(.route-home) .hdr{
   padding: 16px 14px 10px;
   transform: translateY(-2px);
@@ -234,19 +232,25 @@ body:not(.route-home) .nameImg{
 body:not(.route-home) .sub{ opacity:.65; }
 
 /* =========================
-   FRAME (fixed viewport cover)
+   FRAME
+   Split-the-difference bottom breathing room:
+   - Not flush to bottom like your current pic
+   - Not huge empty gap like your older pic
 ========================= */
 .frame{
   position: relative;
   z-index: 5;
   max-width: 1500px;
-  height: calc(100vh - 140px); /* header space; keeps the site "cover-like" */
+
+  /* header + slight bottom gap */
+  height: calc(100vh - 160px);
+
   margin: 0 auto;
   padding: 10px 14px 22px;
 }
 
 @media (max-width: 980px){
-  .frame{ height: calc(100vh - 160px); }
+  .frame{ height: calc(100vh - 180px); }
 }
 
 /* =========================
@@ -342,7 +346,7 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
 }
 
 /* =========================
-   FILMS GRID + DIMENSIONAL LIFT
+   FILMS GRID + DIMENSION
 ========================= */
 .filmsGrid{
   height:100%;
@@ -366,7 +370,7 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   background: rgba(0,0,0,0.25);
   transform: translateZ(0);
   transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
-  z-index: 1; /* allow hover raise */
+  z-index: 1;
 }
 
 .tileImg{
@@ -380,7 +384,7 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   transform: translateY(-2px);
   border-color: rgba(255,255,255,0.26);
   box-shadow: 0 18px 40px rgba(0,0,0,0.55);
-  z-index: 5; /* lifts above vignette visually */
+  z-index: 5;
 }
 
 .tile:hover .tileImg{
@@ -414,6 +418,12 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
 .tile[data-film="humanzee"] .tileLogo{
   max-width: 88%;
   max-height: 190px;
+}
+
+/* Aspens logo a little bigger */
+.tile[data-film="aspens"] .tileLogo{
+  max-width: 78%;
+  max-height: 140px;
 }
 
 .tileMeta{
