@@ -1,4 +1,4 @@
-// app.js — full file (drop-in replacement)
+// app.js — full file
 
 const $ = (s) => document.querySelector(s);
 
@@ -8,328 +8,96 @@ const SITE = {
     left: ["assets/stills/home-left-1.jpg", "assets/stills/home-left-2.jpg"],
     right: ["assets/stills/home-right-1.jpg", "assets/stills/home-right-2.jpg"]
   },
-
-  about: {
-    photo: "assets/stills/about-photo.jpg",
-    bio: "Write your bio here."
-  },
-
+  about: { photo: "assets/stills/about-photo.jpg", bio: "Write your bio here." },
   contact: {
     body: "For inquiries:",
     links: [
       { label: "Email", value: "YOUR_EMAIL@DOMAIN.COM", href: "mailto:YOUR_EMAIL@DOMAIN.COM" },
-      { label: "Instagram", value: "@YOUR_HANDLE", href: "https://instagram.com/YOUR_HANDLE" },
-      { label: "IMDb", value: "Taro O’Halloran", href: "https://www.imdb.com/" }
+      { label: "Instagram", value: "@YOUR_HANDLE", href: "https://instagram.com/YOUR_HANDLE" }
     ]
   },
-
   films: [
-    {
-      id: "humanzee",
-      title: "Humanzee",
-      year: "2024",
-      runtime: "23 min.",
-      genres: "Horror / Drama",
-      tile: "assets/stills/tile-humanzee.jpg",
-      hero: "assets/stills/tile-humanzee.jpg",
-      logo: "assets/films/humanzee/humanzee-logo.png",
-      desc: "Replace with a tight description of HUMANZEE.",
-      actions: [{ label: "Watch", href: "https://www.youtube.com/watch?v=YOUR_LINK" }]
-    },
-    {
-      id: "rendezvous",
-      title: "Rendezvous",
-      year: "2023",
-      runtime: "16 min.",
-      genres: "Crime / Comedy",
-      tile: "assets/stills/tile-rendezvous.jpg",
-      hero: "assets/stills/tile-rendezvous.jpg",
-      logo: "assets/films/rendezvous/rendezvous-logo.png",
-      desc: "Replace with a tight description of RENDEZVOUS.",
-      actions: []
-    },
-    {
-      id: "uap",
-      title: "UAP",
-      year: "2022",
-      runtime: "12 min.",
-      genres: "Comedy / Drama / Sci-Fi",
-      tile: "assets/stills/tile-uap.jpg",
-      hero: "assets/stills/tile-uap.jpg",
-      logo: "assets/films/uap/uap-logo.png",
-      desc: "Replace with a tight description of UAP.",
-      actions: []
-    },
-    {
-      id: "dragons",
-      title: "Do Dragons Sleep in Fictitious Caves?",
-      year: "2022",
-      runtime: "4 min.",
-      genres: "Horror / Drama",
-      tile: "assets/stills/tile-dragons.jpg",
-      hero: "assets/stills/tile-dragons.jpg",
-      logo: "assets/films/dragons/do-dragons-sleep-in-fictitious-caves-logo.png",
-      desc: "Replace with a tight description of DO DRAGONS SLEEP IN FICTITIOUS CAVES?.",
-      actions: []
-    },
-    {
-      id: "aspens",
-      title: "The Whispers of the Aspens",
-      year: "2022",
-      runtime: "1 min.",
-      genres: "Horror",
-      tile: "assets/stills/tile-aspens.jpg",
-      hero: "assets/stills/tile-aspens.jpg",
-      logo: "assets/films/aspens/the-whispers-of-the-aspens-logo.png",
-      desc: "Replace with a tight description of THE WHISPERS OF THE ASPENS.",
-      actions: []
-    }
+    { id:"humanzee", title:"Humanzee", year:"2024", runtime:"23 min.", genres:"Horror / Drama", tile:"assets/stills/tile-humanzee.jpg", hero:"assets/stills/tile-humanzee.jpg", logo:"assets/films/humanzee/humanzee-logo.png", desc:"", actions:[] },
+    { id:"rendezvous", title:"Rendezvous", year:"2023", runtime:"16 min.", genres:"Crime / Comedy", tile:"assets/stills/tile-rendezvous.jpg", hero:"assets/stills/tile-rendezvous.jpg", logo:"assets/films/rendezvous/rendezvous-logo.png", desc:"", actions:[] },
+    { id:"uap", title:"UAP", year:"2022", runtime:"12 min.", genres:"Comedy / Drama / Sci-Fi", tile:"assets/stills/tile-uap.jpg", hero:"assets/stills/tile-uap.jpg", logo:"assets/films/uap/uap-logo.png", desc:"", actions:[] },
+    { id:"dragons", title:"Do Dragons Sleep in Fictitious Caves?", year:"2022", runtime:"4 min.", genres:"Horror / Drama", tile:"assets/stills/tile-dragons.jpg", hero:"assets/stills/tile-dragons.jpg", logo:"assets/films/dragons/do-dragons-sleep-in-fictitious-caves-logo.png", desc:"", actions:[] },
+    { id:"aspens", title:"The Whispers of the Aspens", year:"2022", runtime:"1 min.", genres:"Horror", tile:"assets/stills/tile-aspens.jpg", hero:"assets/stills/tile-aspens.jpg", logo:"assets/films/aspens/the-whispers-of-the-aspens-logo.png", desc:"", actions:[] }
   ]
 };
 
-// ===== DOM refs =====
-const homeLink = $("#homeLink");
+const viewHome=$("#view-home"), viewFilms=$("#view-films"), viewAbout=$("#view-about"), viewContact=$("#view-contact"), viewFilm=$("#view-film");
+const homeHero=$("#homeHero"), leftStack=$("#homeLeftStack"), rightStack=$("#homeRightStack"), filmsGrid=$("#filmsGrid");
+let currentRoute="home", flickerTimer=null;
 
-const viewHome = $("#view-home");
-const viewFilms = $("#view-films");
-const viewAbout = $("#view-about");
-const viewContact = $("#view-contact");
-const viewFilm = $("#view-film");
-const viewError = $("#view-error");
-const errorText = $("#errorText");
+function setHeaderState(route){ document.body.classList.toggle("route-home", route==="home"); }
 
-const homeHero = $("#homeHero");
-const leftStack = $("#homeLeftStack");
-const rightStack = $("#homeRightStack");
-
-const filmsGrid = $("#filmsGrid");
-
-const aboutImg = $("#aboutImg");
-const aboutBody = $("#aboutBody");
-
-const contactBody = $("#contactBody");
-const contactLinks = $("#contactLinks");
-
-const filmHeroImg = $("#filmHeroImg");
-const filmTitle = $("#filmTitle");
-const filmMeta = $("#filmMeta");
-const filmDesc = $("#filmDesc");
-const filmActions = $("#filmActions");
-
-let currentRoute = "home";
-
-function escapeHtml(str) {
-  return String(str)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function setHeaderState(route) {
-  document.body.classList.toggle("route-home", route === "home");
-}
-
-function setTabs(route) {
-  document.querySelectorAll(".tab").forEach(btn => {
-    btn.setAttribute("aria-current", btn.dataset.route === route ? "page" : "false");
-  });
-  if (route === "home" || route.startsWith("film:")) {
-    document.querySelectorAll(".tab").forEach(btn => btn.setAttribute("aria-current", "false"));
-  }
-}
-
-function showOnly(viewEl) {
-  const all = [viewHome, viewFilms, viewAbout, viewContact, viewFilm, viewError];
-  all.forEach(v => {
-    v.hidden = v !== viewEl;
-    v.classList.toggle("is-active", v === viewEl);
+function showOnly(viewEl){
+  [viewHome,viewFilms,viewAbout,viewContact,viewFilm].forEach(v=>{
+    if(!v) return;
+    v.hidden = v!==viewEl;
+    v.classList.toggle("is-active", v===viewEl);
   });
 }
 
-async function transitionTo(route) {
-  if (route === currentRoute) return;
-
-  const active = document.querySelector(".view.is-active");
-  if (active) active.classList.add("is-fading-out");
-
-  await new Promise(r => setTimeout(r, 160));
-
-  currentRoute = route;
-
-  if (route === "home") {
-    setHeaderState("home"); setTabs("home"); showOnly(viewHome);
-  } else if (route === "films") {
-    setHeaderState("films"); setTabs("films"); showOnly(viewFilms);
-  } else if (route === "about") {
-    setHeaderState("about"); setTabs("about"); showOnly(viewAbout);
-  } else if (route === "contact") {
-    setHeaderState("contact"); setTabs("contact"); showOnly(viewContact);
-  } else if (route.startsWith("film:")) {
-    setHeaderState("film"); setTabs("film"); showOnly(viewFilm);
-  } else {
-    setHeaderState("error"); setTabs("error"); showOnly(viewError);
-  }
-
-  if (active) active.classList.remove("is-fading-out");
+function triggerFlicker(){
+  if(flickerTimer) clearTimeout(flickerTimer);
+  document.body.classList.remove("fx-flicker");
+  void document.body.offsetHeight; // force reflow
+  document.body.classList.add("fx-flicker");
+  flickerTimer=setTimeout(()=>document.body.classList.remove("fx-flicker"),240);
 }
 
-function navigate(hash) {
-  history.pushState(null, "", hash);
-  handleRoute();
+async function transitionTo(route){
+  if(route===currentRoute) return;
+  triggerFlicker();
+  currentRoute=route;
+  if(route==="home"){ setHeaderState("home"); showOnly(viewHome); }
+  else if(route==="films"){ setHeaderState("films"); showOnly(viewFilms); }
 }
 
-function handleRoute() {
-  const h = (location.hash || "#home").replace("#", "");
+function navigate(hash){ history.pushState(null,"",hash); handleRoute(); }
 
-  if (!h || h === "home") return transitionTo("home");
-  if (h === "films") return transitionTo("films");
-  if (h === "about") return transitionTo("about");
-  if (h === "contact") return transitionTo("contact");
-
-  if (h.startsWith("film/")) {
-    const id = h.split("/")[1];
-    const film = SITE.films.find(f => f.id === id);
-    if (!film) {
-      if (errorText) errorText.textContent = `Film not found: ${id}`;
-      return transitionTo("error");
-    }
-    renderFilmPage(film);
-    return transitionTo(`film:${id}`);
-  }
-
-  return transitionTo("home");
+function handleRoute(){
+  const h=(location.hash||"#home").replace("#","");
+  if(!h||h==="home") return transitionTo("home");
+  if(h==="films") return transitionTo("films");
 }
 
-function renderHome() {
-  if (homeHero) homeHero.src = SITE.home.hero;
-
-  if (leftStack) leftStack.innerHTML = "";
-  if (rightStack) rightStack.innerHTML = "";
-
-  const mkSide = (src) => {
-    const d = document.createElement("div");
-    d.className = "sideTile";
-    d.innerHTML = `<img src="${src}" alt="">`;
-    return d;
-  };
-
-  (SITE.home.left || []).forEach(src => leftStack && leftStack.appendChild(mkSide(src)));
-  (SITE.home.right || []).forEach(src => rightStack && rightStack.appendChild(mkSide(src)));
+function makeSideTile(src){
+  const d=document.createElement("div");
+  d.className="sideTile";
+  d.innerHTML=`<img src="${src}" alt="">`;
+  return d;
 }
 
-function renderFilms() {
-  if (!filmsGrid) return;
-  filmsGrid.innerHTML = "";
+function renderHome(){
+  homeHero.src=SITE.home.hero;
+  leftStack.innerHTML=""; rightStack.innerHTML="";
+  SITE.home.left.forEach(s=>leftStack.appendChild(makeSideTile(s)));
+  SITE.home.right.forEach(s=>rightStack.appendChild(makeSideTile(s)));
+}
 
-  const films = [...(SITE.films || [])];
-
-  // Ensure grid has exactly 5 tiles
-  while (films.length < 5) {
-    films.push({ id: `blank-${films.length}`, title: "", year: "", runtime: "", genres: "", tile: SITE.home.hero, logo: "" });
-  }
-
-  films.slice(0, 5).forEach(f => {
-    const tile = document.createElement("div");
-    tile.className = "tile";
-
-    const titleOrLogo = f.logo
-      ? `<img class="tileLogo" src="${f.logo}" alt="${escapeHtml(f.title)} logo">`
-      : `<div class="tileTitle">${escapeHtml(f.title || "")}</div>`;
-
-    tile.innerHTML = `
-      <img class="tileImg" src="${f.tile}" alt="">
-      <div class="tileInfo">
-        ${titleOrLogo}
-        <div class="tileMeta">${escapeHtml([f.year, f.runtime].filter(Boolean).join(", "))}</div>
-        <div class="tileGenre">${escapeHtml(f.genres || "")}</div>
-      </div>
-    `;
-
-    const isBlank = String(f.id || "").startsWith("blank-") || !f.title;
-    if (!isBlank) tile.addEventListener("click", () => navigate(`#film/${f.id}`));
-    else {
-      tile.style.opacity = "0.55";
-      tile.style.cursor = "default";
-    }
-
-    filmsGrid.appendChild(tile);
+function renderFilms(){
+  filmsGrid.innerHTML="";
+  SITE.films.slice(0,5).forEach(f=>{
+    const t=document.createElement("div");
+    t.className="tile";
+    t.innerHTML=`<img class="tileImg" src="${f.tile}"><div class="tileInfo"><img class="tileLogo" src="${f.logo}" alt=""></div>`;
+    t.onclick=()=>navigate(`#film/${f.id}`);
+    filmsGrid.appendChild(t);
   });
 }
 
-function renderAbout() {
-  if (aboutImg) aboutImg.src = SITE.about.photo;
-  if (aboutBody) aboutBody.textContent = SITE.about.bio;
-}
-
-function renderContact() {
-  if (contactBody) contactBody.textContent = SITE.contact.body;
-  if (!contactLinks) return;
-
-  contactLinks.innerHTML = "";
-  (SITE.contact.links || []).forEach(l => {
-    const a = document.createElement("a");
-    a.className = "contactLink";
-    a.href = l.href;
-    if (!l.href.startsWith("mailto:")) {
-      a.target = "_blank";
-      a.rel = "noreferrer";
-    }
-    a.innerHTML = `<span>${escapeHtml(l.label)}</span><span>${escapeHtml(l.value)}</span>`;
-    contactLinks.appendChild(a);
+function init(){
+  renderHome(); renderFilms();
+  document.addEventListener("click",(e)=>{
+    const tab=e.target.closest(".tab");
+    if(tab){ e.preventDefault(); navigate(`#${tab.dataset.route}`); }
+    const home=e.target.closest("#homeLink");
+    if(home){ e.preventDefault(); navigate("#home"); }
   });
-}
-
-function renderFilmPage(f) {
-  if (filmHeroImg) filmHeroImg.src = f.hero || f.tile;
-
-  if (filmTitle) {
-    filmTitle.innerHTML = f.logo
-      ? `<img class="filmLogo" src="${f.logo}" alt="${escapeHtml(f.title)} logo">`
-      : escapeHtml((f.title || "").toUpperCase());
-  }
-
-  if (filmMeta) filmMeta.textContent = [f.year, f.runtime, f.genres].filter(Boolean).join(" — ");
-  if (filmDesc) filmDesc.textContent = f.desc || "";
-
-  if (!filmActions) return;
-  filmActions.innerHTML = "";
-
-  (f.actions || []).forEach(a => {
-    const el = document.createElement("a");
-    el.className = "action";
-    el.href = a.href;
-    if (!a.href.startsWith("mailto:") && !a.href.startsWith("#")) {
-      el.target = "_blank";
-      el.rel = "noreferrer";
-    }
-    el.textContent = a.label;
-    filmActions.appendChild(el);
-  });
-}
-
-function init() {
-  renderHome();
-  renderFilms();
-  renderAbout();
-  renderContact();
-
-  // Navigation (event delegation so it always works)
-  document.addEventListener("click", (e) => {
-    const tab = e.target.closest(".tab");
-    if (tab) { e.preventDefault(); navigate(`#${tab.dataset.route}`); return; }
-
-    const home = e.target.closest("#homeLink");
-    if (home) { e.preventDefault(); navigate("#home"); return; }
-  });
-
-  if (!location.hash) history.replaceState(null, "", "#home");
-  setHeaderState("home");
-  setTabs("home");
-  showOnly(viewHome);
-  handleRoute();
-
+  if(!location.hash) history.replaceState(null,"","#home");
+  setHeaderState("home"); showOnly(viewHome); handleRoute();
   window.addEventListener("popstate", handleRoute);
 }
 
