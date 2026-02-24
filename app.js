@@ -25,51 +25,67 @@ const SITE = {
     ]
   },
   films: [
-    {
-      id: "humanzee",
-      title: "Humanzee",
-      year: "2024",
-      runtime: "",
-      genres: "Horror",
-      tile: "assets/stills/tile-humanzee.jpg",
-      hero: "assets/stills/tile-humanzee.jpg",
-      desc: "Replace with a tight description of HUMANZEE.",
-      actions: [{ label: "Watch", href: "https://www.youtube.com/watch?v=YOUR_LINK" }]
-    },
-    {
-      id: "rendezvous",
-      title: "Rendezvous",
-      year: "",
-      runtime: "",
-      genres: "—",
-      tile: "assets/stills/tile-rendezvous.jpg",
-      hero: "assets/stills/tile-rendezvous.jpg",
-      desc: "Replace with a tight description of RENDEZVOUS.",
-      actions: []
-    },
-    {
-      id: "uap",
-      title: "UAP",
-      year: "2022",
-      runtime: "12 min.",
-      genres: "Comedy / Drama / Sci-Fi",
-      tile: "assets/stills/tile-uap.jpg",
-      hero: "assets/stills/tile-uap.jpg",
-      desc: "Replace with a tight description of UAP.",
-      actions: []
-    },
-    {
-      id: "aspens",
-      title: "The Whispers of the Aspens",
-      year: "",
-      runtime: "",
-      genres: "—",
-      tile: "assets/stills/tile-aspens.jpg",
-      hero: "assets/stills/tile-aspens.jpg",
-      desc: "Replace with a tight description of THE WHISPERS OF THE ASPENS.",
-      actions: []
-    }
-  ]
+  {
+    id: "humanzee",
+    title: "Humanzee",
+    year: "2024",
+    runtime: "23 min.",
+    genres: "Horror / Drama",
+    tile: "assets/stills/tile-humanzee.jpg",
+    hero: "assets/stills/tile-humanzee.jpg",
+    logo: "assets/films/humanzee/humanzee-logo.png",
+    desc: "Replace with a tight description of HUMANZEE.",
+    actions: [{ label: "Watch", href: "https://www.youtube.com/watch?v=YOUR_LINK" }]
+  },
+  {
+    id: "rendezvous",
+    title: "Rendezvous",
+    year: "2023",
+    runtime: "16 min.",
+    genres: "Crime / Comedy",
+    tile: "assets/stills/tile-rendezvous.jpg",
+    hero: "assets/stills/tile-rendezvous.jpg",
+    logo: "assets/films/rendezvous/rendezvous-logo.png",
+    desc: "Replace with a tight description of RENDEZVOUS.",
+    actions: []
+  },
+  {
+    id: "uap",
+    title: "UAP",
+    year: "2022",
+    runtime: "12 min.",
+    genres: "Comedy / Drama / Sci-Fi",
+    tile: "assets/stills/tile-uap.jpg",
+    hero: "assets/stills/tile-uap.jpg",
+    logo: "assets/films/uap/uap-logo.png",
+    desc: "Replace with a tight description of UAP.",
+    actions: []
+  },
+  {
+    id: "dragons",
+    title: "Do Dragons Sleep in Fictitious Caves?",
+    year: "2022",
+    runtime: "4 min.",
+    genres: "Horror / Drama",
+    tile: "assets/stills/tile-dragons.jpg",
+    hero: "assets/stills/tile-dragons.jpg",
+    logo: "assets/films/dragons/do-dragons-sleep-in-fictitious-caves-logo.png",
+    desc: "Replace with a tight description of DO DRAGONS SLEEP IN FICTITIOUS CAVES?.",
+    actions: []
+  },
+  {
+    id: "aspens",
+    title: "The Whispers of the Aspens",
+    year: "2022",
+    runtime: "1 min.",
+    genres: "Horror",
+    tile: "assets/stills/tile-aspens.jpg",
+    hero: "assets/stills/tile-aspens.jpg",
+    logo: "assets/films/aspens/the-whispers-of-the-aspens-logo.png",
+    desc: "Replace with a tight description of THE WHISPERS OF THE ASPENS.",
+    actions: []
+  }
+]
 };
 
 const homeLink = $("#homeLink");
