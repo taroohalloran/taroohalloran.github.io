@@ -8,13 +8,14 @@
 </head>
 
 <body class="route-home">
-  <!-- TEXTURE OVERLAYS (LOCKED / FIXED) -->
+
+  <!-- VIGNETTE (FULL BLEED, ALWAYS PRESENT) -->
+  <div class="vignette" aria-hidden="true"></div>
+
+  <!-- TEXTURE OVERLAYS (ALWAYS PRESENT) -->
   <div class="texture texture-concrete" aria-hidden="true"></div>
   <div class="texture texture-grain" aria-hidden="true"></div>
   <div class="texture texture-vhs" aria-hidden="true"></div>
-
-  <!-- VIGNETTE (LOCKED / FIXED) -->
-  <div class="vignette" aria-hidden="true"></div>
 
   <header class="hdr">
     <button class="nameImgBtn" id="homeLink" type="button" aria-label="Home">
@@ -23,28 +24,31 @@
 
     <div class="sub">( writer , director , producer )</div>
 
+    <!-- NAV (PNG ASSET BUTTONS) -->
     <nav class="tabs" aria-label="Primary">
-      <button class="navBtn grainHover" data-route="films" type="button" aria-label="Films">
-        <img class="navBtnImg" data-btn="films" alt="Films">
+      <button class="navBtn grainHover" type="button" data-route="films" aria-label="Films">
+        <img class="navBtnImg" data-btn="films" src="assets/ui/films-button-notselected-standard.png" alt="">
       </button>
 
-      <button class="navBtn grainHover" data-route="about" type="button" aria-label="About">
-        <img class="navBtnImg" data-btn="about" alt="About">
+      <button class="navBtn grainHover" type="button" data-route="about" aria-label="About">
+        <img class="navBtnImg" data-btn="about" src="assets/ui/about-button-notselected-standard.png" alt="">
       </button>
 
-      <button class="navBtn grainHover" data-route="contact" type="button" aria-label="Contact">
-        <img class="navBtnImg" data-btn="contact" alt="Contact">
+      <button class="navBtn grainHover" type="button" data-route="contact" aria-label="Contact">
+        <img class="navBtnImg" data-btn="contact" src="assets/ui/contact-button-notselected-standard.png" alt="">
       </button>
     </nav>
   </header>
 
   <main class="frame">
     <section class="system">
-      <aside class="side side-left">
+
+      <aside class="side side-left" aria-hidden="true">
         <div class="sideStack" id="homeLeftStack"></div>
       </aside>
 
       <section class="center">
+
         <!-- HOME -->
         <section class="view is-active" id="view-home">
           <div class="heroClip">
@@ -88,11 +92,13 @@
         <section class="view" id="view-error" hidden>
           <div id="errorText"></div>
         </section>
+
       </section>
 
-      <aside class="side side-right">
+      <aside class="side side-right" aria-hidden="true">
         <div class="sideStack" id="homeRightStack"></div>
       </aside>
+
     </section>
   </main>
 
