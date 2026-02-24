@@ -37,10 +37,7 @@ const tabs = [
   { key: "contact", btn: $("#tab-contact"), img: $("#tabImg-contact") },
 ];
 
-/* ====== IMPORTANT: Your new button assets live here ======
-   You said: "I put the pngs in the ui folder"
-   So we use: assets/ui/<name>.png
-*/
+/* ====== BUTTON ASSET PATHS (MATCH YOUR GITHUB /assets/ui/ EXACTLY) ====== */
 const TAB_ASSETS = {
   films: {
     notselected: {
@@ -85,9 +82,7 @@ const FILMS = [
     logo: "assets/films/humanzee/logo-humanzee.png",
     hero: "assets/films/humanzee/hero.jpg",
     desc: "",
-    links: [
-      // { label: "Watch", href: "https://..." },
-    ],
+    links: [],
   },
   {
     slug: "rendezvous",
@@ -176,17 +171,14 @@ function parseHash() {
   const raw = (location.hash || "#home").replace(/^#/, "");
   if (!raw || raw === "/") return { route: "home" };
 
-  // allow "#film/humanzee"
   const parts = raw.split("/").filter(Boolean);
   if (parts[0] === "film" && parts[1]) return { route: "film", slug: parts[1] };
 
-  // allow "#home", "#films", ...
   return { route: parts[0] };
 }
 
 function setHash(route) {
-  if (route === "home") location.hash = "#home";
-  else location.hash = `#${route}`;
+  location.hash = route === "home" ? "#home" : `#${route}`;
 }
 
 function setFilmHash(slug) {
@@ -197,35 +189,30 @@ function showView(which) {
   Object.entries(views).forEach(([k, el]) => {
     if (!el) return;
     const active = (k === which);
+
     if (active) {
       el.hidden = false;
-      requestAnimationFrame(() => {
-        el.classList.add("is-active");
-      });
+      requestAnimationFrame(() => el.classList.add("is-active"));
     } else {
       el.classList.remove("is-active");
-      // delay hide to let fade finish
       setTimeout(() => { el.hidden = true; }, 220);
     }
   });
 }
 
 function applyRouteClasses(route) {
-  document.body.classList.remove("route-home","route-films","route-about","route-contact","route-film","route-error");
+  document.body.classList.remove(
+    "route-home","route-films","route-about","route-contact","route-film","route-error"
+  );
   document.body.classList.add(`route-${route}`);
 
-  // Header compact on non-home
   if (route === "home") document.body.classList.remove("header-compact");
   else document.body.classList.add("header-compact");
 }
 
-/* ====== TAB PNG STATE MACHINE ======
-   States depend on:
-   - selected vs notselected (based on current route)
-   - hover vs standard (based on pointer hover)
-*/
+/* ====== TAB STATE ====== */
 function tabIsSelected(tabKey, currentRoute) {
-  if (currentRoute === "film") return tabKey === "films"; // film detail counts as films selected
+  if (currentRoute === "film") return tabKey === "films";
   return tabKey === currentRoute;
 }
 
@@ -235,6 +222,20 @@ function tabSrc(tabKey, selected, hovered) {
   const selKey = selected ? "selected" : "notselected";
   const hovKey = hovered ? "hover" : "standard";
   return group[selKey][hovKey];
+}
+
+let lastHover = { key: null, on: false };
+
+function refreshTabs(opts = null) {
+  if (opts && "hoverKey" in opts) lastHover = { key: opts.hoverKey, on: opts.hoverOn };
+
+  const { route } = parseHash();
+  tabs.forEach(({ key, img }) => {
+    if (!img) return;
+    const selected = tabIsSelected(key, route);
+    const hovered = (lastHover.on && lastHover.key === key);
+    img.src = tabSrc(key, selected, hovered);
+  });
 }
 
 function wireTabs() {
@@ -248,73 +249,65 @@ function wireTabs() {
     btn.addEventListener("mouseenter", () => refreshTabs({ hoverKey: key, hoverOn: true }));
     btn.addEventListener("mouseleave", () => refreshTabs({ hoverKey: key, hoverOn: false }));
 
-    // Preload all assets so swapping never flashes
+    // Preload all assets for this tab
     const a = TAB_ASSETS[key];
     if (a) {
-      [a.notselected.standard, a.notselected.hover, a.selected.standard, a.selected.hover]
-        .forEach(src => { const im = new Image(); im.src = src; });
+      [
+        a.notselected.standard,
+        a.notselected.hover,
+        a.selected.standard,
+        a.selected.hover,
+      ].forEach((src) => {
+        const im = new Image();
+        im.src = src;
+      });
     }
-  });
-}
-
-let lastHover = { key: null, on: false };
-
-function refreshTabs(opts = null) {
-  if (opts && "hoverKey" in opts) lastHover = { key: opts.hoverKey, on: opts.hoverOn };
-
-  const { route } = parseHash();
-  tabs.forEach(({ key, img }) => {
-    const selected = tabIsSelected(key, route);
-    const hovered = (lastHover.on && lastHover.key === key);
-    img.src = tabSrc(key, selected, hovered);
   });
 }
 
 /* ====== HOME ====== */
 function renderHome() {
-  // hero
-  homeHero.src = HOME.hero;
+  if (homeHero) homeHero.src = HOME.hero;
 
-  // side stacks (only visible on home via CSS)
-  homeLeftStack.innerHTML = "";
-  HOME.left.forEach((src) => {
-    const wrap = document.createElement("div");
-    wrap.className = "sideThumb";
-    const im = document.createElement("img");
-    im.src = src;
-    im.alt = "";
-    wrap.appendChild(im);
-    homeLeftStack.appendChild(wrap);
-  });
+  if (homeLeftStack) {
+    homeLeftStack.innerHTML = "";
+    HOME.left.forEach((src) => {
+      const wrap = document.createElement("div");
+      wrap.className = "sideThumb";
+      const im = document.createElement("img");
+      im.src = src;
+      im.alt = "";
+      wrap.appendChild(im);
+      homeLeftStack.appendChild(wrap);
+    });
+  }
 
-  homeRightStack.innerHTML = "";
-  HOME.right.forEach((src) => {
-    const wrap = document.createElement("div");
-    wrap.className = "sideThumb";
-    const im = document.createElement("img");
-    im.src = src;
-    im.alt = "";
-    wrap.appendChild(im);
-    homeRightStack.appendChild(wrap);
-    homeRightStack.appendChild(wrap);
-  });
+  if (homeRightStack) {
+    homeRightStack.innerHTML = "";
+    HOME.right.forEach((src) => {
+      const wrap = document.createElement("div");
+      wrap.className = "sideThumb";
+      const im = document.createElement("img");
+      im.src = src;
+      im.alt = "";
+      wrap.appendChild(im);
+      homeRightStack.appendChild(wrap);
+    });
+  }
 }
 
 /* ====== FILMS ====== */
 function renderFilms() {
+  if (!filmsGrid) return;
   filmsGrid.innerHTML = "";
 
-  // newest to oldest is already ordered above
   FILMS.forEach((f) => {
     const tile = document.createElement("div");
     tile.className = "filmTile grainHover";
     tile.dataset.slug = f.slug;
 
-    // background (optional: if you add posters later, set tile bg image)
     const bg = document.createElement("div");
     bg.className = "filmBg";
-    // leave blank by default; you can set posters later:
-    // bg.style.backgroundImage = `url("${f.hero}")`;
     tile.appendChild(bg);
 
     const logoWrap = document.createElement("div");
@@ -340,55 +333,55 @@ function renderFilms() {
 
 /* ====== ABOUT / CONTACT ====== */
 function renderAbout() {
-  aboutImg.src = ABOUT.photo;
-  aboutBody.innerHTML = ABOUT.bodyHtml;
+  if (aboutImg) aboutImg.src = ABOUT.photo;
+  if (aboutBody) aboutBody.innerHTML = ABOUT.bodyHtml;
 }
 
 function renderContact() {
-  contactBody.innerHTML = CONTACT.bodyHtml;
-  contactLinks.innerHTML = CONTACT.linksHtml;
+  if (contactBody) contactBody.innerHTML = CONTACT.bodyHtml;
+  if (contactLinks) contactLinks.innerHTML = CONTACT.linksHtml;
 }
 
 /* ====== FILM DETAIL ====== */
 function renderFilmDetail(slug) {
   const f = FILMS.find(x => x.slug === slug);
-  if (!f) {
-    showError(`Film not found: ${slug}`);
-    return;
-  }
+  if (!f) return showError(`Film not found: ${slug}`);
 
-  filmHeroImg.src = f.hero || "";
-  filmTitle.textContent = f.title;
-  filmMeta.textContent = `${f.year} · ${f.runtime} · ${f.genre}`;
-  filmDesc.textContent = f.desc || "";
+  if (filmHeroImg) filmHeroImg.src = f.hero || "";
+  if (filmTitle) filmTitle.textContent = f.title;
+  if (filmMeta) filmMeta.textContent = `${f.year} · ${f.runtime} · ${f.genre}`;
+  if (filmDesc) filmDesc.textContent = f.desc || "";
 
-  filmActions.innerHTML = "";
-  if (Array.isArray(f.links) && f.links.length) {
-    const wrap = document.createElement("div");
-    wrap.style.display = "flex";
-    wrap.style.gap = "12px";
-    wrap.style.flexWrap = "wrap";
-    wrap.style.marginTop = "10px";
+  if (filmActions) {
+    filmActions.innerHTML = "";
+    if (Array.isArray(f.links) && f.links.length) {
+      const wrap = document.createElement("div");
+      wrap.style.display = "flex";
+      wrap.style.gap = "12px";
+      wrap.style.flexWrap = "wrap";
+      wrap.style.marginTop = "10px";
 
-    f.links.forEach((l) => {
-      const a = document.createElement("a");
-      a.href = l.href;
-      a.target = "_blank";
-      a.rel = "noreferrer";
-      a.textContent = l.label;
-      a.style.color = "var(--red)";
-      a.style.textDecoration = "none";
-      a.addEventListener("mouseenter", () => (a.style.textDecoration = "underline"));
-      a.addEventListener("mouseleave", () => (a.style.textDecoration = "none"));
-      wrap.appendChild(a);
-    });
+      f.links.forEach((l) => {
+        const a = document.createElement("a");
+        a.href = l.href;
+        a.target = "_blank";
+        a.rel = "noreferrer";
+        a.textContent = l.label;
+        a.style.color = "var(--red)";
+        a.style.textDecoration = "none";
+        a.addEventListener("mouseenter", () => (a.style.textDecoration = "underline"));
+        a.addEventListener("mouseleave", () => (a.style.textDecoration = "none"));
+        wrap.appendChild(a);
+      });
 
-    filmActions.appendChild(wrap);
+      filmActions.appendChild(wrap);
+    }
   }
 }
 
 function showError(msg) {
-  $("#errorText").textContent = msg;
+  const el = $("#errorText");
+  if (el) el.textContent = msg;
   applyRouteClasses("error");
   refreshTabs();
   showView("error");
@@ -399,7 +392,6 @@ function handleRoute() {
   const parsed = parseHash();
   const route = parsed.route || "home";
 
-  // Keep home stable as default fallback
   const allowed = new Set(["home","films","about","contact","film"]);
   const safeRoute = allowed.has(route) ? route : "home";
 
@@ -439,13 +431,13 @@ function handleRoute() {
 
 /* ====== INIT ====== */
 function init() {
-  // Home name click returns home
-  homeLink.addEventListener("click", () => setHash("home"));
+  // Home link always works
+  if (homeLink) homeLink.addEventListener("click", () => setHash("home"));
 
-  // Tabs
+  // Wire tabs before routing
   wireTabs();
 
-  // Initial tab art (prevents blank images before first hover)
+  // Set tab images immediately (prevents blank)
   refreshTabs();
 
   // Route updates
