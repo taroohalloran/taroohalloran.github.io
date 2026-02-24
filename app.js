@@ -2,19 +2,6 @@
 
 const $ = (s) => document.querySelector(s);
 
-/**
- * All data is embedded to avoid GitHub Pages path/JSON issues.
- * Paths are case-sensitive on GitHub Pages.
- *
- * Expected files (examples):
- * - assets/branding/taro-name.png
- * - assets/films/humanzee/humanzee-logo.png
- * - assets/films/rendezvous/rendezvous-logo.png
- * - assets/films/uap/uap-logo.png
- * - assets/films/dragons/do-dragons-sleep-in-fictitious-caves-logo.png
- * - assets/films/aspens/the-whispers-of-the-aspens-logo.png
- * - assets/stills/tile-*.jpg
- */
 const SITE = {
   home: {
     hero: "assets/stills/home-center.jpg",
@@ -24,8 +11,7 @@ const SITE = {
 
   about: {
     photo: "assets/stills/about-photo.jpg",
-    bio:
-      "Write your bio here. Keep it factual and punchy. Director of HUMANZEE. Developing THE LIVING UNDEAD RETURN AGAIN."
+    bio: "Write your bio here."
   },
 
   contact: {
@@ -37,7 +23,6 @@ const SITE = {
     ]
   },
 
-  // Order matters: this also controls how tiles are placed into the 5-tile grid.
   films: [
     {
       id: "humanzee",
@@ -111,7 +96,6 @@ const viewAbout = $("#view-about");
 const viewContact = $("#view-contact");
 const viewFilm = $("#view-film");
 const viewError = $("#view-error");
-
 const errorText = $("#errorText");
 
 const homeHero = $("#homeHero");
@@ -134,7 +118,6 @@ const filmActions = $("#filmActions");
 
 let currentRoute = "home";
 
-// ===== helpers =====
 function escapeHtml(str) {
   return String(str)
     .replaceAll("&", "&amp;")
@@ -176,29 +159,17 @@ async function transitionTo(route) {
   currentRoute = route;
 
   if (route === "home") {
-    setHeaderState("home");
-    setTabs("home");
-    showOnly(viewHome);
+    setHeaderState("home"); setTabs("home"); showOnly(viewHome);
   } else if (route === "films") {
-    setHeaderState("films");
-    setTabs("films");
-    showOnly(viewFilms);
+    setHeaderState("films"); setTabs("films"); showOnly(viewFilms);
   } else if (route === "about") {
-    setHeaderState("about");
-    setTabs("about");
-    showOnly(viewAbout);
+    setHeaderState("about"); setTabs("about"); showOnly(viewAbout);
   } else if (route === "contact") {
-    setHeaderState("contact");
-    setTabs("contact");
-    showOnly(viewContact);
+    setHeaderState("contact"); setTabs("contact"); showOnly(viewContact);
   } else if (route.startsWith("film:")) {
-    setHeaderState("film");
-    setTabs("film");
-    showOnly(viewFilm);
+    setHeaderState("film"); setTabs("film"); showOnly(viewFilm);
   } else {
-    setHeaderState("error");
-    setTabs("error");
-    showOnly(viewError);
+    setHeaderState("error"); setTabs("error"); showOnly(viewError);
   }
 
   if (active) active.classList.remove("is-fading-out");
@@ -221,7 +192,7 @@ function handleRoute() {
     const id = h.split("/")[1];
     const film = SITE.films.find(f => f.id === id);
     if (!film) {
-      errorText.textContent = `Film not found: ${id}`;
+      if (errorText) errorText.textContent = `Film not found: ${id}`;
       return transitionTo("error");
     }
     renderFilmPage(film);
@@ -231,7 +202,6 @@ function handleRoute() {
   return transitionTo("home");
 }
 
-// ===== renderers =====
 function renderHome() {
   if (homeHero) homeHero.src = SITE.home.hero;
 
@@ -253,20 +223,11 @@ function renderFilms() {
   if (!filmsGrid) return;
   filmsGrid.innerHTML = "";
 
-  // Exactly 5 films expected for the grid composition.
-  // If fewer exist, we silently fill with blanks; if more exist, we only show first 5.
   const films = [...(SITE.films || [])];
 
+  // Ensure grid has exactly 5 tiles
   while (films.length < 5) {
-    films.push({
-      id: `blank-${films.length}`,
-      title: "",
-      year: "",
-      runtime: "",
-      genres: "",
-      tile: SITE.home.hero,
-      logo: ""
-    });
+    films.push({ id: `blank-${films.length}`, title: "", year: "", runtime: "", genres: "", tile: SITE.home.hero, logo: "" });
   }
 
   films.slice(0, 5).forEach(f => {
@@ -286,7 +247,6 @@ function renderFilms() {
       </div>
     `;
 
-    // Only clickable if it’s a real film id (not blank)
     const isBlank = String(f.id || "").startsWith("blank-") || !f.title;
     if (!isBlank) tile.addEventListener("click", () => navigate(`#film/${f.id}`));
     else {
@@ -324,17 +284,13 @@ function renderContact() {
 function renderFilmPage(f) {
   if (filmHeroImg) filmHeroImg.src = f.hero || f.tile;
 
-  // title area: prefer logo image
   if (filmTitle) {
     filmTitle.innerHTML = f.logo
       ? `<img class="filmLogo" src="${f.logo}" alt="${escapeHtml(f.title)} logo">`
       : escapeHtml((f.title || "").toUpperCase());
   }
 
-  if (filmMeta) {
-    filmMeta.textContent = [f.year, f.runtime, f.genres].filter(Boolean).join(" — ");
-  }
-
+  if (filmMeta) filmMeta.textContent = [f.year, f.runtime, f.genres].filter(Boolean).join(" — ");
   if (filmDesc) filmDesc.textContent = f.desc || "";
 
   if (!filmActions) return;
@@ -353,34 +309,22 @@ function renderFilmPage(f) {
   });
 }
 
-// ===== init =====
 function init() {
-  // Render all static content once
   renderHome();
   renderFilms();
   renderAbout();
   renderContact();
 
-  // Event delegation: nav always works
+  // Navigation (event delegation so it always works)
   document.addEventListener("click", (e) => {
     const tab = e.target.closest(".tab");
-    if (tab) {
-      e.preventDefault();
-      navigate(`#${tab.dataset.route}`);
-      return;
-    }
+    if (tab) { e.preventDefault(); navigate(`#${tab.dataset.route}`); return; }
 
     const home = e.target.closest("#homeLink");
-    if (home) {
-      e.preventDefault();
-      navigate("#home");
-      return;
-    }
+    if (home) { e.preventDefault(); navigate("#home"); return; }
   });
 
-  // Default route
   if (!location.hash) history.replaceState(null, "", "#home");
-
   setHeaderState("home");
   setTabs("home");
   showOnly(viewHome);
