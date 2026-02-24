@@ -533,3 +533,21 @@ body:not(.route-home) .sub{
 
   .aboutWrap{ grid-template-columns: 1fr; }
 }
+/* ===== Hide side strips on non-home pages ===== */
+body:not(.route-home) .side{
+  display: none;
+}
+
+body:not(.route-home) .system{
+  grid-template-columns: 1fr; /* center only */
+}
+
+body:not(.route-home) .frame{
+  max-width: 1200px; /* optional: tighter “poster” feel */
+}
+/* ===== Lock texture bitmaps to the viewport ===== */
+.texture{
+  background-attachment: fixed;
+  transform: translateZ(0);
+  will-change: transform;
+}
