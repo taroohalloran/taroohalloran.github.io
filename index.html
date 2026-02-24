@@ -8,97 +8,86 @@
 </head>
 
 <body class="route-home">
-  <!-- TEXTURE OVERLAYS (order matters: concrete -> grain -> vhs) -->
+
+  <!-- TEXTURE OVERLAYS -->
   <div class="texture texture-concrete" aria-hidden="true"></div>
   <div class="texture texture-grain" aria-hidden="true"></div>
   <div class="texture texture-vhs" aria-hidden="true"></div>
 
-  <header class="hdr" id="hdr">
+  <header class="hdr">
     <button class="nameImgBtn" id="homeLink" type="button" aria-label="Home">
       <img class="nameImg" src="assets/branding/taro-name.png" alt="Taro O’Halloran">
     </button>
     <div class="sub">( writer , director , producer )</div>
 
-    <nav class="tabs" aria-label="Site">
+    <nav class="tabs">
       <button class="tab" data-route="films">FILMS</button>
       <button class="tab" data-route="about">ABOUT</button>
       <button class="tab" data-route="contact">CONTACT</button>
     </nav>
   </header>
 
-  <main class="frame" id="frame">
+  <main class="frame">
     <section class="system">
+
       <aside class="side side-left">
-        <div class="sideMask" aria-hidden="true"></div>
+        <div class="sideMask"></div>
         <div class="sideStack" id="homeLeftStack"></div>
       </aside>
 
       <section class="center">
+
         <!-- HOME -->
-        <section class="view is-active" data-route="home" id="view-home">
+        <section class="view is-active" id="view-home">
           <div class="heroClip">
-            <div class="heroMask" aria-hidden="true"></div>
-            <img class="heroImg" id="homeHero" alt="" />
+            <img class="heroImg" id="homeHero" alt="">
           </div>
         </section>
 
         <!-- FILMS -->
-        <section class="view" data-route="films" id="view-films" hidden>
+        <section class="view" id="view-films" hidden>
           <div class="filmsGrid" id="filmsGrid"></div>
         </section>
 
         <!-- ABOUT -->
-        <section class="view" data-route="about" id="view-about" hidden>
+        <section class="view" id="view-about" hidden>
           <div class="aboutWrap">
-            <div class="aboutPhoto">
-              <img id="aboutImg" alt="Portrait" />
-              <div class="aboutShade" aria-hidden="true"></div>
-            </div>
-            <div class="aboutText">
-              <div class="panelTitle">BIO</div>
-              <div class="panelBody" id="aboutBody"></div>
-            </div>
+            <img id="aboutImg" class="aboutPhoto" alt="">
+            <div class="aboutText" id="aboutBody"></div>
           </div>
         </section>
 
         <!-- CONTACT -->
-        <section class="view" data-route="contact" id="view-contact" hidden>
+        <section class="view" id="view-contact" hidden>
           <div class="contactWrap">
-            <div class="panelTitle">CONTACT</div>
-            <div class="panelBody" id="contactBody"></div>
-            <div class="contactLinks" id="contactLinks"></div>
+            <div id="contactBody"></div>
+            <div id="contactLinks"></div>
           </div>
         </section>
 
         <!-- FILM DETAIL -->
-        <section class="view" data-route="film" id="view-film" hidden>
+        <section class="view" id="view-film" hidden>
           <div class="filmPage">
-            <div class="filmHero">
-              <img id="filmHeroImg" alt="" />
-              <div class="filmHeroShade" aria-hidden="true"></div>
-            </div>
-            <div class="filmInfo">
-              <div class="panelTitle" id="filmTitle"></div>
-              <div class="panelMeta" id="filmMeta"></div>
-              <div class="panelBody" id="filmDesc"></div>
-              <div class="actions" id="filmActions"></div>
-            </div>
+            <img id="filmHeroImg" class="filmHeroImg" alt="">
+            <h1 id="filmTitle"></h1>
+            <div id="filmMeta"></div>
+            <p id="filmDesc"></p>
+            <div id="filmActions"></div>
           </div>
         </section>
 
         <!-- ERROR -->
-        <section class="view" data-route="error" id="view-error" hidden>
-          <div class="contactWrap">
-            <div class="panelTitle">ERROR</div>
-            <div class="panelBody" id="errorText"></div>
-          </div>
+        <section class="view" id="view-error" hidden>
+          <div id="errorText"></div>
         </section>
+
       </section>
 
       <aside class="side side-right">
-        <div class="sideMask" aria-hidden="true"></div>
+        <div class="sideMask"></div>
         <div class="sideStack" id="homeRightStack"></div>
       </aside>
+
     </section>
   </main>
 
