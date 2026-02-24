@@ -1,9 +1,124 @@
 /* =========================================================
-   TARO SITE — stable hash router + PNG tab states + hover grain per-element
-   ========================================================= */
+   TARO SITE ROUTER + UI (FULL)
+   - fixes broken pages
+   - uses PNG nav button assets from assets/ui/
+   - hover grain stays clipped to element (no square boxes)
+========================================================= */
 
-const $ = (sel) => document.querySelector(sel);
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
+/* -----------------------------
+   ASSET PATHS
+------------------------------ */
+const UI = {
+  nav: {
+    films: {
+      ns: "assets/ui/films-button-notselected-standard.png",
+      nh: "assets/ui/films-button-notselected-hover.png",
+      ss: "assets/ui/films-button-selected-standard.png",
+      sh: "assets/ui/films-button-selected-hover.png",
+    },
+    about: {
+      ns: "assets/ui/about-button-notselected-standard.png",
+      nh: "assets/ui/about-button-notselected-hover.png",
+      ss: "assets/ui/about-button-selected-standard.png",
+      sh: "assets/ui/about-button-selected-hover.png",
+    },
+    contact: {
+      ns: "assets/ui/contact-button-notselected-standard.png",
+      nh: "assets/ui/contact-button-notselected-hover.png",
+      ss: "assets/ui/contact-button-selected-standard.png",
+      sh: "assets/ui/contact-button-selected-hover.png",
+    },
+  }
+};
+
+/* If any of these filenames differ, they must match exactly. */
+const FILMS = [
+  {
+    slug: "humanzee",
+    title: "HUMANZEE",
+    year: "2024",
+    minutes: "23",
+    genres: "Horror/Drama",
+    logo: "assets/films/humanzee-logo.png",
+    hero: "assets/films/humanzee-hero.jpg",
+    desc: "Replace this with your Humanzee description.",
+    links: [
+      // { label: "Watch", href: "#" },
+    ],
+    feature: true
+  },
+  {
+    slug: "rendezvous",
+    title: "RENDEZVOUS",
+    year: "2023",
+    minutes: "16",
+    genres: "Crime/Comedy",
+    logo: "assets/films/rendezvous-logo.png",
+    hero: "assets/films/rendezvous-hero.jpg",
+    desc: "Replace this with your Rendezvous description.",
+    links: []
+  },
+  {
+    slug: "uap",
+    title: "Do Dragons Sleep in Fictitious Caves?",
+    year: "2022",
+    minutes: "4",
+    genres: "Horror/Drama",
+    logo: "assets/films/uap-logo.png",
+    hero: "assets/films/uap-hero.jpg",
+    desc: "Replace this with your description.",
+    links: []
+  },
+  {
+    slug: "whispers",
+    title: "The Whispers of the Aspens",
+    year: "2022",
+    minutes: "1",
+    genres: "Horror",
+    logo: "assets/films/the-whispers-of-the-aspens-logo.png",
+    hero: "assets/films/the-whispers-of-the-aspens-hero.jpg",
+    desc: "Replace this with your description.",
+    links: []
+  }
+];
+
+/* Home images (placeholders; safe if missing) */
+const HOME = {
+  hero: "assets/backgrounds/home-hero.jpg",
+  left: [
+    "assets/backgrounds/home-left-1.jpg",
+    "assets/backgrounds/home-left-2.jpg"
+  ],
+  right: [
+    "assets/backgrounds/home-right-1.jpg",
+    "assets/backgrounds/home-right-2.jpg"
+  ]
+};
+
+const ABOUT = {
+  photo: "assets/branding/about-photo.jpg",
+  body: `
+    <p><strong>Taro O’Halloran</strong> is a writer/director/producer based in Massachusetts, working in horror and genre with a handmade, grindhouse-forward sensibility.</p>
+    <p>Replace this with your bio copy.</p>
+  `
+};
+
+const CONTACT = {
+  body: `
+    <p>Replace this with your contact copy.</p>
+  `,
+  links: [
+    // { label: "Email", href: "mailto:you@example.com" },
+    // { label: "Instagram", href: "https://instagram.com/..." },
+  ]
+};
+
+/* -----------------------------
+   DOM
+------------------------------ */
 const views = {
   home: $("#view-home"),
   films: $("#view-films"),
@@ -13,13 +128,15 @@ const views = {
   error: $("#view-error"),
 };
 
-const homeHero = $("#homeHero");
-const homeLeftStack = $("#homeLeftStack");
-const homeRightStack = $("#homeRightStack");
+const homeHeroImg = $("#homeHero");
+const leftStack = $("#homeLeftStack");
+const rightStack = $("#homeRightStack");
 
 const filmsGrid = $("#filmsGrid");
+
 const aboutImg = $("#aboutImg");
 const aboutBody = $("#aboutBody");
+
 const contactBody = $("#contactBody");
 const contactLinks = $("#contactLinks");
 
@@ -29,422 +146,312 @@ const filmMeta = $("#filmMeta");
 const filmDesc = $("#filmDesc");
 const filmActions = $("#filmActions");
 
-const homeLink = $("#homeLink");
+const errorText = $("#errorText");
 
-const tabs = [
-  { key: "films", btn: $("#tab-films"), img: $("#tabImg-films") },
-  { key: "about", btn: $("#tab-about"), img: $("#tabImg-about") },
-  { key: "contact", btn: $("#tab-contact"), img: $("#tabImg-contact") },
-];
+/* Nav buttons */
+const navButtons = $$(".navBtn");
+const navImgs = $$(".navBtnImg");
 
-/* ====== BUTTON ASSET PATHS (MATCH YOUR GITHUB /assets/ui/ EXACTLY) ====== */
-const TAB_ASSETS = {
-  films: {
-    notselected: {
-      standard: "assets/ui/films-button-notselected-standard.png",
-      hover: "assets/ui/films-button-notselected-hover.png",
-    },
-    selected: {
-      standard: "assets/ui/films-button-selected-standard.png",
-      hover: "assets/ui/films-button-selected-hover.png",
-    },
-  },
-  about: {
-    notselected: {
-      standard: "assets/ui/about-button-notselected-standard.png",
-      hover: "assets/ui/about-button-notselected-hover.png",
-    },
-    selected: {
-      standard: "assets/ui/about-button-selected-standard.png",
-      hover: "assets/ui/about-button-selected-hover.png",
-    },
-  },
-  contact: {
-    notselected: {
-      standard: "assets/ui/contact-button-notselected-standard.png",
-      hover: "assets/ui/contact-button-notselected-hover.png",
-    },
-    selected: {
-      standard: "assets/ui/contact-button-selected-standard.png",
-      hover: "assets/ui/contact-button-selected-hover.png",
-    },
-  },
-};
-
-/* ====== Content ====== */
-const FILMS = [
-  {
-    slug: "humanzee",
-    title: "Humanzee",
-    year: "2024",
-    runtime: "23 min.",
-    genre: "Horror/Drama",
-    logo: "assets/films/humanzee/logo-humanzee.png",
-    hero: "assets/films/humanzee/hero.jpg",
-    desc: "",
-    links: [],
-  },
-  {
-    slug: "rendezvous",
-    title: "Rendezvous",
-    year: "2023",
-    runtime: "16 min.",
-    genre: "Crime/Comedy",
-    logo: "assets/films/rendezvous/logo-rendezvous.png",
-    hero: "assets/films/rendezvous/hero.jpg",
-    desc: "",
-    links: [],
-  },
-  {
-    slug: "uap",
-    title: "UAP",
-    year: "2022",
-    runtime: "12 min.",
-    genre: "Comedy/Drama/Sci Fi",
-    logo: "assets/films/uap/logo-uap.png",
-    hero: "assets/films/uap/hero.jpg",
-    desc: "",
-    links: [],
-  },
-  {
-    slug: "do-dragons-sleep-in-fictitious-caves",
-    title: "Do Dragons Sleep in Fictitious Caves?",
-    year: "2022",
-    runtime: "4 min.",
-    genre: "Horror/Drama",
-    logo: "assets/films/do-dragons-sleep-in-fictitious-caves/logo-do-dragons-sleep-in-fictitious-caves.png",
-    hero: "assets/films/do-dragons-sleep-in-fictitious-caves/hero.jpg",
-    desc: "",
-    links: [],
-  },
-  {
-    slug: "the-whispers-of-the-aspens",
-    title: "The Whispers of the Aspens",
-    year: "2022",
-    runtime: "1 min.",
-    genre: "Horror",
-    logo: "assets/films/the-whispers-of-the-aspens/logo-the-whispers-of-the-aspens.png",
-    hero: "assets/films/the-whispers-of-the-aspens/hero.jpg",
-    desc: "",
-    links: [],
-  },
-];
-
-const HOME = {
-  hero: "assets/home/home-hero.jpg",
-  left: [
-    "assets/home/side-left-1.jpg",
-    "assets/home/side-left-2.jpg",
-  ],
-  right: [
-    "assets/home/side-right-1.jpg",
-    "assets/home/side-right-2.jpg",
-  ],
-};
-
-const ABOUT = {
-  photo: "assets/about/taro.jpg",
-  bodyHtml: `
-    <p><b>Taro O’Halloran</b> is a writer/director/producer based in Massachusetts, working in horror and genre with a handmade, grindhouse-forward sensibility.</p>
-    <p>Replace this with your bio copy.</p>
-  `,
-};
-
-const CONTACT = {
-  bodyHtml: `
-    <div style="font-size:15px; line-height:1.7;">
-      <p><b>Contact</b></p>
-      <p>Email: <span id="contactEmail">you@email.com</span></p>
-    </div>
-  `,
-  linksHtml: `
-    <div style="margin-top:10px; display:flex; gap:14px; flex-wrap:wrap;">
-      <a href="#" target="_blank" rel="noreferrer">Instagram</a>
-      <a href="#" target="_blank" rel="noreferrer">YouTube</a>
-      <a href="#" target="_blank" rel="noreferrer">IMDb</a>
-    </div>
-  `,
-};
-
-/* ====== Router ====== */
-function parseHash() {
-  const raw = (location.hash || "#home").replace(/^#/, "");
-  if (!raw || raw === "/") return { route: "home" };
-
-  const parts = raw.split("/").filter(Boolean);
-  if (parts[0] === "film" && parts[1]) return { route: "film", slug: parts[1] };
-
-  return { route: parts[0] };
+/* -----------------------------
+   PRELOAD (avoids “nothing shows” feel)
+------------------------------ */
+function preload(srcs = []) {
+  srcs.forEach(src => {
+    const img = new Image();
+    img.src = src;
+  });
 }
 
-function setHash(route) {
-  location.hash = route === "home" ? "#home" : `#${route}`;
+preload([
+  ...Object.values(UI.nav.films),
+  ...Object.values(UI.nav.about),
+  ...Object.values(UI.nav.contact),
+]);
+
+/* -----------------------------
+   NAV IMAGE STATE
+------------------------------ */
+function setNavImage(key, { selected, hovered }) {
+  const map = UI.nav[key];
+  const img = $(`.navBtnImg[data-btn="${key}"]`);
+  if (!img) return;
+
+  if (selected && hovered) img.src = map.sh;
+  else if (selected && !hovered) img.src = map.ss;
+  else if (!selected && hovered) img.src = map.nh;
+  else img.src = map.ns;
 }
 
-function setFilmHash(slug) {
-  location.hash = `#film/${slug}`;
+function syncNavImages(activeRoute) {
+  ["films", "about", "contact"].forEach(key => {
+    const isSelected = (activeRoute === key);
+    setNavImage(key, { selected: isSelected, hovered: false });
+  });
 }
 
-function showView(which) {
-  Object.entries(views).forEach(([k, el]) => {
-    if (!el) return;
-    const active = (k === which);
-
-    if (active) {
-      el.hidden = false;
-      requestAnimationFrame(() => el.classList.add("is-active"));
+/* -----------------------------
+   VIEW SWITCHING
+------------------------------ */
+function showOnly(which) {
+  Object.keys(views).forEach(k => {
+    const v = views[k];
+    if (!v) return;
+    if (k === which) {
+      v.hidden = false;
+      v.classList.add("is-active");
     } else {
-      el.classList.remove("is-active");
-      setTimeout(() => { el.hidden = true; }, 220);
+      v.hidden = true;
+      v.classList.remove("is-active");
     }
   });
 }
 
-function applyRouteClasses(route) {
-  document.body.classList.remove(
-    "route-home","route-films","route-about","route-contact","route-film","route-error"
-  );
-  document.body.classList.add(`route-${route}`);
+/* -----------------------------
+   ROUTING
+   Uses hash routes: #home, #films, #about, #contact, #film/<slug>
+------------------------------ */
+function parseRoute() {
+  const raw = (location.hash || "#home").replace(/^#/, "");
+  const parts = raw.split("/").filter(Boolean);
 
-  if (route === "home") document.body.classList.remove("header-compact");
-  else document.body.classList.add("header-compact");
+  if (parts.length === 0) return { page: "home" };
+  if (parts[0] === "home") return { page: "home" };
+  if (parts[0] === "films") return { page: "films" };
+  if (parts[0] === "about") return { page: "about" };
+  if (parts[0] === "contact") return { page: "contact" };
+  if (parts[0] === "film" && parts[1]) return { page: "film", slug: parts[1] };
+
+  return { page: "error", message: `Unknown route: #${raw}` };
 }
 
-/* ====== TAB STATE ====== */
-function tabIsSelected(tabKey, currentRoute) {
-  if (currentRoute === "film") return tabKey === "films";
-  return tabKey === currentRoute;
+function setBodyRouteClass(page) {
+  document.body.classList.remove("route-home","route-films","route-about","route-contact","route-film","route-error");
+  document.body.classList.add(`route-${page}`);
 }
 
-function tabSrc(tabKey, selected, hovered) {
-  const group = TAB_ASSETS[tabKey];
-  if (!group) return "";
-  const selKey = selected ? "selected" : "notselected";
-  const hovKey = hovered ? "hover" : "standard";
-  return group[selKey][hovKey];
-}
-
-let lastHover = { key: null, on: false };
-
-function refreshTabs(opts = null) {
-  if (opts && "hoverKey" in opts) lastHover = { key: opts.hoverKey, on: opts.hoverOn };
-
-  const { route } = parseHash();
-  tabs.forEach(({ key, img }) => {
-    if (!img) return;
-    const selected = tabIsSelected(key, route);
-    const hovered = (lastHover.on && lastHover.key === key);
-    img.src = tabSrc(key, selected, hovered);
-  });
-}
-
-function wireTabs() {
-  tabs.forEach(({ key, btn, img }) => {
-    if (!btn || !img) return;
-
-    // Click routing
-    btn.addEventListener("click", () => setHash(key));
-
-    // Hover swapping
-    btn.addEventListener("mouseenter", () => refreshTabs({ hoverKey: key, hoverOn: true }));
-    btn.addEventListener("mouseleave", () => refreshTabs({ hoverKey: key, hoverOn: false }));
-
-    // Preload all assets for this tab
-    const a = TAB_ASSETS[key];
-    if (a) {
-      [
-        a.notselected.standard,
-        a.notselected.hover,
-        a.selected.standard,
-        a.selected.hover,
-      ].forEach((src) => {
-        const im = new Image();
-        im.src = src;
-      });
-    }
-  });
-}
-
-/* ====== HOME ====== */
+/* -----------------------------
+   RENDERERS
+------------------------------ */
 function renderHome() {
-  if (homeHero) homeHero.src = HOME.hero;
+  setBodyRouteClass("home");
+  showOnly("home");
 
-  if (homeLeftStack) {
-    homeLeftStack.innerHTML = "";
-    HOME.left.forEach((src) => {
-      const wrap = document.createElement("div");
-      wrap.className = "sideThumb";
-      const im = document.createElement("img");
-      im.src = src;
-      im.alt = "";
-      wrap.appendChild(im);
-      homeLeftStack.appendChild(wrap);
-    });
+  // hero
+  if (homeHeroImg) homeHeroImg.src = HOME.hero;
+
+  // side stacks (only build once)
+  if (leftStack && leftStack.childElementCount === 0) {
+    HOME.left.forEach(src => leftStack.appendChild(makeSideBox(src)));
+  }
+  if (rightStack && rightStack.childElementCount === 0) {
+    HOME.right.forEach(src => rightStack.appendChild(makeSideBox(src)));
   }
 
-  if (homeRightStack) {
-    homeRightStack.innerHTML = "";
-    HOME.right.forEach((src) => {
-      const wrap = document.createElement("div");
-      wrap.className = "sideThumb";
-      const im = document.createElement("img");
-      im.src = src;
-      im.alt = "";
-      wrap.appendChild(im);
-      homeRightStack.appendChild(wrap);
-    });
-  }
+  // nav state (no tab "selected" on home)
+  ["films","about","contact"].forEach(key => setNavImage(key, { selected:false, hovered:false }));
 }
 
-/* ====== FILMS ====== */
+function makeSideBox(src) {
+  const wrap = document.createElement("div");
+  wrap.className = "sideBox";
+  const img = document.createElement("img");
+  img.alt = "";
+  img.src = src;
+  wrap.appendChild(img);
+  return wrap;
+}
+
 function renderFilms() {
+  setBodyRouteClass("films");
+  showOnly("films");
+  syncNavImages("films");
+
   if (!filmsGrid) return;
   filmsGrid.innerHTML = "";
 
-  FILMS.forEach((f) => {
-    const tile = document.createElement("div");
-    tile.className = "filmTile grainHover";
-    tile.dataset.slug = f.slug;
+  const sorted = [...FILMS].sort((a,b) => (b.feature ? 1 : 0) - (a.feature ? 1 : 0));
 
-    const bg = document.createElement("div");
-    bg.className = "filmBg";
-    tile.appendChild(bg);
+  sorted.forEach(f => {
+    const card = document.createElement("article");
+    card.className = "filmCard grainHover" + (f.feature ? " is-feature" : "");
+    card.dataset.slug = f.slug;
+    card.tabIndex = 0;
+    card.setAttribute("role","button");
+    card.setAttribute("aria-label", `${f.title}`);
 
-    const logoWrap = document.createElement("div");
-    logoWrap.className = "filmLogo";
+    const inner = document.createElement("div");
+    inner.className = "filmInner";
+
     const logo = document.createElement("img");
+    logo.className = "filmLogo";
     logo.src = f.logo;
     logo.alt = `${f.title} logo`;
-    logoWrap.appendChild(logo);
-    tile.appendChild(logoWrap);
 
-    const info = document.createElement("div");
-    info.className = "filmInfo";
-    const infoText = document.createElement("div");
-    infoText.className = "filmInfoText";
-    infoText.innerHTML = `${f.year} · ${f.runtime} · ${f.genre}`;
-    info.appendChild(infoText);
-    tile.appendChild(info);
+    inner.appendChild(logo);
 
-    tile.addEventListener("click", () => setFilmHash(f.slug));
-    filmsGrid.appendChild(tile);
+    const meta = document.createElement("div");
+    meta.className = "filmMetaLine";
+    meta.textContent = `${f.year} • ${f.minutes} min. • ${f.genres}`;
+
+    card.appendChild(inner);
+    card.appendChild(meta);
+
+    card.addEventListener("click", () => goToFilm(f.slug));
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        goToFilm(f.slug);
+      }
+    });
+
+    filmsGrid.appendChild(card);
   });
 }
 
-/* ====== ABOUT / CONTACT ====== */
 function renderAbout() {
+  setBodyRouteClass("about");
+  showOnly("about");
+  syncNavImages("about");
+
   if (aboutImg) aboutImg.src = ABOUT.photo;
-  if (aboutBody) aboutBody.innerHTML = ABOUT.bodyHtml;
+  if (aboutBody) aboutBody.innerHTML = ABOUT.body;
 }
 
 function renderContact() {
-  if (contactBody) contactBody.innerHTML = CONTACT.bodyHtml;
-  if (contactLinks) contactLinks.innerHTML = CONTACT.linksHtml;
+  setBodyRouteClass("contact");
+  showOnly("contact");
+  syncNavImages("contact");
+
+  if (contactBody) contactBody.innerHTML = CONTACT.body;
+
+  if (contactLinks) {
+    contactLinks.innerHTML = "";
+    CONTACT.links.forEach(l => {
+      const a = document.createElement("a");
+      a.href = l.href;
+      a.textContent = l.label;
+      a.target = "_blank";
+      a.rel = "noreferrer";
+      a.style.display = "inline-block";
+      a.style.marginRight = "14px";
+      a.style.color = "rgba(255,255,255,0.85)";
+      contactLinks.appendChild(a);
+    });
+  }
 }
 
-/* ====== FILM DETAIL ====== */
-function renderFilmDetail(slug) {
-  const f = FILMS.find(x => x.slug === slug);
-  if (!f) return showError(`Film not found: ${slug}`);
+function renderFilm(slug) {
+  setBodyRouteClass("film");
+  showOnly("film");
+  // keep nav in a sane state: films selected when in film detail
+  syncNavImages("films");
 
-  if (filmHeroImg) filmHeroImg.src = f.hero || "";
+  const f = FILMS.find(x => x.slug === slug);
+  if (!f) {
+    renderError(`Film not found: ${slug}`);
+    return;
+  }
+
+  if (filmHeroImg) filmHeroImg.src = f.hero;
   if (filmTitle) filmTitle.textContent = f.title;
-  if (filmMeta) filmMeta.textContent = `${f.year} · ${f.runtime} · ${f.genre}`;
+  if (filmMeta) filmMeta.textContent = `${f.year} • ${f.minutes} min. • ${f.genres}`;
   if (filmDesc) filmDesc.textContent = f.desc || "";
 
   if (filmActions) {
     filmActions.innerHTML = "";
-    if (Array.isArray(f.links) && f.links.length) {
-      const wrap = document.createElement("div");
-      wrap.style.display = "flex";
-      wrap.style.gap = "12px";
-      wrap.style.flexWrap = "wrap";
-      wrap.style.marginTop = "10px";
-
-      f.links.forEach((l) => {
-        const a = document.createElement("a");
-        a.href = l.href;
-        a.target = "_blank";
-        a.rel = "noreferrer";
-        a.textContent = l.label;
-        a.style.color = "var(--red)";
-        a.style.textDecoration = "none";
-        a.addEventListener("mouseenter", () => (a.style.textDecoration = "underline"));
-        a.addEventListener("mouseleave", () => (a.style.textDecoration = "none"));
-        wrap.appendChild(a);
-      });
-
-      filmActions.appendChild(wrap);
-    }
+    (f.links || []).forEach(l => {
+      const a = document.createElement("a");
+      a.href = l.href;
+      a.textContent = l.label;
+      a.target = "_blank";
+      a.rel = "noreferrer";
+      a.style.display = "inline-block";
+      a.style.marginRight = "12px";
+      a.style.padding = "10px 14px";
+      a.style.border = "1px solid rgba(255,255,255,0.25)";
+      a.style.borderRadius = "999px";
+      a.style.color = "rgba(255,255,255,0.85)";
+      a.style.textDecoration = "none";
+      filmActions.appendChild(a);
+    });
   }
 }
 
-function showError(msg) {
-  const el = $("#errorText");
-  if (el) el.textContent = msg;
-  applyRouteClasses("error");
-  refreshTabs();
-  showView("error");
+function renderError(msg) {
+  setBodyRouteClass("error");
+  showOnly("error");
+  if (errorText) errorText.textContent = msg || "Something went wrong.";
+  // nav state: none selected
+  ["films","about","contact"].forEach(key => setNavImage(key, { selected:false, hovered:false }));
 }
 
-/* ====== MAIN ROUTE HANDLER ====== */
-function handleRoute() {
-  const parsed = parseHash();
-  const route = parsed.route || "home";
-
-  const allowed = new Set(["home","films","about","contact","film"]);
-  const safeRoute = allowed.has(route) ? route : "home";
-
-  applyRouteClasses(safeRoute);
-  refreshTabs();
-
-  if (safeRoute === "home") {
-    renderHome();
-    showView("home");
-    return;
-  }
-
-  if (safeRoute === "films") {
-    renderFilms();
-    showView("films");
-    return;
-  }
-
-  if (safeRoute === "about") {
-    renderAbout();
-    showView("about");
-    return;
-  }
-
-  if (safeRoute === "contact") {
-    renderContact();
-    showView("contact");
-    return;
-  }
-
-  if (safeRoute === "film") {
-    renderFilmDetail(parsed.slug);
-    showView("film");
-    return;
-  }
+/* -----------------------------
+   NAV / CLICK WIRES
+------------------------------ */
+function go(hash) {
+  location.hash = hash;
 }
 
-/* ====== INIT ====== */
+function goToFilm(slug) {
+  go(`#film/${slug}`);
+}
+
+function wireNav() {
+  // Name logo returns home
+  const homeLink = $("#homeLink");
+  if (homeLink) homeLink.addEventListener("click", () => go("#home"));
+
+  // Route buttons
+  navButtons.forEach(btn => {
+    const route = btn.getAttribute("data-route");
+    btn.addEventListener("click", () => go(`#${route}`));
+  });
+
+  // Hover swapping for button assets (selected/notselected + hover)
+  navButtons.forEach(btn => {
+    const route = btn.getAttribute("data-route"); // films/about/contact
+    btn.addEventListener("pointerenter", () => {
+      const current = parseRoute();
+      const active = (current.page === "film") ? "films" : current.page;
+      const selected = (active === route);
+      setNavImage(route, { selected, hovered: true });
+    });
+    btn.addEventListener("pointerleave", () => {
+      const current = parseRoute();
+      const active = (current.page === "film") ? "films" : current.page;
+      const selected = (active === route);
+      setNavImage(route, { selected, hovered: false });
+    });
+  });
+
+  // Ensure images exist immediately (prevents “still nothing”)
+  // default home: all not-selected standard
+  ["films","about","contact"].forEach(k => setNavImage(k, { selected:false, hovered:false }));
+}
+
+/* -----------------------------
+   ROUTE DISPATCH
+------------------------------ */
+function renderFromRoute() {
+  const r = parseRoute();
+
+  // This prevents “buttons disappear / page dead” regressions:
+  // Always keep nav images in sync after view render.
+  if (r.page === "home") return renderHome();
+  if (r.page === "films") return renderFilms();
+  if (r.page === "about") return renderAbout();
+  if (r.page === "contact") return renderContact();
+  if (r.page === "film") return renderFilm(r.slug);
+  return renderError(r.message);
+}
+
+/* -----------------------------
+   INIT
+------------------------------ */
 function init() {
-  // Home link always works
-  if (homeLink) homeLink.addEventListener("click", () => setHash("home"));
-
-  // Wire tabs before routing
-  wireTabs();
-
-  // Set tab images immediately (prevents blank)
-  refreshTabs();
-
-  // Route updates
-  window.addEventListener("hashchange", handleRoute);
-
-  // First load
-  handleRoute();
+  wireNav();
+  window.addEventListener("hashchange", renderFromRoute);
+  renderFromRoute();
 }
 
-init();
+document.addEventListener("DOMContentLoaded", init);
