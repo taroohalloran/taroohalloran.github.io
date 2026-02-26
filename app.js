@@ -1,15 +1,16 @@
 /* =========================================================
-   TARO SITE ROUTER + UI (FULL)
-   - hash routing: #home #films #about #contact #film/<slug>
+   TARO SITE v2 (FULL)
+   - hash routing only (#home/#films/#about/#contact/#film/<slug>)
    - PNG nav button assets from assets/ui/
-   - hover grain clipped to hovered element only
+   - hover grain stays clipped to hovered element (no boxes)
+   - films grid restored (big left tile + 2x2 right)
 ========================================================= */
 
-const $ = (sel, root=document) => root.querySelector(sel);
-const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
 /* -----------------------------
-   ASSET PATHS
+   ASSET PATHS (MUST MATCH FILENAMES EXACTLY)
 ------------------------------ */
 const UI = {
   nav: {
@@ -34,10 +35,12 @@ const UI = {
   }
 };
 
+/* -----------------------------
+   DATA (update paths as needed)
+------------------------------ */
 const FILMS = [
   {
     slug: "humanzee",
-    title: "HUMANZEE",
     year: "2024",
     minutes: "23",
     genres: "Horror/Drama",
@@ -49,7 +52,6 @@ const FILMS = [
   },
   {
     slug: "rendezvous",
-    title: "RENDEZVOUS",
     year: "2023",
     minutes: "16",
     genres: "Crime/Comedy",
@@ -61,7 +63,6 @@ const FILMS = [
   },
   {
     slug: "uap",
-    title: "Do Dragons Sleep in Fictitious Caves?",
     year: "2022",
     minutes: "4",
     genres: "Horror/Drama",
@@ -73,7 +74,6 @@ const FILMS = [
   },
   {
     slug: "whispers",
-    title: "The Whispers of the Aspens",
     year: "2022",
     minutes: "1",
     genres: "Horror",
@@ -85,7 +85,6 @@ const FILMS = [
   }
 ];
 
-/* Home images (safe if missing) */
 const HOME = {
   hero: "assets/backgrounds/home-hero.jpg",
   left: [
@@ -107,8 +106,13 @@ const ABOUT = {
 };
 
 const CONTACT = {
-  body: `<p>Replace this with your contact copy.</p>`,
-  links: []
+  body: `
+    <p>Replace this with your contact copy.</p>
+  `,
+  links: [
+    // { label: "Email", href: "mailto:you@example.com" },
+    // { label: "Instagram", href: "https://instagram.com/..." },
+  ]
 };
 
 /* -----------------------------
@@ -126,12 +130,10 @@ const views = {
 const homeHeroImg = $("#homeHero");
 const leftStack = $("#homeLeftStack");
 const rightStack = $("#homeRightStack");
-
 const filmsGrid = $("#filmsGrid");
 
 const aboutImg = $("#aboutImg");
 const aboutBody = $("#aboutBody");
-
 const contactBody = $("#contactBody");
 const contactLinks = $("#contactLinks");
 
@@ -143,11 +145,11 @@ const filmActions = $("#filmActions");
 
 const errorText = $("#errorText");
 
-/* Nav buttons */
+/* nav */
 const navButtons = $$(".navBtn");
 
 /* -----------------------------
-   PRELOAD (avoids “nothing shows”)
+   PRELOAD (prevents “nothing shows” feel)
 ------------------------------ */
 function preload(srcs = []) {
   srcs.forEach(src => {
@@ -176,10 +178,17 @@ function setNavImage(key, { selected, hovered }) {
   else img.src = map.ns;
 }
 
-function syncNavImages(activeRoute) {
-  ["films", "about", "contact"].forEach(key => {
-    const isSelected = (activeRoute === key);
-    setNavImage(key, { selected: isSelected, hovered: false });
+function activeNavKeyFromRoute(route) {
+  // film detail counts as films selected
+  if (route.page === "film") return "films";
+  if (route.page === "films" || route.page === "about" || route.page === "contact") return route.page;
+  return null; // home/error => none selected
+}
+
+function syncNavImages(route) {
+  const active = activeNavKeyFromRoute(route);
+  ["films","about","contact"].forEach(key => {
+    setNavImage(key, { selected: active === key, hovered: false });
   });
 }
 
@@ -190,6 +199,7 @@ function showOnly(which) {
   Object.keys(views).forEach(k => {
     const v = views[k];
     if (!v) return;
+
     if (k === which) {
       v.hidden = false;
       v.classList.add("is-active");
@@ -201,7 +211,8 @@ function showOnly(which) {
 }
 
 /* -----------------------------
-   ROUTING (hash)
+   ROUTING (HASH ONLY)
+   #home | #films | #about | #contact | #film/<slug>
 ------------------------------ */
 function parseRoute() {
   const raw = (location.hash || "#home").replace(/^#/, "");
@@ -218,9 +229,7 @@ function parseRoute() {
 }
 
 function setBodyRouteClass(page) {
-  document.body.classList.remove(
-    "route-home","route-films","route-about","route-contact","route-film","route-error"
-  );
+  document.body.classList.remove("route-home","route-films","route-about","route-contact","route-film","route-error");
   document.body.classList.add(`route-${page}`);
 }
 
@@ -237,9 +246,10 @@ function makeSideBox(src) {
   return wrap;
 }
 
-function renderHome() {
+function renderHome(route) {
   setBodyRouteClass("home");
   showOnly("home");
+  syncNavImages(route);
 
   if (homeHeroImg) homeHeroImg.src = HOME.hero;
 
@@ -249,31 +259,26 @@ function renderHome() {
   if (rightStack && rightStack.childElementCount === 0) {
     HOME.right.forEach(src => rightStack.appendChild(makeSideBox(src)));
   }
-
-  // Home: no selected tab
-  ["films","about","contact"].forEach(key => setNavImage(key, { selected:false, hovered:false }));
 }
 
-function renderFilms() {
+function renderFilms(route) {
   setBodyRouteClass("films");
   showOnly("films");
-  syncNavImages("films");
+  syncNavImages(route);
 
   if (!filmsGrid) return;
   filmsGrid.innerHTML = "";
 
-  const feature = FILMS.find(f => f.feature) || FILMS[0];
-  const rest = FILMS.filter(f => f !== feature);
+  // Keep your intended layout: feature first (big left tile)
+  const sorted = [...FILMS].sort((a,b) => (b.feature === true) - (a.feature === true));
 
-  const ordered = [feature, ...rest];
-
-  ordered.forEach((f, idx) => {
+  sorted.forEach(f => {
     const card = document.createElement("article");
     card.className = "filmCard grainHover" + (f.feature ? " is-feature" : "");
     card.dataset.slug = f.slug;
     card.tabIndex = 0;
-    card.setAttribute("role","button");
-    card.setAttribute("aria-label", `${f.title}`);
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-label", `${f.slug}`);
 
     const inner = document.createElement("div");
     inner.className = "filmInner";
@@ -281,7 +286,7 @@ function renderFilms() {
     const logo = document.createElement("img");
     logo.className = "filmLogo";
     logo.src = f.logo;
-    logo.alt = `${f.title} logo`;
+    logo.alt = `${f.slug} logo`;
 
     inner.appendChild(logo);
 
@@ -304,19 +309,19 @@ function renderFilms() {
   });
 }
 
-function renderAbout() {
+function renderAbout(route) {
   setBodyRouteClass("about");
   showOnly("about");
-  syncNavImages("about");
+  syncNavImages(route);
 
   if (aboutImg) aboutImg.src = ABOUT.photo;
   if (aboutBody) aboutBody.innerHTML = ABOUT.body;
 }
 
-function renderContact() {
+function renderContact(route) {
   setBodyRouteClass("contact");
   showOnly("contact");
-  syncNavImages("contact");
+  syncNavImages(route);
 
   if (contactBody) contactBody.innerHTML = CONTACT.body;
 
@@ -328,26 +333,21 @@ function renderContact() {
       a.textContent = l.label;
       a.target = "_blank";
       a.rel = "noreferrer";
-      a.style.display = "inline-block";
-      a.style.marginRight = "14px";
-      a.style.color = "rgba(255,255,255,0.85)";
       contactLinks.appendChild(a);
     });
   }
 }
 
-function renderFilm(slug) {
+function renderFilm(route) {
   setBodyRouteClass("film");
   showOnly("film");
+  syncNavImages(route);
 
-  // Film detail = “Films” selected
-  syncNavImages("films");
-
-  const f = FILMS.find(x => x.slug === slug);
-  if (!f) return renderError(`Film not found: ${slug}`);
+  const f = FILMS.find(x => x.slug === route.slug);
+  if (!f) return renderError({ page: "error", message: `Film not found: ${route.slug}` });
 
   if (filmHeroImg) filmHeroImg.src = f.hero;
-  if (filmTitle) filmTitle.textContent = f.title;
+  if (filmTitle) filmTitle.textContent = f.slug.toUpperCase().replace(/-/g, " ");
   if (filmMeta) filmMeta.textContent = `${f.year} • ${f.minutes} min. • ${f.genres}`;
   if (filmDesc) filmDesc.textContent = f.desc || "";
 
@@ -359,30 +359,23 @@ function renderFilm(slug) {
       a.textContent = l.label;
       a.target = "_blank";
       a.rel = "noreferrer";
-      a.style.display = "inline-block";
-      a.style.marginRight = "12px";
-      a.style.padding = "10px 14px";
-      a.style.border = "1px solid rgba(255,255,255,0.25)";
-      a.style.borderRadius = "999px";
-      a.style.color = "rgba(255,255,255,0.85)";
-      a.style.textDecoration = "none";
-      a.classList.add("grainHover"); // hover grain on the action pill itself
       filmActions.appendChild(a);
     });
   }
 }
 
-function renderError(msg) {
+function renderError(route) {
   setBodyRouteClass("error");
   showOnly("error");
-  if (errorText) errorText.textContent = msg || "Something went wrong.";
-  ["films","about","contact"].forEach(key => setNavImage(key, { selected:false, hovered:false }));
+  syncNavImages(route);
+  if (errorText) errorText.textContent = route.message || "Something went wrong.";
 }
 
 /* -----------------------------
    NAV / CLICK WIRES
 ------------------------------ */
 function go(hash) {
+  // Always hash routes. Never path routes.
   location.hash = hash;
 }
 
@@ -394,46 +387,43 @@ function wireNav() {
   const homeLink = $("#homeLink");
   if (homeLink) homeLink.addEventListener("click", () => go("#home"));
 
+  // clicks
   navButtons.forEach(btn => {
     const route = btn.getAttribute("data-route");
     btn.addEventListener("click", () => go(`#${route}`));
   });
 
-  // Hover swapping for PNG states
+  // hover swap images (selected/not + hover)
   navButtons.forEach(btn => {
-    const route = btn.getAttribute("data-route"); // films/about/contact
-
+    const key = btn.getAttribute("data-route");
     btn.addEventListener("pointerenter", () => {
-      const current = parseRoute();
-      const active = (current.page === "film") ? "films" : current.page;
-      const selected = (active === route);
-      setNavImage(route, { selected, hovered: true });
+      const r = parseRoute();
+      const active = activeNavKeyFromRoute(r);
+      setNavImage(key, { selected: active === key, hovered: true });
     });
-
     btn.addEventListener("pointerleave", () => {
-      const current = parseRoute();
-      const active = (current.page === "film") ? "films" : current.page;
-      const selected = (active === route);
-      setNavImage(route, { selected, hovered: false });
+      const r = parseRoute();
+      const active = activeNavKeyFromRoute(r);
+      setNavImage(key, { selected: active === key, hovered: false });
     });
   });
 
-  // Initial state on load
+  // initial images
   ["films","about","contact"].forEach(k => setNavImage(k, { selected:false, hovered:false }));
 }
 
 /* -----------------------------
-   ROUTE DISPATCH
+   DISPATCH
 ------------------------------ */
 function renderFromRoute() {
   const r = parseRoute();
 
-  if (r.page === "home") return renderHome();
-  if (r.page === "films") return renderFilms();
-  if (r.page === "about") return renderAbout();
-  if (r.page === "contact") return renderContact();
-  if (r.page === "film") return renderFilm(r.slug);
-  return renderError(r.message);
+  if (r.page === "home") return renderHome(r);
+  if (r.page === "films") return renderFilms(r);
+  if (r.page === "about") return renderAbout(r);
+  if (r.page === "contact") return renderContact(r);
+  if (r.page === "film") return renderFilm(r);
+  return renderError(r);
 }
 
 /* -----------------------------
