@@ -6,13 +6,12 @@
   --ink: rgba(255,255,255,0.82);
   --line: rgba(255,255,255,0.22);
   --line2: rgba(255,255,255,0.14);
-  --shadow: rgba(0,0,0,0.55);
 
-  /* global grain (subtle) */
-  --grainOpacity: 0.055;
+  /* global grain subtle */
+  --grainOpacity: 0.07;
 
-  /* hover grain (big + obvious) */
-  --hoverGrainOpacity: 0.38;
+  /* hover grain obvious */
+  --hoverGrainOpacity: 0.40;
   --hoverGrainSize: 220px;
 
   /* home vignette stronger */
@@ -28,61 +27,23 @@
 
 *{ box-sizing:border-box; }
 html, body{ height:100%; }
-html{ background:#000; }
 body{
   margin:0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
   color: var(--ink);
   background:#000;
   overflow-x:hidden;
 }
 
 /* -----------------------------
-   LOCKED OVERLAYS / BACKGROUND
+   FIXED OVERLAYS (NO SEAMS)
 ------------------------------ */
-
-/* Vignette layer (fixed, full bleed) */
-.vignette{
-  position: fixed;
-  inset: 0;
-  pointer-events:none;
-  z-index: 9; /* below textures, above content background */
-  transform: translateZ(0);
-  transition: opacity 450ms ease, filter 450ms ease;
-}
-
-/* HOME: strong vignette that starts at absolute edges */
-body.route-home .vignette{
-  opacity: 1;
-  background:
-    radial-gradient(
-      ellipse at center,
-      rgba(0,0,0,0) var(--vigInnerHome),
-      rgba(0,0,0,var(--vigHomeStrength)) var(--vigOuterHome)
-    );
-}
-
-/* OTHER PAGES: less intrusive vignette */
-body.route-films .vignette,
-body.route-about .vignette,
-body.route-contact .vignette,
-body.route-film .vignette,
-body.route-error .vignette{
-  opacity: 1;
-  background:
-    radial-gradient(
-      ellipse at center,
-      rgba(0,0,0,0) var(--vigInnerOther),
-      rgba(0,0,0,var(--vigOtherStrength)) var(--vigOuterOther)
-    );
-}
-
 .texture{
   position:fixed;
-  inset:-80px;              /* IMPORTANT: prevents top/bottom “strip” when scrolling */
+  inset:0;
   pointer-events:none;
-  z-index:10;               /* above content */
-  transform: translateZ(0);
+  z-index:10;
+  /* Do NOT transform fixed overlays (causes scroll seams in some cases) */
 }
 
 .texture-concrete{
@@ -97,24 +58,56 @@ body.route-error .vignette{
   opacity: 0.76;
 }
 
-/* Animated film grain (global subtle) */
+/* Global subtle animated grain */
 .texture-grain{
   opacity: var(--grainOpacity);
   mix-blend-mode: overlay;
   background-image: url("assets/textures/film-grain.png");
   background-repeat: repeat;
-  background-size: 520px 520px;
+  background-size: 420px 420px;
   animation: grainMove 700ms steps(6) infinite;
   filter: contrast(115%) brightness(105%);
 }
 
-/* shared grain motion */
 @keyframes grainMove{
   0%   { background-position: 0 0; }
   25%  { background-position: 90px -70px; }
   50%  { background-position: -60px 110px; }
   75%  { background-position: 120px 60px; }
   100% { background-position: 0 0; }
+}
+
+/* VIGNETTE (full bleed, per-route) */
+.vignette{
+  position: fixed;
+  inset: 0;
+  pointer-events:none;
+  z-index: 9;
+  transition: background 450ms ease;
+}
+
+/* HOME: strong vignette that starts at absolute edges */
+body.route-home .vignette{
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(0,0,0,0) var(--vigInnerHome),
+      rgba(0,0,0,var(--vigHomeStrength)) var(--vigOuterHome)
+    );
+}
+
+/* OTHER PAGES: less intrusive vignette */
+body.route-films .vignette,
+body.route-about .vignette,
+body.route-contact .vignette,
+body.route-film .vignette,
+body.route-error .vignette{
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(0,0,0,0) var(--vigInnerOther),
+      rgba(0,0,0,var(--vigOtherStrength)) var(--vigOuterOther)
+    );
 }
 
 /* -----------------------------
@@ -124,7 +117,7 @@ body.route-error .vignette{
   position:relative;
   z-index: 20;
   text-align:center;
-  padding: 42px 16px 10px;
+  padding: 42px 16px 12px;
 }
 
 .nameImgBtn{
@@ -149,16 +142,15 @@ body.route-error .vignette{
   opacity: 0.85;
 }
 
-/* NAV BUTTONS (IMAGE ASSETS) */
+/* NAV BUTTONS (PNG ASSETS) */
 .tabs{
   margin-top: 16px;
   display:flex;
-  gap: 16px;
+  gap: 18px;
   justify-content:center;
   align-items:center;
 }
 
-/* Bigger, click-safe pill */
 .navBtn{
   position:relative;
   border:0;
@@ -166,9 +158,9 @@ body.route-error .vignette{
   padding:0;
   cursor:pointer;
   border-radius: 999px;
-  overflow:hidden;          /* critical: clips hover grain to pill */
-  transform: translateZ(0);
+  overflow:hidden; /* clips hover grain to pill */
   transition: transform 140ms ease;
+  will-change: transform;
 }
 
 .navBtn:hover{
@@ -177,20 +169,19 @@ body.route-error .vignette{
 
 .navBtnImg{
   display:block;
-  width: 176px;             /* larger than before */
+  width: 170px; /* larger buttons */
   height: auto;
   user-select:none;
   -webkit-user-drag:none;
 }
 
 /* -----------------------------
-   LAYOUT FRAME (NO THIN LINE)
+   MAIN LAYOUT (CONSISTENT)
 ------------------------------ */
 .frame{
   position:relative;
   z-index: 5;
   padding: 10px 16px 44px;
-  border: 0;
 }
 
 .system{
@@ -200,11 +191,20 @@ body.route-error .vignette{
   grid-template-columns: 170px 1fr 170px;
   gap: 16px;
   align-items: start;
-  border: 0;
 }
 
+/* Side stacks are only for HOME; we hide the sides on other routes via body classes */
 .side{
   min-height: 520px;
+}
+
+body.route-films .side,
+body.route-about .side,
+body.route-contact .side,
+body.route-film .side,
+body.route-error .side{
+  opacity: 0;
+  pointer-events:none;
 }
 
 .sideStack{
@@ -214,7 +214,6 @@ body.route-error .vignette{
   padding-top: 140px;
 }
 
-/* side boxes are placeholders for your images */
 .sideBox{
   width: 100%;
   aspect-ratio: 4 / 3;
@@ -261,7 +260,7 @@ body.route-error .vignette{
 }
 
 /* -----------------------------
-   FILMS GRID (RESTORED)
+   FILMS GRID (BIG LEFT + 2x2 RIGHT)
 ------------------------------ */
 .filmsGrid{
   display:grid;
@@ -269,9 +268,7 @@ body.route-error .vignette{
   grid-template-rows: 260px 260px;
   gap: 14px;
   padding-top: 16px;
-
-  /* split the difference: some room at bottom */
-  padding-bottom: 34px;
+  padding-bottom: 34px; /* split the difference */
 }
 
 .filmCard{
@@ -281,8 +278,8 @@ body.route-error .vignette{
   overflow:hidden; /* clips hover grain */
   background: rgba(0,0,0,0.25);
   cursor:pointer;
-  transform: translateZ(0);
   transition: transform 160ms ease, box-shadow 160ms ease;
+  will-change: transform;
 }
 
 .filmCard:hover{
@@ -290,7 +287,7 @@ body.route-error .vignette{
   box-shadow: 0 16px 38px rgba(0,0,0,0.55);
 }
 
-.filmCard .filmInner{
+.filmInner{
   position:absolute;
   inset:0;
   display:flex;
@@ -308,19 +305,13 @@ body.route-error .vignette{
   filter: drop-shadow(0 10px 18px rgba(0,0,0,0.55));
 }
 
-/* Humanzee bigger than the rest */
+/* Humanzee bigger */
 .filmCard[data-slug="humanzee"] .filmLogo{
-  max-width: 88%;
-  max-height: 62%;
+  max-width: 90%;
+  max-height: 64%;
 }
 
-/* Whispers slightly bigger */
-.filmCard[data-slug="whispers"] .filmLogo{
-  max-width: 84%;
-  max-height: 60%;
-}
-
-/* No title under logo; meta stays */
+/* Meta only (no extra title under logo) */
 .filmMetaLine{
   position:absolute;
   left: 16px;
@@ -332,7 +323,6 @@ body.route-error .vignette{
   text-align:left;
 }
 
-/* Big left tile */
 .filmCard.is-feature{
   grid-row: 1 / span 2;
 }
@@ -372,6 +362,19 @@ body.route-error .vignette{
   border-radius: 10px;
   background: rgba(0,0,0,0.25);
   padding: 18px;
+  line-height: 1.55;
+}
+
+.contactLinks a{
+  display:inline-block;
+  margin-right: 14px;
+  color: rgba(255,255,255,0.85);
+  text-decoration:none;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+
+.contactLinks a:hover{
+  border-bottom-color: rgba(255,255,255,0.45);
 }
 
 .filmPage{
@@ -396,24 +399,46 @@ body.route-error .vignette{
   letter-spacing: 0.02em;
 }
 
-#filmMeta{
+.filmMeta{
   opacity: 0.85;
   margin-bottom: 14px;
 }
 
-#filmDesc{
+.filmDesc{
   max-width: 80ch;
   line-height: 1.6;
 }
 
+.filmActions a{
+  display:inline-block;
+  margin-right: 12px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 999px;
+  color: rgba(255,255,255,0.85);
+  text-decoration:none;
+}
+
+.filmActions a:hover{
+  border-color: rgba(255,255,255,0.45);
+}
+
+/* Error */
+.errorCard{
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(0,0,0,0.25);
+}
+
 /* -----------------------------
    HOVER GRAIN (ONLY ON TARGET)
-   - clipped to element shape
+   - No boxes around buttons: clipped by border-radius + overflow
 ------------------------------ */
 .grainHover{
   position: relative;
-  overflow: hidden;     /* MUST be on the actual element */
-  isolation: isolate;   /* keeps blend contained (prevents “spilling”) */
+  overflow: hidden;
 }
 
 .grainHover::after{
@@ -422,20 +447,15 @@ body.route-error .vignette{
   inset:0;
   border-radius: inherit;
   pointer-events:none;
-
   background-image: url("assets/textures/film-grain.png");
   background-repeat: repeat;
   background-size: 520px 520px;
-
   mix-blend-mode: overlay;
   opacity: 0;
-
   animation: grainMove 700ms steps(6) infinite;
   filter: contrast(140%) brightness(112%);
-  transform: translateZ(0);
 }
 
-/* Big, obvious grain on hover only */
 .grainHover:hover::after{
   opacity: var(--hoverGrainOpacity);
   background-size: var(--hoverGrainSize) var(--hoverGrainSize);
@@ -449,6 +469,7 @@ body.route-error .vignette{
     grid-template-columns: 1fr;
   }
   .side{ display:none; }
+
   .filmsGrid{
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 260px 260px 260px;
@@ -456,6 +477,7 @@ body.route-error .vignette{
   .filmCard.is-feature{
     grid-row: auto;
   }
+
   .aboutWrap{
     grid-template-columns: 1fr;
   }
@@ -463,7 +485,10 @@ body.route-error .vignette{
 }
 
 @media (max-width: 520px){
-  .navBtnImg{ width: 150px; }
-  .filmsGrid{ grid-template-columns: 1fr; grid-template-rows: repeat(4, 240px); }
+  .navBtnImg{ width: 145px; }
+  .filmsGrid{
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(4, 240px);
+  }
   .heroClip{ height: 46vh; }
 }
