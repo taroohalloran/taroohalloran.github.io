@@ -9,10 +9,10 @@
 
 <body class="route-home">
 
-  <!-- VIGNETTE (FULL BLEED, ALWAYS PRESENT) -->
+  <!-- VIGNETTE (full bleed; changes per route via body class) -->
   <div class="vignette" aria-hidden="true"></div>
 
-  <!-- TEXTURE OVERLAYS (ALWAYS PRESENT) -->
+  <!-- TEXTURE OVERLAYS (fixed; never scroll) -->
   <div class="texture texture-concrete" aria-hidden="true"></div>
   <div class="texture texture-grain" aria-hidden="true"></div>
   <div class="texture texture-vhs" aria-hidden="true"></div>
@@ -24,18 +24,18 @@
 
     <div class="sub">( writer , director , producer )</div>
 
-    <!-- NAV (PNG ASSET BUTTONS) -->
+    <!-- NAV (PNG assets) -->
     <nav class="tabs" aria-label="Primary">
       <button class="navBtn grainHover" type="button" data-route="films" aria-label="Films">
-        <img class="navBtnImg" data-btn="films" src="assets/ui/films-button-notselected-standard.png" alt="">
+        <img class="navBtnImg" data-btn="films" alt="Films">
       </button>
 
       <button class="navBtn grainHover" type="button" data-route="about" aria-label="About">
-        <img class="navBtnImg" data-btn="about" src="assets/ui/about-button-notselected-standard.png" alt="">
+        <img class="navBtnImg" data-btn="about" alt="About">
       </button>
 
       <button class="navBtn grainHover" type="button" data-route="contact" aria-label="Contact">
-        <img class="navBtnImg" data-btn="contact" src="assets/ui/contact-button-notselected-standard.png" alt="">
+        <img class="navBtnImg" data-btn="contact" alt="Contact">
       </button>
     </nav>
   </header>
@@ -73,7 +73,7 @@
         <section class="view" id="view-contact" hidden>
           <div class="contactWrap">
             <div id="contactBody"></div>
-            <div id="contactLinks"></div>
+            <div class="contactLinks" id="contactLinks"></div>
           </div>
         </section>
 
@@ -82,15 +82,17 @@
           <div class="filmPage">
             <img id="filmHeroImg" class="filmHeroImg" alt="">
             <h1 id="filmTitle"></h1>
-            <div id="filmMeta"></div>
-            <p id="filmDesc"></p>
-            <div id="filmActions"></div>
+            <div id="filmMeta" class="filmMeta"></div>
+            <p id="filmDesc" class="filmDesc"></p>
+            <div id="filmActions" class="filmActions"></div>
           </div>
         </section>
 
         <!-- ERROR -->
         <section class="view" id="view-error" hidden>
-          <div id="errorText"></div>
+          <div class="errorCard">
+            <div id="errorText"></div>
+          </div>
         </section>
 
       </section>
