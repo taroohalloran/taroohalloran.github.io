@@ -4,15 +4,18 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Taro O’Halloran</title>
-  <link rel="stylesheet" href="styles.css" />
+
+  <!-- CACHE-BUST: change v= whenever you update -->
+  <link rel="stylesheet" href="styles.css?v=V2_001" />
 </head>
 
 <body class="route-home">
 
-  <!-- VIGNETTE (full bleed; changes per route via body class) -->
+  <!-- PROOF MARKER (view-source should show V2_001) -->
+  <!-- BUILD: V2_001 -->
+
   <div class="vignette" aria-hidden="true"></div>
 
-  <!-- TEXTURE OVERLAYS (fixed; never scroll) -->
   <div class="texture texture-concrete" aria-hidden="true"></div>
   <div class="texture texture-grain" aria-hidden="true"></div>
   <div class="texture texture-vhs" aria-hidden="true"></div>
@@ -24,7 +27,6 @@
 
     <div class="sub">( writer , director , producer )</div>
 
-    <!-- NAV (PNG assets) -->
     <nav class="tabs" aria-label="Primary">
       <button class="navBtn grainHover" type="button" data-route="films" aria-label="Films">
         <img class="navBtnImg" data-btn="films" alt="Films">
@@ -49,19 +51,16 @@
 
       <section class="center">
 
-        <!-- HOME -->
         <section class="view is-active" id="view-home">
           <div class="heroClip">
             <img class="heroImg" id="homeHero" alt="">
           </div>
         </section>
 
-        <!-- FILMS -->
         <section class="view" id="view-films" hidden>
           <div class="filmsGrid" id="filmsGrid"></div>
         </section>
 
-        <!-- ABOUT -->
         <section class="view" id="view-about" hidden>
           <div class="aboutWrap">
             <img id="aboutImg" class="aboutPhoto" alt="">
@@ -69,7 +68,6 @@
           </div>
         </section>
 
-        <!-- CONTACT -->
         <section class="view" id="view-contact" hidden>
           <div class="contactWrap">
             <div id="contactBody"></div>
@@ -77,7 +75,6 @@
           </div>
         </section>
 
-        <!-- FILM DETAIL -->
         <section class="view" id="view-film" hidden>
           <div class="filmPage">
             <img id="filmHeroImg" class="filmHeroImg" alt="">
@@ -88,7 +85,6 @@
           </div>
         </section>
 
-        <!-- ERROR -->
         <section class="view" id="view-error" hidden>
           <div class="errorCard">
             <div id="errorText"></div>
@@ -104,6 +100,7 @@
     </section>
   </main>
 
-  <script src="app.js"></script>
+  <!-- CACHE-BUST -->
+  <script src="app.js?v=V2_001"></script>
 </body>
 </html>
