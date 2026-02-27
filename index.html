@@ -96,13 +96,7 @@
 
         <!-- FILM DETAIL -->
         <section class="view" id="view-film" hidden>
-          <div class="filmPage">
-            <img id="filmHeroImg" class="filmHeroImg" alt="">
-            <h1 id="filmTitle"></h1>
-            <div id="filmMeta" class="filmMeta"></div>
-            <p id="filmDesc" class="filmDesc"></p>
-            <div id="filmActions" class="filmActions"></div>
-          </div>
+          <div class="filmPage" id="filmPage"></div>
         </section>
 
         <!-- ERROR -->
@@ -122,5 +116,25 @@
   </main>
 
   <script src="app.js?v=V2_100"></script>
+
+  <!-- FILM BURN TRANSITION OVERLAY -->
+  <div id="burnOverlay" class="burnOverlay" aria-hidden="true"></div>
+
+  <!-- LIGHTBOX -->
+  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Image lightbox" hidden>
+    <div class="lbContent">
+      <button id="lbClose" class="lbClose" type="button" aria-label="Close lightbox">&#x2715;</button>
+      <img id="lbImg" class="lbImg" alt="">
+      <div class="lbNav">
+        <button id="lbPrev" class="lbPrev" type="button" aria-label="Previous image">&#8249;</button>
+        <span id="lbCounter" class="lbCounter"></span>
+        <button id="lbNext" class="lbNext" type="button" aria-label="Next image">&#8250;</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="siteFooter">
+    &copy; 2025 TARO O&rsquo;HALLORAN &mdash; ALL RIGHTS RESERVED
+  </footer>
 </body>
 </html>

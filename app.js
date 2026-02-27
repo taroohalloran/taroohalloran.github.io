@@ -5,6 +5,8 @@
    - Films grid uses poster stills; hover zoom + blur; overlay logo+meta
    - Hover grain is CLIPPED to the element only (no big circle/box)
    - Home-only side stacks (never on other pages)
+   - Film detail: three types (youtube+gallery, slideshow, youtube)
+   - Lightbox, crossfade slideshow, film burn transitions
 ========================================================= */
 
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -39,7 +41,7 @@ const UI = {
 /* ---------------------------------------------------------
    FILMS DATA
    - UAP and "Do Dragons Sleep in Fictitious Caves?" are SEPARATE films.
-   - Update still/hero filenames if yours differ.
+   - type: "youtube+gallery" | "slideshow" | "youtube"
 --------------------------------------------------------- */
 const FILMS = [
   {
@@ -52,7 +54,15 @@ const FILMS = [
     still: "assets/films/humanzee/humanzee-still.jpg",
     hero: "assets/films/humanzee/humanzee-hero.jpg",
     desc: "Replace this with your Humanzee description.",
-    links: [],
+    type: "youtube+gallery",
+    youtube: "https://www.youtube.com/embed/atS2CL-sMSs",
+    gallery: [
+      "assets/films/humanzee/gallery-1.jpg",
+      "assets/films/humanzee/gallery-2.jpg",
+      "assets/films/humanzee/gallery-3.jpg",
+      "assets/films/humanzee/gallery-4.jpg",
+      "assets/films/humanzee/gallery-5.jpg",
+    ],
     feature: true,
   },
 
@@ -66,7 +76,15 @@ const FILMS = [
     still: "assets/films/rendezvous/rendezvous-still.jpg",
     hero: "assets/films/rendezvous/rendezvous-hero.jpg",
     desc: "Replace this with your Rendezvous description.",
-    links: [],
+    type: "youtube+gallery",
+    youtube: "https://www.youtube.com/embed/6H2bz3OdPy8",
+    gallery: [
+      "assets/films/rendezvous/gallery-1.jpg",
+      "assets/films/rendezvous/gallery-2.jpg",
+      "assets/films/rendezvous/gallery-3.jpg",
+      "assets/films/rendezvous/gallery-4.jpg",
+      "assets/films/rendezvous/gallery-5.jpg",
+    ],
   },
 
   {
@@ -79,7 +97,14 @@ const FILMS = [
     still: "assets/films/uap/uap-still.jpg",
     hero: "assets/films/uap/uap-hero.jpg",
     desc: "Replace this with your UAP description.",
-    links: [],
+    type: "slideshow",
+    slides: [
+      "assets/films/uap/slide-1.jpg",
+      "assets/films/uap/slide-2.jpg",
+      "assets/films/uap/slide-3.jpg",
+      "assets/films/uap/slide-4.jpg",
+      "assets/films/uap/slide-5.jpg",
+    ],
   },
 
   {
@@ -92,7 +117,14 @@ const FILMS = [
     still: "assets/films/dragons/dragons-still.jpg",
     hero: "assets/films/dragons/dragons-hero.jpg",
     desc: "Replace this with your Do Dragons description.",
-    links: [],
+    type: "slideshow",
+    slides: [
+      "assets/films/dragons/slide-1.jpg",
+      "assets/films/dragons/slide-2.jpg",
+      "assets/films/dragons/slide-3.jpg",
+      "assets/films/dragons/slide-4.jpg",
+      "assets/films/dragons/slide-5.jpg",
+    ],
   },
 
   {
@@ -105,7 +137,8 @@ const FILMS = [
     still: "assets/films/aspens/aspens-still.jpg",
     hero: "assets/films/aspens/aspens-hero.jpg",
     desc: "Replace this with your Whispers description.",
-    links: [],
+    type: "youtube",
+    youtube: "https://www.youtube.com/embed/zg2Qe_hOSyE",
   },
 ];
 
@@ -119,14 +152,18 @@ const HOME = {
 const ABOUT = {
   photo: "assets/branding/about-photo.jpg",
   body: `
-    <p><strong>Taro O’Halloran</strong> is a writer/director/producer based in Massachusetts, working in horror and genre with a handmade, grindhouse-forward sensibility.</p>
+    <p><strong>Taro O'Halloran</strong> is a writer/director/producer based in Massachusetts, working in horror and genre with a handmade, grindhouse-forward sensibility.</p>
     <p>Replace this with your bio copy.</p>
   `,
 };
 
 const CONTACT = {
-  body: `<p>Replace this with your contact copy.</p>`,
-  links: [],
+  body: `<p>For inquiries:</p>`,
+  items: [
+    { label: "Email", value: "YOUR_EMAIL@DOMAIN.COM", href: "mailto:YOUR_EMAIL@DOMAIN.COM" },
+    { label: "Instagram", value: "@YOUR_HANDLE", href: "https://instagram.com/YOUR_HANDLE" },
+    { label: "IMDb", value: "Taro O\u2019Halloran", href: "https://www.imdb.com/" },
+  ],
 };
 
 /* -----------------------------
@@ -152,12 +189,6 @@ const aboutBody = $("#aboutBody");
 
 const contactBody = $("#contactBody");
 const contactLinks = $("#contactLinks");
-
-const filmHeroImg = $("#filmHeroImg");
-const filmTitle = $("#filmTitle");
-const filmMeta = $("#filmMeta");
-const filmDesc = $("#filmDesc");
-const filmActions = $("#filmActions");
 
 const errorText = $("#errorText");
 
@@ -197,6 +228,9 @@ function setNavImage(key, { selected, hovered }) {
   else if (selected && !hovered) img.src = map.ss;
   else if (!selected && hovered) img.src = map.nh;
   else img.src = map.ns;
+
+  const btn = img.closest(".navBtn");
+  if (btn) btn.classList.toggle("is-active", selected);
 }
 
 function parseRoute() {
@@ -223,6 +257,34 @@ function syncNavImages() {
   const active = currentActiveNavKey();
   ["films", "about", "contact"].forEach((key) => {
     setNavImage(key, { selected: active === key, hovered: false });
+  });
+}
+
+/* -----------------------------
+   FILM BURN TRANSITION
+------------------------------ */
+function filmBurn(cb) {
+  const overlay = $("#burnOverlay");
+  if (!overlay) { cb(); return; }
+
+  overlay.style.display = "block";
+  overlay.style.opacity = "0";
+  overlay.style.transition = "opacity 130ms ease-in";
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      overlay.style.opacity = "1";
+      setTimeout(() => {
+        cb();
+        overlay.style.transition = "opacity 220ms ease-out";
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            overlay.style.opacity = "0";
+            setTimeout(() => { overlay.style.display = "none"; }, 220);
+          });
+        });
+      }, 130);
+    });
   });
 }
 
@@ -276,6 +338,7 @@ function makeSideBox(src) {
 function renderHome() {
   setBodyRouteClass("home");
   showOnly("home");
+  stopSlideshow();
 
   if (homeHeroImg) homeHeroImg.src = HOME.hero;
 
@@ -295,6 +358,7 @@ function renderFilms() {
   setBodyRouteClass("films");
   showOnly("films");
   clearHomeSides();
+  stopSlideshow();
   syncNavImages();
 
   if (!filmsGrid) return;
@@ -312,7 +376,7 @@ function renderFilms() {
 
     // background still
     const bg = document.createElement("img");
-    bg.className = "filmStill";
+    bg.className = "filmStill filmGrade";
     bg.src = f.still;
     bg.alt = "";
 
@@ -327,7 +391,7 @@ function renderFilms() {
 
     const meta = document.createElement("div");
     meta.className = "filmMetaLine";
-    meta.textContent = `${f.year} • ${f.minutes} min. • ${f.genres}`;
+    meta.textContent = `${f.year} \u2022 ${f.minutes} min. \u2022 ${f.genres}`;
 
     overlay.appendChild(logo);
     overlay.appendChild(meta);
@@ -335,11 +399,11 @@ function renderFilms() {
     card.appendChild(bg);
     card.appendChild(overlay);
 
-    card.addEventListener("click", () => goToFilm(f.slug));
+    card.addEventListener("click", () => go(`#film/${f.slug}`));
     card.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        goToFilm(f.slug);
+        go(`#film/${f.slug}`);
       }
     });
 
@@ -354,6 +418,7 @@ function renderAbout() {
   setBodyRouteClass("about");
   showOnly("about");
   clearHomeSides();
+  stopSlideshow();
   syncNavImages();
 
   if (aboutImg) aboutImg.src = ABOUT.photo;
@@ -364,21 +429,214 @@ function renderContact() {
   setBodyRouteClass("contact");
   showOnly("contact");
   clearHomeSides();
+  stopSlideshow();
   syncNavImages();
 
   if (contactBody) contactBody.innerHTML = CONTACT.body;
 
   if (contactLinks) {
     contactLinks.innerHTML = "";
-    CONTACT.links.forEach((l) => {
+    (CONTACT.items || []).forEach((item) => {
       const a = document.createElement("a");
-      a.href = l.href;
-      a.textContent = l.label;
+      a.className = "contactBadge";
+      a.href = item.href;
       a.target = "_blank";
       a.rel = "noreferrer";
+
+      const label = document.createElement("span");
+      label.className = "badgeLabel";
+      label.textContent = item.label;
+
+      const value = document.createElement("span");
+      value.className = "badgeValue";
+      value.textContent = item.value;
+
+      a.appendChild(label);
+      a.appendChild(value);
       contactLinks.appendChild(a);
     });
   }
+}
+
+/* -----------------------------
+   SLIDESHOW
+------------------------------ */
+let slideshowInterval = null;
+let slideshowIndex = 0;
+
+function stopSlideshow() {
+  if (slideshowInterval) {
+    clearInterval(slideshowInterval);
+    slideshowInterval = null;
+  }
+}
+
+function buildSlideshow(slides, filmTitle) {
+  const container = document.createElement("div");
+  container.className = "filmSlideshow";
+
+  const slidesWrap = document.createElement("div");
+  slidesWrap.className = "slidesWrap";
+
+  slides.forEach((src, i) => {
+    const img = document.createElement("img");
+    img.className = "slideImg filmGrade" + (i === 0 ? " is-active" : "");
+    img.alt = `${filmTitle} slide ${i + 1}`;
+    img.loading = i === 0 ? "eager" : "lazy";
+    hideOnError(img);
+    img.src = src;
+    slidesWrap.appendChild(img);
+  });
+
+  const prevBtn = document.createElement("button");
+  prevBtn.className = "slideArrow slideArrow-prev";
+  prevBtn.type = "button";
+  prevBtn.setAttribute("aria-label", "Previous slide");
+  prevBtn.innerHTML = "&#8249;";
+
+  const nextBtn = document.createElement("button");
+  nextBtn.className = "slideArrow slideArrow-next";
+  nextBtn.type = "button";
+  nextBtn.setAttribute("aria-label", "Next slide");
+  nextBtn.innerHTML = "&#8250;";
+
+  container.appendChild(slidesWrap);
+  container.appendChild(prevBtn);
+  container.appendChild(nextBtn);
+
+  slideshowIndex = 0;
+  stopSlideshow();
+
+  function goToSlide(idx) {
+    const imgs = Array.from(slidesWrap.querySelectorAll(".slideImg")).filter(
+      (img) => img.style.display !== "none"
+    );
+    if (imgs.length === 0) return;
+    idx = ((idx % imgs.length) + imgs.length) % imgs.length;
+    slideshowIndex = idx;
+    imgs.forEach((img, i) => img.classList.toggle("is-active", i === idx));
+  }
+
+  prevBtn.addEventListener("click", () => goToSlide(slideshowIndex - 1));
+  nextBtn.addEventListener("click", () => goToSlide(slideshowIndex + 1));
+
+  slideshowInterval = setInterval(() => goToSlide(slideshowIndex + 1), 4000);
+
+  return container;
+}
+
+/* -----------------------------
+   LIGHTBOX
+------------------------------ */
+let lbPaths = [];
+let lbIndex = 0;
+let lbTitle = "";
+
+function openLightbox(paths, idx, title) {
+  lbPaths = paths;
+  lbIndex = idx;
+  lbTitle = title;
+  updateLightbox();
+  const lb = $("#lightbox");
+  if (lb) {
+    lb.hidden = false;
+    lb.focus();
+  }
+}
+
+function closeLightbox() {
+  const lb = $("#lightbox");
+  if (lb) lb.hidden = true;
+}
+
+function updateLightbox() {
+  const img = $("#lbImg");
+  if (!img) return;
+  img.src = lbPaths[lbIndex] || "";
+  img.alt = `${lbTitle} still ${lbIndex + 1}`;
+  const counter = $("#lbCounter");
+  if (counter) counter.textContent = `${lbIndex + 1} / ${lbPaths.length}`;
+}
+
+function wireLightbox() {
+  const lb = $("#lightbox");
+  if (!lb) return;
+
+  $("#lbClose").addEventListener("click", closeLightbox);
+
+  $("#lbPrev").addEventListener("click", () => {
+    lbIndex = (lbIndex - 1 + lbPaths.length) % lbPaths.length;
+    updateLightbox();
+  });
+
+  $("#lbNext").addEventListener("click", () => {
+    lbIndex = (lbIndex + 1) % lbPaths.length;
+    updateLightbox();
+  });
+
+  lb.addEventListener("click", (e) => {
+    if (e.target === lb) closeLightbox();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (lb.hidden) return;
+    if (e.key === "Escape") closeLightbox();
+    if (e.key === "ArrowLeft") {
+      lbIndex = (lbIndex - 1 + lbPaths.length) % lbPaths.length;
+      updateLightbox();
+    }
+    if (e.key === "ArrowRight") {
+      lbIndex = (lbIndex + 1) % lbPaths.length;
+      updateLightbox();
+    }
+  });
+}
+
+/* -----------------------------
+   HELPERS
+------------------------------ */
+function formatFilmMeta(f) {
+  return `${f.year} \u00b7 ${f.minutes} min. \u00b7 ${f.genres}`;
+}
+
+function hideOnError(img) {
+  img.onerror = () => { img.style.display = "none"; };
+}
+
+/* -----------------------------
+   FILM DETAIL -- BUILDERS
+------------------------------ */
+function buildYoutubeEmbed(src) {
+  const wrap = document.createElement("div");
+  wrap.className = "filmEmbedWrap";
+  const iframe = document.createElement("iframe");
+  iframe.className = "filmEmbed";
+  iframe.src = src;
+  iframe.title = "Film embed";
+  iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+  iframe.allowFullscreen = true;
+  iframe.loading = "lazy";
+  wrap.appendChild(iframe);
+  return wrap;
+}
+
+function buildGalleryRow(paths, title) {
+  if (!paths || paths.length === 0) return null;
+  const row = document.createElement("div");
+  row.className = "filmGalleryRow";
+
+  paths.forEach((src, i) => {
+    const img = document.createElement("img");
+    img.className = "filmGalleryThumb filmGrade";
+    img.alt = `${title} still ${i + 1}`;
+    img.loading = "lazy";
+    hideOnError(img);
+    img.src = src;
+    img.addEventListener("click", () => openLightbox(paths, i, title));
+    row.appendChild(img);
+  });
+
+  return row;
 }
 
 /* -----------------------------
@@ -388,27 +646,54 @@ function renderFilm(slug) {
   setBodyRouteClass("film");
   showOnly("film");
   clearHomeSides();
-  syncNavImages(); // films stays selected because route-film maps to films
+  stopSlideshow();
+  syncNavImages();
 
   const f = FILMS.find((x) => x.slug === slug);
   if (!f) return renderError(`Film not found: ${slug}`);
 
-  if (filmHeroImg) filmHeroImg.src = f.hero;
-  if (filmTitle) filmTitle.textContent = f.title;
-  if (filmMeta) filmMeta.textContent = `${f.year} • ${f.minutes} min. • ${f.genres}`;
-  if (filmDesc) filmDesc.textContent = f.desc || "";
+  const page = $("#filmPage");
+  if (!page) return;
+  page.innerHTML = "";
 
-  if (filmActions) {
-    filmActions.innerHTML = "";
-    (f.links || []).forEach((l) => {
-      const a = document.createElement("a");
-      a.href = l.href;
-      a.textContent = l.label;
-      a.target = "_blank";
-      a.rel = "noreferrer";
-      filmActions.appendChild(a);
-    });
+  const sleeve = document.createElement("div");
+  sleeve.className = "vhsSleeve";
+
+  // Media at top
+  if (f.type === "youtube" || f.type === "youtube+gallery") {
+    sleeve.appendChild(buildYoutubeEmbed(f.youtube));
+  } else if (f.type === "slideshow") {
+    sleeve.appendChild(buildSlideshow(f.slides || [], f.title));
   }
+
+  // Info: title, meta, description
+  const info = document.createElement("div");
+  info.className = "vhsInfo";
+
+  const titleEl = document.createElement("h1");
+  titleEl.className = "vhsTitle";
+  titleEl.textContent = f.title;
+  info.appendChild(titleEl);
+
+  const meta = document.createElement("div");
+  meta.className = "vhsMeta";
+  meta.textContent = formatFilmMeta(f);
+  info.appendChild(meta);
+
+  const desc = document.createElement("p");
+  desc.className = "vhsDesc";
+  desc.textContent = f.desc || "";
+  info.appendChild(desc);
+
+  sleeve.appendChild(info);
+
+  // Gallery row (youtube+gallery only)
+  if (f.type === "youtube+gallery") {
+    const gallery = buildGalleryRow(f.gallery || [], f.title);
+    if (gallery) sleeve.appendChild(gallery);
+  }
+
+  page.appendChild(sleeve);
 }
 
 function renderError(msg) {
@@ -423,11 +708,7 @@ function renderError(msg) {
    NAV / CLICK WIRES
 ------------------------------ */
 function go(hash) {
-  location.hash = hash;
-}
-
-function goToFilm(slug) {
-  go(`#film/${slug}`);
+  filmBurn(() => { location.hash = hash; });
 }
 
 function wireNav() {
@@ -479,6 +760,7 @@ function renderFromRoute() {
 ------------------------------ */
 function init() {
   wireNav();
+  wireLightbox();
   window.addEventListener("hashchange", () => {
     renderFromRoute();
     syncNavImages();

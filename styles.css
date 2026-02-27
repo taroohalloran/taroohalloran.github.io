@@ -1,10 +1,13 @@
 /* =========================================================
-   TARO SITE — V2
-   - name shrinks + moves up off-home (with VHS + red glow)
+   TARO SITE -- V2
+   - name shrinks + moves up off-home (16mm projection glow)
    - nav uses PNG assets + films selected never vanishes
    - hover grain is CLIPPED to pill (no circle halo)
    - film tiles match mockup: stills fill, hover enlarge + blur + info reveal
    - side stacks ONLY on home
+   - 16mm projection aesthetic: gate weave, projector flicker, warm amber glow
+   - Film detail: VHS back-cover layout, slideshow, lightbox, gallery
+   - Film burn page transitions
 ========================================================= */
 
 :root{
@@ -64,14 +67,23 @@ body{
   opacity: 0.76;
 }
 
+/* Projector flicker oscillates the grain opacity slightly */
+@keyframes projectorFlicker{
+  0%   { opacity: var(--grainOpacity); }
+  22%  { opacity: calc(var(--grainOpacity) * 1.38); }
+  47%  { opacity: calc(var(--grainOpacity) * 0.82); }
+  68%  { opacity: calc(var(--grainOpacity) * 1.25); }
+  85%  { opacity: calc(var(--grainOpacity) * 0.90); }
+  100% { opacity: var(--grainOpacity); }
+}
+
 .texture-grain{
-  opacity: var(--grainOpacity);
   mix-blend-mode: overlay;
   background-image: url("assets/textures/film-grain.png");
   background-repeat: repeat;
   background-size: 420px 420px;
-  animation: grainMove 700ms steps(6) infinite;
   filter: contrast(115%) brightness(105%);
+  animation: grainMove 700ms steps(6) infinite, projectorFlicker 3.7s ease-in-out infinite;
 }
 
 @keyframes grainMove{
@@ -133,6 +145,15 @@ body.route-film .hdr{
   padding-bottom: 6px;
 }
 
+/* Gate weave on button container -- subtle, slow, organic */
+@keyframes gateWeave{
+  0%   { transform: translate(0px, 0px); }
+  22%  { transform: translate(-0.6px, 0.4px); }
+  47%  { transform: translate(0.5px, -0.6px); }
+  73%  { transform: translate(-0.4px, 0.5px); }
+  100% { transform: translate(0px, 0px); }
+}
+
 .nameImgBtn{
   position: relative;
   border:0;
@@ -140,6 +161,7 @@ body.route-film .hdr{
   cursor:pointer;
   padding:0;
   display:inline-block;
+  animation: gateWeave 7.3s ease-in-out infinite;
 }
 
 /* Name image scale changes per route (smooth) */
@@ -160,17 +182,17 @@ body.route-film .nameImg{
   transform: translateY(-2px);
 }
 
-/* Subtle animated red glow on name */
+/* Warm projector lamp glow -- amber/orange instead of red */
 @keyframes glowPulse{
-  0%   { filter: drop-shadow(0 10px 14px rgba(0,0,0,0.5)) drop-shadow(0 0 10px rgba(255,42,42,0.28)); }
-  50%  { filter: drop-shadow(0 10px 14px rgba(0,0,0,0.5)) drop-shadow(0 0 18px rgba(255,42,42,0.40)); }
-  100% { filter: drop-shadow(0 10px 14px rgba(0,0,0,0.5)) drop-shadow(0 0 10px rgba(255,42,42,0.28)); }
+  0%   { filter: drop-shadow(0 10px 14px rgba(0,0,0,0.5)) drop-shadow(0 0 10px rgba(255,180,80,0.28)); }
+  50%  { filter: drop-shadow(0 10px 14px rgba(0,0,0,0.5)) drop-shadow(0 0 20px rgba(255,180,80,0.42)); }
+  100% { filter: drop-shadow(0 10px 14px rgba(0,0,0,0.5)) drop-shadow(0 0 10px rgba(255,180,80,0.28)); }
 }
 .nameImg{
   animation: glowPulse 3.6s ease-in-out infinite;
 }
 
-/* VHS-ish shimmer on name (masked to letters; NOT a rectangle) */
+/* Masked pseudo-elements: grain only on the letter shapes */
 .nameImgBtn::before,
 .nameImgBtn::after{
   content:"";
@@ -192,27 +214,26 @@ body.route-film .nameImg{
   mask-size: contain;
 }
 
-/* subtle VHS “wiggle” layers */
-@keyframes vhsWobble{
-  0%   { transform: translateX(-1px); opacity: 0.16; filter: hue-rotate(0deg) saturate(120%); }
-  50%  { transform: translateX(1px); opacity: 0.10; filter: hue-rotate(6deg) saturate(140%); }
-  100% { transform: translateX(-1px); opacity: 0.16; filter: hue-rotate(0deg) saturate(120%); }
+/* Breathing grain opacity on name letters */
+@keyframes nameGrainBreathe{
+  0%, 100% { opacity: 0.16; }
+  38%       { opacity: 0.09; }
+  65%       { opacity: 0.21; }
 }
 
-/* After = visible subtle grain on name */
+/* After = visible grain on name with breathing */
 .nameImgBtn::after{
-  opacity: 0.16;
   background: rgba(127,127,127,1);
   filter: url(#grain-noise) contrast(140%);
+  animation: nameGrainBreathe 4.1s ease-in-out infinite;
 }
 
-/* Before = VHS wobble tint */
+/* Before = warm projector tint (no VHS wobble translateX) */
 .nameImgBtn::before{
-  opacity: 0.10;
-  background: rgba(127,127,127,1);
+  opacity: 0.08;
+  background: rgba(255,180,80,0.3);
   mix-blend-mode: screen;
   filter: url(#grain-noise) contrast(120%);
-  animation: vhsWobble 2.8s ease-in-out infinite;
 }
 
 .sub{
@@ -252,10 +273,15 @@ body.route-film .sub{
   border-radius: 999px;
   overflow:hidden; /* CLIP grain to pill area */
   transform: translateZ(0);
-  transition: transform 140ms ease;
+  transition: transform 140ms ease, box-shadow 300ms ease;
 }
 .navBtn:hover .navPill{
   transform: scale(1.055);
+}
+
+/* Selected nav button: constant soft warm projector glow */
+.navBtn.is-active .navPill{
+  box-shadow: 0 0 14px 4px rgba(255,180,80,0.22), 0 0 28px 8px rgba(255,180,80,0.10);
 }
 
 .navBtnImg{
@@ -332,12 +358,33 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   background: rgba(0,0,0,0.25);
   box-shadow: 0 18px 60px rgba(0,0,0,0.55);
 }
+
+/* Gate weave on home hero -- film unsteady in the projector gate */
+@keyframes heroGateWeave{
+  0%   { transform: translate(0px, 0px); }
+  30%  { transform: translate(-1.2px, 0.8px); }
+  58%  { transform: translate(0.9px, -1.2px); }
+  80%  { transform: translate(-0.7px, 1px); }
+  100% { transform: translate(0px, 0px); }
+}
+
 .heroImg{
   width:100%;
   height:100%;
   object-fit: cover;
   display:block;
-  filter: contrast(105%) brightness(96%);
+  filter: contrast(1.06) brightness(0.97) saturate(0.88) sepia(0.04);
+  animation: heroGateWeave 9.5s ease-in-out infinite;
+}
+
+/* Analog color grade for all film imagery */
+.filmGrade{
+  filter: contrast(1.06) brightness(0.97) saturate(0.88) sepia(0.04);
+}
+
+/* Override for hover state on film stills */
+.filmTile:hover .filmStill.filmGrade{
+  filter: blur(5px) contrast(1.08) brightness(0.92) saturate(0.88) sepia(0.04);
 }
 
 /* -----------------------------
@@ -384,11 +431,9 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   display:block;
   transform: scale(1.02);
   transition: filter 180ms ease, transform 180ms ease;
-  filter: contrast(106%) brightness(96%);
 }
 
 .filmTile:hover .filmStill{
-  filter: blur(5px) contrast(108%) brightness(92%);
   transform: scale(1.05);
 }
 
@@ -462,6 +507,8 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   background: rgba(0,0,0,0.25);
   line-height: 1.55;
 }
+
+/* Contact page */
 .contactWrap{
   padding-top: 10px;
   padding-bottom: 24px;
@@ -471,45 +518,245 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   padding: 18px;
 }
 
+/* Contact badges -- like VHS sleeve genre tags */
+.contactLinks{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.contactBadge{
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--red);
+  border-radius: 4px;
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--ink);
+  transition: box-shadow 150ms ease;
+}
+.contactBadge:hover{
+  box-shadow: 0 0 14px rgba(255,42,42,0.35);
+}
+
+.badgeLabel{
+  background: var(--red);
+  color: #fff;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  padding: 3px 10px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.badgeValue{
+  padding: 6px 10px;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+/* -----------------------------
+   FILM DETAIL -- VHS back-cover layout
+------------------------------ */
 .filmPage{
   padding-top: 10px;
   padding-bottom: 24px;
 }
-.filmHeroImg{
-  width:100%;
-  height: 360px;
-  object-fit: cover;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: rgba(0,0,0,0.25);
-  display:block;
-  margin-bottom: 18px;
-}
-#filmTitle{
-  margin: 0 0 8px;
-  font-size: 28px;
-  letter-spacing: 0.02em;
-}
-#filmMeta{
-  opacity: 0.85;
-  margin-bottom: 14px;
-}
-#filmDesc{
-  max-width: 80ch;
-  line-height: 1.6;
+
+.vhsSleeve{
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 6px;
+  background: rgba(0,0,0,0.30);
+  padding: 20px;
 }
 
-.errorCard{
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: rgba(0,0,0,0.25);
-  padding: 18px;
+/* Responsive 16:9 YouTube embed */
+.filmEmbedWrap{
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  border-radius: 4px;
+  margin-bottom: 18px;
+  background: #000;
+}
+.filmEmbed{
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border: 0;
+}
+
+/* Info block below media */
+.vhsInfo{
+  padding: 4px 0 12px;
+}
+.vhsTitle{
+  margin: 0 0 8px;
+  font-size: 24px;
+  letter-spacing: 0.04em;
+}
+.vhsMeta{
+  font-size: 12px;
+  letter-spacing: 0.10em;
+  opacity: 0.68;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+.vhsDesc{
+  max-width: 72ch;
+  line-height: 1.68;
+  text-align: justify;
+  opacity: 0.88;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Gallery row */
+.filmGalleryRow{
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.filmGalleryThumb{
+  width: 120px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 3px;
+  border: 1px solid rgba(255,255,255,0.14);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+.filmGalleryThumb:hover{
+  transform: scale(1.06);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.55);
+}
+
+/* Crossfade slideshow */
+.filmSlideshow{
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #000;
+  margin-bottom: 18px;
+}
+.slidesWrap{
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.slideImg{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 600ms ease-in-out;
+}
+.slideImg.is-active{
+  opacity: 1;
+}
+.slideArrow{
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.46);
+  border: 1px solid rgba(255,255,255,0.22);
+  color: #fff;
+  font-size: 30px;
+  line-height: 1;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  z-index: 2;
+  transition: background 150ms ease;
+}
+.slideArrow:hover{ background: rgba(0,0,0,0.72); }
+.slideArrow-prev{ left: 12px; }
+.slideArrow-next{ right: 12px; }
+
+/* -----------------------------
+   LIGHTBOX
+------------------------------ */
+.lightbox{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.88);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.lightbox[hidden]{ display: none !important; }
+
+.lbContent{
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.lbImg{
+  max-width: 100%;
+  max-height: 78vh;
+  object-fit: contain;
+  border-radius: 4px;
+}
+.lbClose{
+  position: absolute;
+  top: -44px;
+  right: 0;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.40);
+  color: #fff;
+  font-size: 18px;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 150ms ease;
+}
+.lbClose:hover{ background: rgba(80,0,0,0.7); }
+.lbNav{
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.lbPrev, .lbNext{
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(255,255,255,0.30);
+  color: #fff;
+  font-size: 26px;
+  padding: 6px 18px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 150ms ease;
+}
+.lbPrev:hover, .lbNext:hover{ background: rgba(0,0,0,0.72); }
+.lbCounter{
+  font-size: 13px;
+  opacity: 0.65;
+  min-width: 54px;
+  text-align: center;
 }
 
 /* -----------------------------
-   HOVER GRAIN — CLIPPED TO ELEMENT (pill / tile)
+   HOVER GRAIN -- CLIPPED TO ELEMENT (pill / tile)
    IMPORTANT: apply .grainHover to the thing you want textured,
-   not the parent button (prevents “big circle around icon”).
+   not the parent button (prevents "big circle around icon").
 ------------------------------ */
 .grainHover{
   position: relative;
@@ -527,10 +774,67 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   opacity: 0;
   filter: url(#grain-noise) contrast(140%) brightness(112%);
   transform: translateZ(0);
+  transition: opacity 180ms ease;
 }
 
 .grainHover:hover::after{
   opacity: var(--hoverGrainOpacity);
+}
+
+/* Nav pill: hot splice flash + breathing grain on hover */
+@keyframes navSpliceFlash{
+  0%   { opacity: 0.72; filter: url(#grain-noise) contrast(140%) brightness(300%); }
+  30%  { opacity: 0.55; filter: url(#grain-noise) contrast(140%) brightness(180%); }
+  100% { opacity: var(--hoverGrainOpacity); filter: url(#grain-noise) contrast(140%) brightness(112%); }
+}
+@keyframes navGrainBreathe{
+  0%, 100% { opacity: var(--hoverGrainOpacity); }
+  50%       { opacity: calc(var(--hoverGrainOpacity) * 0.60); }
+}
+
+.navPill.grainHover::after{
+  transition: none; /* animation takes over */
+}
+.navPill.grainHover:hover::after{
+  animation: navSpliceFlash 0.32s ease-out, navGrainBreathe 2.2s ease-in-out 0.32s infinite;
+}
+
+/* -----------------------------
+   FILM BURN OVERLAY
+------------------------------ */
+.burnOverlay{
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 900;
+  background: rgba(255,220,140,1);
+  opacity: 0;
+  display: none;
+}
+
+/* -----------------------------
+   ERROR
+------------------------------ */
+.errorCard{
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(0,0,0,0.25);
+  padding: 18px;
+}
+
+/* -----------------------------
+   FOOTER
+------------------------------ */
+.siteFooter{
+  position: relative;
+  z-index: 20;
+  text-align: center;
+  padding: 20px 16px 28px;
+  font-size: 11px;
+  letter-spacing: 0.10em;
+  opacity: 0.38;
+  color: var(--ink);
+  text-transform: uppercase;
 }
 
 /* -----------------------------
@@ -557,4 +861,7 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
     grid-template-rows: repeat(4, 260px);
   }
   .heroClip{ height: 46vh; }
+  .filmGalleryThumb{ width: 96px; height: 64px; }
+  .vhsSleeve{ padding: 14px; }
+  .lbContent{ max-width: 96vw; }
 }
