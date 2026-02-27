@@ -6,12 +6,13 @@
   --ink: rgba(255,255,255,0.82);
   --line: rgba(255,255,255,0.22);
   --line2: rgba(255,255,255,0.14);
+  --shadow: rgba(0,0,0,0.55);
 
-  /* global grain subtle */
-  --grainOpacity: 0.07;
+  /* global grain (subtle) */
+  --grainOpacity: 0.08;
 
-  /* hover grain obvious */
-  --hoverGrainOpacity: 0.40;
+  /* hover grain (big + obvious) */
+  --hoverGrainOpacity: 0.38;
   --hoverGrainSize: 220px;
 
   /* home vignette stronger */
@@ -23,27 +24,45 @@
   --vigOtherStrength: 0.70;
   --vigInnerOther: 62%;
   --vigOuterOther: 92%;
+
+  /* header sizing */
+  --hdrHomePadTop: 42px;
+  --hdrHomePadBottom: 10px;
+  --hdrOtherPadTop: 18px;
+  --hdrOtherPadBottom: 6px;
+
+  /* name sizes */
+  --nameHomeW: min(980px, 92vw);
+  --nameOtherW: min(520px, 82vw);
+
+  /* nav button size */
+  --navBtnW: 170px;
+
+  /* subtle glow */
+  --glowA: 0.24;
+  --glowB: 0.36;
 }
 
 *{ box-sizing:border-box; }
 html, body{ height:100%; }
+
 body{
   margin:0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
   color: var(--ink);
   background:#000;
   overflow-x:hidden;
 }
 
 /* -----------------------------
-   FIXED OVERLAYS (NO SEAMS)
+   LOCKED OVERLAYS / BACKGROUND
 ------------------------------ */
 .texture{
   position:fixed;
   inset:0;
   pointer-events:none;
   z-index:10;
-  /* Do NOT transform fixed overlays (causes scroll seams in some cases) */
+  transform: translateZ(0);
 }
 
 .texture-concrete{
@@ -58,7 +77,7 @@ body{
   opacity: 0.76;
 }
 
-/* Global subtle animated grain */
+/* Animated film grain (global subtle) */
 .texture-grain{
   opacity: var(--grainOpacity);
   mix-blend-mode: overlay;
@@ -77,17 +96,19 @@ body{
   100% { background-position: 0 0; }
 }
 
-/* VIGNETTE (full bleed, per-route) */
+/* Vignette layer (fixed, full bleed) */
 .vignette{
   position: fixed;
   inset: 0;
   pointer-events:none;
   z-index: 9;
-  transition: background 450ms ease;
+  transform: translateZ(0);
+  transition: opacity 450ms ease, filter 450ms ease;
 }
 
-/* HOME: strong vignette that starts at absolute edges */
+/* HOME vignette */
 body.route-home .vignette{
+  opacity: 1;
   background:
     radial-gradient(
       ellipse at center,
@@ -96,12 +117,12 @@ body.route-home .vignette{
     );
 }
 
-/* OTHER PAGES: less intrusive vignette */
+/* OTHER pages vignette */
 body.route-films .vignette,
 body.route-about .vignette,
 body.route-contact .vignette,
-body.route-film .vignette,
-body.route-error .vignette{
+body.route-film .vignette{
+  opacity: 1;
   background:
     radial-gradient(
       ellipse at center,
@@ -111,13 +132,18 @@ body.route-error .vignette{
 }
 
 /* -----------------------------
-   HEADER
+   HEADER (HOME -> COMPACT TRANSITION RESTORED)
 ------------------------------ */
 .hdr{
   position:relative;
   z-index: 20;
   text-align:center;
-  padding: 42px 16px 12px;
+  padding: var(--hdrHomePadTop) 16px var(--hdrHomePadBottom);
+  transition: padding 380ms ease;
+}
+
+body:not(.route-home) .hdr{
+  padding: var(--hdrOtherPadTop) 16px var(--hdrOtherPadBottom);
 }
 
 .nameImgBtn{
@@ -127,12 +153,73 @@ body.route-error .vignette{
   padding:0;
 }
 
+/* wrapper so we can apply VHS + glow without touching the global overlays */
+.nameFX{
+  position: relative;
+  display:inline-block;
+  transform: translateZ(0);
+}
+
+/* subtle animated red glow (requested) */
+.nameFX{
+  animation: nameGlow 2.9s ease-in-out infinite;
+  filter:
+    drop-shadow(0 10px 14px rgba(0,0,0,0.5))
+    drop-shadow(0 0 18px rgba(255,42,42,var(--glowA)));
+}
+
+@keyframes nameGlow{
+  0%{
+    filter:
+      drop-shadow(0 10px 14px rgba(0,0,0,0.5))
+      drop-shadow(0 0 16px rgba(255,42,42,var(--glowA)));
+  }
+  50%{
+    filter:
+      drop-shadow(0 10px 14px rgba(0,0,0,0.5))
+      drop-shadow(0 0 22px rgba(255,42,42,var(--glowB)));
+  }
+  100%{
+    filter:
+      drop-shadow(0 10px 14px rgba(0,0,0,0.5))
+      drop-shadow(0 0 16px rgba(255,42,42,var(--glowA)));
+  }
+}
+
+/* VHS effect ON THE NAME (requested to restore) */
+.nameFX::after{
+  content:"";
+  position:absolute;
+  inset:-8px;
+  pointer-events:none;
+  background: url("assets/textures/vhs-texture.png") center/cover no-repeat;
+  mix-blend-mode: lighten;
+  opacity: 0.33;
+  filter: contrast(135%) brightness(112%);
+  animation: vhsDrift 1.2s steps(6) infinite;
+  border-radius: 10px;
+}
+
+@keyframes vhsDrift{
+  0%   { transform: translate(0,0) skewX(0deg); background-position: 0 0; }
+  20%  { transform: translate(1px,-1px) skewX(-0.2deg); background-position: 40px -20px; }
+  40%  { transform: translate(-1px,1px) skewX(0.25deg); background-position: -30px 30px; }
+  60%  { transform: translate(1px,0px) skewX(-0.15deg); background-position: 25px 10px; }
+  80%  { transform: translate(-1px,-1px) skewX(0.1deg); background-position: -18px -12px; }
+  100% { transform: translate(0,0) skewX(0deg); background-position: 0 0; }
+}
+
 .nameImg{
   display:block;
   margin:0 auto;
-  width:min(980px, 92vw);
+  width: var(--nameHomeW);
   height:auto;
-  filter: drop-shadow(0 10px 14px rgba(0,0,0,0.5));
+  transition: width 420ms ease, transform 420ms ease, opacity 420ms ease;
+}
+
+/* compact name for non-home */
+body:not(.route-home) .nameImg{
+  width: var(--nameOtherW);
 }
 
 .sub{
@@ -140,48 +227,95 @@ body.route-error .vignette{
   font-size: 13px;
   letter-spacing: 0.12em;
   opacity: 0.85;
+  transition: margin 380ms ease;
 }
 
-/* NAV BUTTONS (PNG ASSETS) */
+body:not(.route-home) .sub{
+  margin-top: 6px;
+}
+
+/* -----------------------------
+   NAV BUTTONS (IMAGE ASSETS) + GRAIN MASK (ICON ONLY)
+------------------------------ */
 .tabs{
-  margin-top: 16px;
+  margin-top: 14px;
   display:flex;
   gap: 18px;
   justify-content:center;
   align-items:center;
 }
 
+/* larger buttons requested */
 .navBtn{
   position:relative;
   border:0;
   background:transparent;
   padding:0;
   cursor:pointer;
-  border-radius: 999px;
-  overflow:hidden; /* clips hover grain to pill */
+  transform: translateZ(0);
   transition: transform 140ms ease;
-  will-change: transform;
 }
 
+/* slightly bigger on hover (requested) */
 .navBtn:hover{
-  transform: scale(1.06);
+  transform: scale(1.05);
 }
 
 .navBtnImg{
   display:block;
-  width: 170px; /* larger buttons */
+  width: var(--navBtnW);
   height: auto;
   user-select:none;
   -webkit-user-drag:none;
 }
 
+/* ICON-ONLY HOVER GRAIN:
+   Uses CSS mask-image set by JS per-state so the grain only appears on non-transparent pixels
+*/
+.navBtn::after{
+  content:"";
+  position:absolute;
+  inset:-2px;                 /* tiny bleed so edges don’t clip */
+  pointer-events:none;
+  background-image: url("assets/textures/film-grain.png");
+  background-repeat: repeat;
+  background-size: 520px 520px;
+  mix-blend-mode: overlay;
+  opacity: 0;
+  animation: grainMove 700ms steps(6) infinite;
+  filter: contrast(140%) brightness(112%);
+  transform: translateZ(0);
+
+  /* MASK (set by JS: --btnMask: url(...) ) */
+  -webkit-mask-image: var(--btnMask);
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+
+  mask-image: var(--btnMask);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+}
+
+/* Big, obvious grain on hover, but ONLY on icon */
+.navBtn:hover::after{
+  opacity: var(--hoverGrainOpacity);
+  background-size: var(--hoverGrainSize) var(--hoverGrainSize);
+}
+
 /* -----------------------------
-   MAIN LAYOUT (CONSISTENT)
+   LAYOUT FRAME (CONTENT STARTS HIGHER ON NON-HOME)
 ------------------------------ */
 .frame{
   position:relative;
   z-index: 5;
   padding: 10px 16px 44px;
+  transition: padding 380ms ease;
+}
+
+body:not(.route-home) .frame{
+  padding-top: 2px; /* pull content up when name shrinks */
 }
 
 .system{
@@ -193,18 +327,8 @@ body.route-error .vignette{
   align-items: start;
 }
 
-/* Side stacks are only for HOME; we hide the sides on other routes via body classes */
 .side{
   min-height: 520px;
-}
-
-body.route-films .side,
-body.route-about .side,
-body.route-contact .side,
-body.route-film .side,
-body.route-error .side{
-  opacity: 0;
-  pointer-events:none;
 }
 
 .sideStack{
@@ -214,6 +338,7 @@ body.route-error .side{
   padding-top: 140px;
 }
 
+/* side boxes */
 .sideBox{
   width: 100%;
   aspect-ratio: 4 / 3;
@@ -260,26 +385,26 @@ body.route-error .side{
 }
 
 /* -----------------------------
-   FILMS GRID (BIG LEFT + 2x2 RIGHT)
+   FILMS GRID (BIGGER TILES + LOGOS)
 ------------------------------ */
 .filmsGrid{
   display:grid;
-  grid-template-columns: 1.2fr 1fr 1fr;
-  grid-template-rows: 260px 260px;
+  grid-template-columns: 1.25fr 1fr 1fr;
+  grid-template-rows: 310px 310px;   /* bigger */
   gap: 14px;
-  padding-top: 16px;
-  padding-bottom: 34px; /* split the difference */
+  padding-top: 10px;
+  padding-bottom: 26px;
 }
 
 .filmCard{
   position:relative;
   border: 1px solid var(--line);
   border-radius: 10px;
-  overflow:hidden; /* clips hover grain */
+  overflow:hidden;
   background: rgba(0,0,0,0.25);
   cursor:pointer;
+  transform: translateZ(0);
   transition: transform 160ms ease, box-shadow 160ms ease;
-  will-change: transform;
 }
 
 .filmCard:hover{
@@ -287,7 +412,7 @@ body.route-error .side{
   box-shadow: 0 16px 38px rgba(0,0,0,0.55);
 }
 
-.filmInner{
+.filmCard .filmInner{
   position:absolute;
   inset:0;
   display:flex;
@@ -297,21 +422,20 @@ body.route-error .side{
 }
 
 .filmLogo{
-  max-width: 78%;
-  max-height: 58%;
+  max-width: 84%;
+  max-height: 64%;
   width:auto;
   height:auto;
   display:block;
   filter: drop-shadow(0 10px 18px rgba(0,0,0,0.55));
 }
 
-/* Humanzee bigger */
+/* Humanzee bigger than the rest */
 .filmCard[data-slug="humanzee"] .filmLogo{
-  max-width: 90%;
-  max-height: 64%;
+  max-width: 92%;
+  max-height: 70%;
 }
 
-/* Meta only (no extra title under logo) */
 .filmMetaLine{
   position:absolute;
   left: 16px;
@@ -334,8 +458,8 @@ body.route-error .side{
   display:grid;
   grid-template-columns: 1fr 1.2fr;
   gap: 14px;
-  padding-top: 18px;
-  padding-bottom: 34px;
+  padding-top: 10px;
+  padding-bottom: 26px;
 }
 
 .aboutPhoto{
@@ -356,13 +480,12 @@ body.route-error .side{
 }
 
 .contactWrap{
-  padding-top: 18px;
-  padding-bottom: 34px;
+  padding-top: 10px;
+  padding-bottom: 26px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: rgba(0,0,0,0.25);
   padding: 18px;
-  line-height: 1.55;
 }
 
 .contactLinks a{
@@ -370,16 +493,11 @@ body.route-error .side{
   margin-right: 14px;
   color: rgba(255,255,255,0.85);
   text-decoration:none;
-  border-bottom: 1px solid rgba(255,255,255,0.15);
-}
-
-.contactLinks a:hover{
-  border-bottom-color: rgba(255,255,255,0.45);
 }
 
 .filmPage{
-  padding-top: 18px;
-  padding-bottom: 34px;
+  padding-top: 10px;
+  padding-bottom: 26px;
 }
 
 .filmHeroImg{
@@ -399,96 +517,42 @@ body.route-error .side{
   letter-spacing: 0.02em;
 }
 
-.filmMeta{
+#filmMeta{
   opacity: 0.85;
   margin-bottom: 14px;
 }
 
-.filmDesc{
+#filmDesc{
   max-width: 80ch;
   line-height: 1.6;
 }
 
-.filmActions a{
-  display:inline-block;
-  margin-right: 12px;
-  padding: 10px 14px;
-  border: 1px solid rgba(255,255,255,0.25);
-  border-radius: 999px;
-  color: rgba(255,255,255,0.85);
-  text-decoration:none;
-}
-
-.filmActions a:hover{
-  border-color: rgba(255,255,255,0.45);
-}
-
-/* Error */
 .errorCard{
-  margin-top: 18px;
-  padding: 18px;
   border: 1px solid var(--line);
   border-radius: 10px;
+  padding: 18px;
   background: rgba(0,0,0,0.25);
-}
-
-/* -----------------------------
-   HOVER GRAIN (ONLY ON TARGET)
-   - No boxes around buttons: clipped by border-radius + overflow
------------------------------- */
-.grainHover{
-  position: relative;
-  overflow: hidden;
-}
-
-.grainHover::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius: inherit;
-  pointer-events:none;
-  background-image: url("assets/textures/film-grain.png");
-  background-repeat: repeat;
-  background-size: 520px 520px;
-  mix-blend-mode: overlay;
-  opacity: 0;
-  animation: grainMove 700ms steps(6) infinite;
-  filter: contrast(140%) brightness(112%);
-}
-
-.grainHover:hover::after{
-  opacity: var(--hoverGrainOpacity);
-  background-size: var(--hoverGrainSize) var(--hoverGrainSize);
 }
 
 /* -----------------------------
    RESPONSIVE
 ------------------------------ */
 @media (max-width: 1080px){
-  .system{
-    grid-template-columns: 1fr;
-  }
+  .system{ grid-template-columns: 1fr; }
   .side{ display:none; }
 
   .filmsGrid{
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 260px 260px 260px;
+    grid-template-rows: 300px 300px 300px;
   }
-  .filmCard.is-feature{
-    grid-row: auto;
-  }
+  .filmCard.is-feature{ grid-row: auto; }
 
-  .aboutWrap{
-    grid-template-columns: 1fr;
-  }
+  .aboutWrap{ grid-template-columns: 1fr; }
   .aboutPhoto{ height: 280px; }
 }
 
 @media (max-width: 520px){
-  .navBtnImg{ width: 145px; }
-  .filmsGrid{
-    grid-template-columns: 1fr;
-    grid-template-rows: repeat(4, 240px);
-  }
+  :root{ --navBtnW: 150px; }
+  .filmsGrid{ grid-template-columns: 1fr; grid-template-rows: repeat(4, 260px); }
   .heroClip{ height: 46vh; }
 }
