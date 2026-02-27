@@ -1,16 +1,20 @@
 /* =========================================================
-   TARO SITE v2 (FULL)
-   - hash routing only (#home/#films/#about/#contact/#film/<slug>)
-   - PNG nav button assets from assets/ui/
-   - hover grain stays clipped to hovered element (no boxes)
-   - films grid restored (big left tile + 2x2 right)
+   TARO SITE ROUTER + UI (V2_003)
+   Fixes:
+   1) Restores home->inner header transition (big name -> small top)
+      + restores VHS effect ON NAME (CSS)
+   2) Adds subtle animated red glow (CSS)
+   3) Films tab now reliably shows selected state (no “only when hover”)
+   4) Hover grain on nav buttons is ICON-ONLY via mask-image (no circle/halo)
+   5) Content starts higher on inner pages; films tiles bigger (CSS)
+   6) Film logos restored via correct paths (per established filenames)
 ========================================================= */
 
-const $ = (sel, root = document) => root.querySelector(sel);
-const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
 /* -----------------------------
-   ASSET PATHS (MUST MATCH FILENAMES EXACTLY)
+   ASSET PATHS
 ------------------------------ */
 const UI = {
   nav: {
@@ -35,12 +39,13 @@ const UI = {
   }
 };
 
-/* -----------------------------
-   DATA (update paths as needed)
------------------------------- */
+/* Films (logos + heroes)
+   IMPORTANT: these filenames MUST exist exactly under assets/films/
+*/
 const FILMS = [
   {
     slug: "humanzee",
+    title: "HUMANZEE",
     year: "2024",
     minutes: "23",
     genres: "Horror/Drama",
@@ -52,6 +57,7 @@ const FILMS = [
   },
   {
     slug: "rendezvous",
+    title: "RENDEZVOUS",
     year: "2023",
     minutes: "16",
     genres: "Crime/Comedy",
@@ -63,6 +69,7 @@ const FILMS = [
   },
   {
     slug: "uap",
+    title: "Do Dragons Sleep in Fictitious Caves?",
     year: "2022",
     minutes: "4",
     genres: "Horror/Drama",
@@ -74,6 +81,7 @@ const FILMS = [
   },
   {
     slug: "whispers",
+    title: "The Whispers of the Aspens",
     year: "2022",
     minutes: "1",
     genres: "Horror",
@@ -85,6 +93,7 @@ const FILMS = [
   }
 ];
 
+/* Home images (safe even if missing; they’ll just be blank) */
 const HOME = {
   hero: "assets/backgrounds/home-hero.jpg",
   left: [
@@ -106,13 +115,8 @@ const ABOUT = {
 };
 
 const CONTACT = {
-  body: `
-    <p>Replace this with your contact copy.</p>
-  `,
-  links: [
-    // { label: "Email", href: "mailto:you@example.com" },
-    // { label: "Instagram", href: "https://instagram.com/..." },
-  ]
+  body: `<p>Replace this with your contact copy.</p>`,
+  links: []
 };
 
 /* -----------------------------
@@ -130,10 +134,12 @@ const views = {
 const homeHeroImg = $("#homeHero");
 const leftStack = $("#homeLeftStack");
 const rightStack = $("#homeRightStack");
+
 const filmsGrid = $("#filmsGrid");
 
 const aboutImg = $("#aboutImg");
 const aboutBody = $("#aboutBody");
+
 const contactBody = $("#contactBody");
 const contactLinks = $("#contactLinks");
 
@@ -145,19 +151,15 @@ const filmActions = $("#filmActions");
 
 const errorText = $("#errorText");
 
-/* nav */
+/* Nav buttons */
 const navButtons = $$(".navBtn");
 
 /* -----------------------------
-   PRELOAD (prevents “nothing shows” feel)
+   PRELOAD
 ------------------------------ */
 function preload(srcs = []) {
-  srcs.forEach(src => {
-    const img = new Image();
-    img.src = src;
-  });
+  srcs.forEach(src => { const img = new Image(); img.src = src; });
 }
-
 preload([
   ...Object.values(UI.nav.films),
   ...Object.values(UI.nav.about),
@@ -165,30 +167,37 @@ preload([
 ]);
 
 /* -----------------------------
-   NAV IMAGE STATE
+   NAV IMAGE STATE + ICON MASK (fixes “grain circle”)
 ------------------------------ */
 function setNavImage(key, { selected, hovered }) {
   const map = UI.nav[key];
   const img = $(`.navBtnImg[data-btn="${key}"]`);
   if (!img) return;
 
-  if (selected && hovered) img.src = map.sh;
-  else if (selected && !hovered) img.src = map.ss;
-  else if (!selected && hovered) img.src = map.nh;
-  else img.src = map.ns;
+  let src = map.ns;
+  if (selected && hovered) src = map.sh;
+  else if (selected && !hovered) src = map.ss;
+  else if (!selected && hovered) src = map.nh;
+  else src = map.ns;
+
+  img.src = src;
+
+  // critical: keep the button’s mask synced to the currently displayed PNG
+  const btn = img.closest(".navBtn");
+  if (btn) btn.style.setProperty("--btnMask", `url("${src}")`);
+
+  // accessibility: aria-current
+  if (btn) {
+    if (selected) btn.setAttribute("aria-current", "page");
+    else btn.removeAttribute("aria-current");
+  }
 }
 
-function activeNavKeyFromRoute(route) {
-  // film detail counts as films selected
-  if (route.page === "film") return "films";
-  if (route.page === "films" || route.page === "about" || route.page === "contact") return route.page;
-  return null; // home/error => none selected
-}
-
-function syncNavImages(route) {
-  const active = activeNavKeyFromRoute(route);
-  ["films","about","contact"].forEach(key => {
-    setNavImage(key, { selected: active === key, hovered: false });
+function setNavState(activeKeyOrNull) {
+  const keys = ["films","about","contact"];
+  keys.forEach(key => {
+    const selected = (activeKeyOrNull === key);
+    setNavImage(key, { selected, hovered: false });
   });
 }
 
@@ -199,27 +208,21 @@ function showOnly(which) {
   Object.keys(views).forEach(k => {
     const v = views[k];
     if (!v) return;
-
-    if (k === which) {
-      v.hidden = false;
-      v.classList.add("is-active");
-    } else {
-      v.hidden = true;
-      v.classList.remove("is-active");
-    }
+    const on = (k === which);
+    v.hidden = !on;
+    v.classList.toggle("is-active", on);
   });
 }
 
 /* -----------------------------
    ROUTING (HASH ONLY)
-   #home | #films | #about | #contact | #film/<slug>
+   #home, #films, #about, #contact, #film/<slug>
 ------------------------------ */
 function parseRoute() {
   const raw = (location.hash || "#home").replace(/^#/, "");
   const parts = raw.split("/").filter(Boolean);
 
-  if (parts.length === 0) return { page: "home" };
-  if (parts[0] === "home") return { page: "home" };
+  if (parts.length === 0 || parts[0] === "home") return { page: "home" };
   if (parts[0] === "films") return { page: "films" };
   if (parts[0] === "about") return { page: "about" };
   if (parts[0] === "contact") return { page: "contact" };
@@ -246,13 +249,13 @@ function makeSideBox(src) {
   return wrap;
 }
 
-function renderHome(route) {
+function renderHome() {
   setBodyRouteClass("home");
   showOnly("home");
-  syncNavImages(route);
 
   if (homeHeroImg) homeHeroImg.src = HOME.hero;
 
+  // build side stacks once
   if (leftStack && leftStack.childElementCount === 0) {
     HOME.left.forEach(src => leftStack.appendChild(makeSideBox(src)));
   }
@@ -261,24 +264,23 @@ function renderHome(route) {
   }
 }
 
-function renderFilms(route) {
+function renderFilms() {
   setBodyRouteClass("films");
   showOnly("films");
-  syncNavImages(route);
 
   if (!filmsGrid) return;
   filmsGrid.innerHTML = "";
 
-  // Keep your intended layout: feature first (big left tile)
-  const sorted = [...FILMS].sort((a,b) => (b.feature === true) - (a.feature === true));
+  // keep feature first
+  const sorted = [...FILMS].sort((a,b) => (b.feature ? 1 : 0) - (a.feature ? 1 : 0));
 
   sorted.forEach(f => {
     const card = document.createElement("article");
-    card.className = "filmCard grainHover" + (f.feature ? " is-feature" : "");
+    card.className = "filmCard" + (f.feature ? " is-feature" : "");
     card.dataset.slug = f.slug;
     card.tabIndex = 0;
-    card.setAttribute("role", "button");
-    card.setAttribute("aria-label", `${f.slug}`);
+    card.setAttribute("role","button");
+    card.setAttribute("aria-label", f.title);
 
     const inner = document.createElement("div");
     inner.className = "filmInner";
@@ -286,7 +288,7 @@ function renderFilms(route) {
     const logo = document.createElement("img");
     logo.className = "filmLogo";
     logo.src = f.logo;
-    logo.alt = `${f.slug} logo`;
+    logo.alt = `${f.title} logo`;
 
     inner.appendChild(logo);
 
@@ -309,20 +311,16 @@ function renderFilms(route) {
   });
 }
 
-function renderAbout(route) {
+function renderAbout() {
   setBodyRouteClass("about");
   showOnly("about");
-  syncNavImages(route);
-
   if (aboutImg) aboutImg.src = ABOUT.photo;
   if (aboutBody) aboutBody.innerHTML = ABOUT.body;
 }
 
-function renderContact(route) {
+function renderContact() {
   setBodyRouteClass("contact");
   showOnly("contact");
-  syncNavImages(route);
-
   if (contactBody) contactBody.innerHTML = CONTACT.body;
 
   if (contactLinks) {
@@ -338,16 +336,15 @@ function renderContact(route) {
   }
 }
 
-function renderFilm(route) {
+function renderFilm(slug) {
   setBodyRouteClass("film");
   showOnly("film");
-  syncNavImages(route);
 
-  const f = FILMS.find(x => x.slug === route.slug);
-  if (!f) return renderError({ page: "error", message: `Film not found: ${route.slug}` });
+  const f = FILMS.find(x => x.slug === slug);
+  if (!f) return renderError(`Film not found: ${slug}`);
 
   if (filmHeroImg) filmHeroImg.src = f.hero;
-  if (filmTitle) filmTitle.textContent = f.slug.toUpperCase().replace(/-/g, " ");
+  if (filmTitle) filmTitle.textContent = f.title;
   if (filmMeta) filmMeta.textContent = `${f.year} • ${f.minutes} min. • ${f.genres}`;
   if (filmDesc) filmDesc.textContent = f.desc || "";
 
@@ -359,23 +356,28 @@ function renderFilm(route) {
       a.textContent = l.label;
       a.target = "_blank";
       a.rel = "noreferrer";
+      a.style.display = "inline-block";
+      a.style.marginRight = "12px";
+      a.style.padding = "10px 14px";
+      a.style.border = "1px solid rgba(255,255,255,0.25)";
+      a.style.borderRadius = "999px";
+      a.style.color = "rgba(255,255,255,0.85)";
+      a.style.textDecoration = "none";
       filmActions.appendChild(a);
     });
   }
 }
 
-function renderError(route) {
+function renderError(msg) {
   setBodyRouteClass("error");
   showOnly("error");
-  syncNavImages(route);
-  if (errorText) errorText.textContent = route.message || "Something went wrong.";
+  if (errorText) errorText.textContent = msg || "Something went wrong.";
 }
 
 /* -----------------------------
    NAV / CLICK WIRES
 ------------------------------ */
 function go(hash) {
-  // Always hash routes. Never path routes.
   location.hash = hash;
 }
 
@@ -387,43 +389,48 @@ function wireNav() {
   const homeLink = $("#homeLink");
   if (homeLink) homeLink.addEventListener("click", () => go("#home"));
 
-  // clicks
   navButtons.forEach(btn => {
     const route = btn.getAttribute("data-route");
     btn.addEventListener("click", () => go(`#${route}`));
   });
 
-  // hover swap images (selected/not + hover)
+  // Hover swapping for button assets (and keep mask synced)
   navButtons.forEach(btn => {
-    const key = btn.getAttribute("data-route");
+    const route = btn.getAttribute("data-route"); // films/about/contact
     btn.addEventListener("pointerenter", () => {
       const r = parseRoute();
-      const active = activeNavKeyFromRoute(r);
-      setNavImage(key, { selected: active === key, hovered: true });
+      const activeKey = (r.page === "film") ? "films" : (["films","about","contact"].includes(r.page) ? r.page : null);
+      const selected = (activeKey === route);
+      setNavImage(route, { selected, hovered: true });
     });
     btn.addEventListener("pointerleave", () => {
       const r = parseRoute();
-      const active = activeNavKeyFromRoute(r);
-      setNavImage(key, { selected: active === key, hovered: false });
+      const activeKey = (r.page === "film") ? "films" : (["films","about","contact"].includes(r.page) ? r.page : null);
+      const selected = (activeKey === route);
+      setNavImage(route, { selected, hovered: false });
     });
   });
 
-  // initial images
-  ["films","about","contact"].forEach(k => setNavImage(k, { selected:false, hovered:false }));
+  // Initialize images + masks immediately (prevents “nothing shows”)
+  setNavState(null);
 }
 
 /* -----------------------------
-   DISPATCH
+   ROUTE DISPATCH + NAV SYNC (fixes Films selected bug)
 ------------------------------ */
 function renderFromRoute() {
   const r = parseRoute();
 
-  if (r.page === "home") return renderHome(r);
-  if (r.page === "films") return renderFilms(r);
-  if (r.page === "about") return renderAbout(r);
-  if (r.page === "contact") return renderContact(r);
-  if (r.page === "film") return renderFilm(r);
-  return renderError(r);
+  if (r.page === "home") renderHome();
+  else if (r.page === "films") renderFilms();
+  else if (r.page === "about") renderAbout();
+  else if (r.page === "contact") renderContact();
+  else if (r.page === "film") renderFilm(r.slug);
+  else renderError(r.message);
+
+  // Always sync nav after rendering (prevents films-only-selected-on-hover regression)
+  const activeKey = (r.page === "film") ? "films" : (["films","about","contact"].includes(r.page) ? r.page : null);
+  setNavState(activeKey);
 }
 
 /* -----------------------------
