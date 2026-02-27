@@ -4,41 +4,40 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Taro O’Halloran</title>
-
-  <!-- FORCE ALL RELATIVE PATHS TO RESOLVE FROM SITE ROOT -->
-  <base href="/" />
-
-  <!-- CACHE-BUST -->
-  <link rel="stylesheet" href="styles.css?v=V2_002" />
+  <link rel="stylesheet" href="styles.css?v=V2_003" />
 </head>
 
 <body class="route-home">
+  <!-- BUILD: V2_003 -->
 
-  <!-- BUILD: V2_002 -->
-
+  <!-- VIGNETTE (full bleed; changes per route via body class) -->
   <div class="vignette" aria-hidden="true"></div>
 
+  <!-- TEXTURE OVERLAYS (fixed; never scroll) -->
   <div class="texture texture-concrete" aria-hidden="true"></div>
   <div class="texture texture-grain" aria-hidden="true"></div>
   <div class="texture texture-vhs" aria-hidden="true"></div>
 
-  <header class="hdr">
+  <header class="hdr" id="hdr">
     <button class="nameImgBtn" id="homeLink" type="button" aria-label="Home">
-      <img class="nameImg" src="assets/branding/taro-name.png" alt="Taro O’Halloran">
+      <span class="nameFX">
+        <img class="nameImg" src="assets/branding/taro-name.png" alt="Taro O’Halloran">
+      </span>
     </button>
 
     <div class="sub">( writer , director , producer )</div>
 
+    <!-- NAV (PNG assets) -->
     <nav class="tabs" aria-label="Primary">
-      <button class="navBtn grainHover" type="button" data-route="films" aria-label="Films">
+      <button class="navBtn" type="button" data-route="films" aria-label="Films">
         <img class="navBtnImg" data-btn="films" alt="Films">
       </button>
 
-      <button class="navBtn grainHover" type="button" data-route="about" aria-label="About">
+      <button class="navBtn" type="button" data-route="about" aria-label="About">
         <img class="navBtnImg" data-btn="about" alt="About">
       </button>
 
-      <button class="navBtn grainHover" type="button" data-route="contact" aria-label="Contact">
+      <button class="navBtn" type="button" data-route="contact" aria-label="Contact">
         <img class="navBtnImg" data-btn="contact" alt="Contact">
       </button>
     </nav>
@@ -53,16 +52,19 @@
 
       <section class="center">
 
+        <!-- HOME -->
         <section class="view is-active" id="view-home">
           <div class="heroClip">
             <img class="heroImg" id="homeHero" alt="">
           </div>
         </section>
 
+        <!-- FILMS -->
         <section class="view" id="view-films" hidden>
           <div class="filmsGrid" id="filmsGrid"></div>
         </section>
 
+        <!-- ABOUT -->
         <section class="view" id="view-about" hidden>
           <div class="aboutWrap">
             <img id="aboutImg" class="aboutPhoto" alt="">
@@ -70,6 +72,7 @@
           </div>
         </section>
 
+        <!-- CONTACT -->
         <section class="view" id="view-contact" hidden>
           <div class="contactWrap">
             <div id="contactBody"></div>
@@ -77,6 +80,7 @@
           </div>
         </section>
 
+        <!-- FILM DETAIL -->
         <section class="view" id="view-film" hidden>
           <div class="filmPage">
             <img id="filmHeroImg" class="filmHeroImg" alt="">
@@ -87,6 +91,7 @@
           </div>
         </section>
 
+        <!-- ERROR -->
         <section class="view" id="view-error" hidden>
           <div class="errorCard">
             <div id="errorText"></div>
@@ -102,7 +107,6 @@
     </section>
   </main>
 
-  <!-- CACHE-BUST -->
-  <script src="app.js?v=V2_002"></script>
+  <script src="app.js?v=V2_003"></script>
 </body>
 </html>
