@@ -175,13 +175,10 @@ body.route-film .nameImg{
 .nameImgBtn::after{
   content:"";
   position:absolute;
-  inset:-8px;
+  inset:0;
   pointer-events:none;
-  background-image: url("assets/textures/film-grain.png");
-  background-repeat: repeat;
   mix-blend-mode: overlay;
   opacity: 0;
-  animation: grainMove 700ms steps(6) infinite;
 
   /* KEY: mask to the name image so it only appears on the letters */
   -webkit-mask-image: url("assets/branding/taro-name.png");
@@ -205,15 +202,17 @@ body.route-film .nameImg{
 /* After = visible subtle grain on name */
 .nameImgBtn::after{
   opacity: 0.16;
-  background-size: 340px 340px;
+  background: rgba(127,127,127,1);
+  filter: url(#grain-noise) contrast(140%);
 }
 
 /* Before = VHS wobble tint */
 .nameImgBtn::before{
   opacity: 0.10;
-  background-size: 520px 520px;
+  background: rgba(127,127,127,1);
   mix-blend-mode: screen;
-  animation: grainMove 700ms steps(6) infinite, vhsWobble 2.8s ease-in-out infinite;
+  filter: url(#grain-noise) contrast(120%);
+  animation: vhsWobble 2.8s ease-in-out infinite;
 }
 
 .sub{
@@ -221,13 +220,12 @@ body.route-film .nameImg{
   font-size: 13px;
   letter-spacing: 0.12em;
   opacity: 0.85;
-  transition: margin 380ms ease;
 }
 body.route-films .sub,
 body.route-about .sub,
 body.route-contact .sub,
 body.route-film .sub{
-  margin-top: 6px;
+  display: none;
 }
 
 /* -----------------------------
@@ -524,18 +522,15 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   inset:0;
   border-radius: inherit;
   pointer-events:none;
-  background-image: url("assets/textures/film-grain.png");
-  background-repeat: repeat;
+  background: rgba(127,127,127,1);
   mix-blend-mode: overlay;
   opacity: 0;
-  animation: grainMove 700ms steps(6) infinite;
-  filter: contrast(140%) brightness(112%);
+  filter: url(#grain-noise) contrast(140%) brightness(112%);
   transform: translateZ(0);
 }
 
 .grainHover:hover::after{
   opacity: var(--hoverGrainOpacity);
-  background-size: var(--hoverGrainSize) var(--hoverGrainSize);
 }
 
 /* -----------------------------
