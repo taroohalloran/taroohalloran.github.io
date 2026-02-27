@@ -48,9 +48,9 @@ const FILMS = [
     year: "2024",
     minutes: "23",
     genres: "Horror/Drama",
-    logo: "assets/films/humanzee-logo.png",
-    still: "assets/films/humanzee-still.jpg",
-    hero: "assets/films/humanzee-hero.jpg",
+    logo: "assets/films/humanzee/humanzee-logo.png",
+    still: "assets/films/humanzee/humanzee-still.jpg",
+    hero: "assets/films/humanzee/humanzee-hero.jpg",
     desc: "Replace this with your Humanzee description.",
     links: [],
     feature: true,
@@ -62,9 +62,9 @@ const FILMS = [
     year: "2023",
     minutes: "16",
     genres: "Crime/Comedy",
-    logo: "assets/films/rendezvous-logo.png",
-    still: "assets/films/rendezvous-still.jpg",
-    hero: "assets/films/rendezvous-hero.jpg",
+    logo: "assets/films/rendezvous/rendezvous-logo.png",
+    still: "assets/films/rendezvous/rendezvous-still.jpg",
+    hero: "assets/films/rendezvous/rendezvous-hero.jpg",
     desc: "Replace this with your Rendezvous description.",
     links: [],
   },
@@ -75,9 +75,9 @@ const FILMS = [
     year: "2022",
     minutes: "12",
     genres: "Comedy/Drama/Sci Fi",
-    logo: "assets/films/uap-logo.png",
-    still: "assets/films/uap-still.jpg",
-    hero: "assets/films/uap-hero.jpg",
+    logo: "assets/films/uap/uap-logo.png",
+    still: "assets/films/uap/uap-still.jpg",
+    hero: "assets/films/uap/uap-hero.jpg",
     desc: "Replace this with your UAP description.",
     links: [],
   },
@@ -88,9 +88,9 @@ const FILMS = [
     year: "2022",
     minutes: "4",
     genres: "Horror/Drama",
-    logo: "assets/films/do-dragons-sleep-in-fictitious-caves-logo.png",
-    still: "assets/films/do-dragons-sleep-in-fictitious-caves-still.jpg",
-    hero: "assets/films/do-dragons-sleep-in-fictitious-caves-hero.jpg",
+    logo: "assets/films/dragons/do-dragons-sleep-in-fictitious-caves-logo.png",
+    still: "assets/films/dragons/dragons-still.jpg",
+    hero: "assets/films/dragons/dragons-hero.jpg",
     desc: "Replace this with your Do Dragons description.",
     links: [],
   },
@@ -101,9 +101,9 @@ const FILMS = [
     year: "2022",
     minutes: "1",
     genres: "Horror",
-    logo: "assets/films/the-whispers-of-the-aspens-logo.png",
-    still: "assets/films/the-whispers-of-the-aspens-still.jpg",
-    hero: "assets/films/the-whispers-of-the-aspens-hero.jpg",
+    logo: "assets/films/aspens/the-whispers-of-the-aspens-logo.png",
+    still: "assets/films/aspens/aspens-still.jpg",
+    hero: "assets/films/aspens/aspens-hero.jpg",
     desc: "Replace this with your Whispers description.",
     links: [],
   },
@@ -111,7 +111,7 @@ const FILMS = [
 
 /* Home images (only shown on HOME) */
 const HOME = {
-  hero: "assets/backgrounds/home-hero.jpg",
+  hero: "assets/backgrounds/bg.jpg",
   left: ["assets/backgrounds/home-left-1.jpg", "assets/backgrounds/home-left-2.jpg"],
   right: ["assets/backgrounds/home-right-1.jpg", "assets/backgrounds/home-right-2.jpg"],
 };
@@ -304,7 +304,7 @@ function renderFilms() {
 
   sorted.forEach((f) => {
     const card = document.createElement("article");
-    card.className = "filmCard filmCardV2 grainHover" + (f.feature ? " is-feature" : "");
+    card.className = "filmTile grainHover" + (f.feature ? " is-feature" : "");
     card.dataset.slug = f.slug;
     card.tabIndex = 0;
     card.setAttribute("role", "button");
@@ -321,12 +321,12 @@ function renderFilms() {
     overlay.className = "filmOverlay";
 
     const logo = document.createElement("img");
-    logo.className = "filmOverlayLogo";
+    logo.className = "filmLogo";
     logo.src = f.logo;
     logo.alt = `${f.title} logo`;
 
     const meta = document.createElement("div");
-    meta.className = "filmOverlayMeta";
+    meta.className = "filmMetaLine";
     meta.textContent = `${f.year} • ${f.minutes} min. • ${f.genres}`;
 
     overlay.appendChild(logo);
