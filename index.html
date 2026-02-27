@@ -4,41 +4,43 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Taro O’Halloran</title>
-  <link rel="stylesheet" href="styles.css?v=V2_003" />
+  <link rel="stylesheet" href="styles.css?v=V2_100" />
 </head>
 
 <body class="route-home">
-  <!-- BUILD: V2_003 -->
-
-  <!-- VIGNETTE (full bleed; changes per route via body class) -->
+  <!-- VIGNETTE (changes by body class) -->
   <div class="vignette" aria-hidden="true"></div>
 
-  <!-- TEXTURE OVERLAYS (fixed; never scroll) -->
+  <!-- LOCKED TEXTURE OVERLAYS -->
   <div class="texture texture-concrete" aria-hidden="true"></div>
   <div class="texture texture-grain" aria-hidden="true"></div>
   <div class="texture texture-vhs" aria-hidden="true"></div>
 
-  <header class="hdr" id="hdr">
+  <header class="hdr">
     <button class="nameImgBtn" id="homeLink" type="button" aria-label="Home">
-      <span class="nameFX">
-        <img class="nameImg" src="assets/branding/taro-name.png" alt="Taro O’Halloran">
-      </span>
+      <img class="nameImg" id="nameImg" src="assets/branding/taro-name.png" alt="Taro O’Halloran">
     </button>
 
     <div class="sub">( writer , director , producer )</div>
 
-    <!-- NAV (PNG assets) -->
+    <!-- NAV (PNG assets in assets/ui/) -->
     <nav class="tabs" aria-label="Primary">
       <button class="navBtn" type="button" data-route="films" aria-label="Films">
-        <img class="navBtnImg" data-btn="films" alt="Films">
+        <span class="navPill grainHover">
+          <img class="navBtnImg" data-btn="films" alt="Films">
+        </span>
       </button>
 
       <button class="navBtn" type="button" data-route="about" aria-label="About">
-        <img class="navBtnImg" data-btn="about" alt="About">
+        <span class="navPill grainHover">
+          <img class="navBtnImg" data-btn="about" alt="About">
+        </span>
       </button>
 
       <button class="navBtn" type="button" data-route="contact" aria-label="Contact">
-        <img class="navBtnImg" data-btn="contact" alt="Contact">
+        <span class="navPill grainHover">
+          <img class="navBtnImg" data-btn="contact" alt="Contact">
+        </span>
       </button>
     </nav>
   </header>
@@ -46,6 +48,7 @@
   <main class="frame">
     <section class="system">
 
+      <!-- SIDE STACKS (HOME ONLY; CSS hides them elsewhere) -->
       <aside class="side side-left" aria-hidden="true">
         <div class="sideStack" id="homeLeftStack"></div>
       </aside>
@@ -107,6 +110,6 @@
     </section>
   </main>
 
-  <script src="app.js?v=V2_003"></script>
+  <script src="app.js?v=V2_100"></script>
 </body>
 </html>
