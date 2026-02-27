@@ -1,6 +1,12 @@
-/* -----------------------------
-   BASE
------------------------------- */
+/* =========================================================
+   TARO SITE — V2
+   - name shrinks + moves up off-home (with VHS + red glow)
+   - nav uses PNG assets + films selected never vanishes
+   - hover grain is CLIPPED to pill (no circle halo)
+   - film tiles match mockup: stills fill, hover enlarge + blur + info reveal
+   - side stacks ONLY on home
+========================================================= */
+
 :root{
   --red: #ff2a2a;
   --ink: rgba(255,255,255,0.82);
@@ -8,54 +14,35 @@
   --line2: rgba(255,255,255,0.14);
   --shadow: rgba(0,0,0,0.55);
 
-  /* global grain (subtle) */
+  /* global grain subtle */
   --grainOpacity: 0.08;
 
-  /* hover grain (big + obvious) */
-  --hoverGrainOpacity: 0.38;
+  /* hover grain big + obvious */
+  --hoverGrainOpacity: 0.34;
   --hoverGrainSize: 220px;
 
-  /* home vignette stronger */
+  /* vignette */
   --vigHomeStrength: 0.92;
   --vigInnerHome: 50%;
   --vigOuterHome: 88%;
 
-  /* other pages vignette lighter */
-  --vigOtherStrength: 0.70;
+  --vigOtherStrength: 0.72;
   --vigInnerOther: 62%;
   --vigOuterOther: 92%;
-
-  /* header sizing */
-  --hdrHomePadTop: 42px;
-  --hdrHomePadBottom: 10px;
-  --hdrOtherPadTop: 18px;
-  --hdrOtherPadBottom: 6px;
-
-  /* name sizes */
-  --nameHomeW: min(980px, 92vw);
-  --nameOtherW: min(520px, 82vw);
-
-  /* nav button size */
-  --navBtnW: 170px;
-
-  /* subtle glow */
-  --glowA: 0.24;
-  --glowB: 0.36;
 }
 
 *{ box-sizing:border-box; }
 html, body{ height:100%; }
-
 body{
   margin:0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
   color: var(--ink);
   background:#000;
   overflow-x:hidden;
 }
 
 /* -----------------------------
-   LOCKED OVERLAYS / BACKGROUND
+   BACKGROUND OVERLAYS
 ------------------------------ */
 .texture{
   position:fixed;
@@ -77,7 +64,6 @@ body{
   opacity: 0.76;
 }
 
-/* Animated film grain (global subtle) */
 .texture-grain{
   opacity: var(--grainOpacity);
   mix-blend-mode: overlay;
@@ -96,7 +82,6 @@ body{
   100% { background-position: 0 0; }
 }
 
-/* Vignette layer (fixed, full bleed) */
 .vignette{
   position: fixed;
   inset: 0;
@@ -106,120 +91,129 @@ body{
   transition: opacity 450ms ease, filter 450ms ease;
 }
 
-/* HOME vignette */
 body.route-home .vignette{
   opacity: 1;
-  background:
-    radial-gradient(
-      ellipse at center,
-      rgba(0,0,0,0) var(--vigInnerHome),
-      rgba(0,0,0,var(--vigHomeStrength)) var(--vigOuterHome)
-    );
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0,0,0,0) var(--vigInnerHome),
+    rgba(0,0,0,var(--vigHomeStrength)) var(--vigOuterHome)
+  );
 }
-
-/* OTHER pages vignette */
 body.route-films .vignette,
 body.route-about .vignette,
 body.route-contact .vignette,
 body.route-film .vignette{
   opacity: 1;
-  background:
-    radial-gradient(
-      ellipse at center,
-      rgba(0,0,0,0) var(--vigInnerOther),
-      rgba(0,0,0,var(--vigOtherStrength)) var(--vigOuterOther)
-    );
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0,0,0,0) var(--vigInnerOther),
+    rgba(0,0,0,var(--vigOtherStrength)) var(--vigOuterOther)
+  );
 }
 
 /* -----------------------------
-   HEADER (HOME -> COMPACT TRANSITION RESTORED)
+   HEADER + NAME (home big -> other small)
 ------------------------------ */
 .hdr{
   position:relative;
   z-index: 20;
   text-align:center;
-  padding: var(--hdrHomePadTop) 16px var(--hdrHomePadBottom);
+  padding: 46px 16px 10px;
   transition: padding 380ms ease;
 }
 
-body:not(.route-home) .hdr{
-  padding: var(--hdrOtherPadTop) 16px var(--hdrOtherPadBottom);
+body.route-home .hdr{
+  padding-top: 46px;
+}
+body.route-films .hdr,
+body.route-about .hdr,
+body.route-contact .hdr,
+body.route-film .hdr{
+  padding-top: 18px; /* content starts higher on non-home */
+  padding-bottom: 6px;
 }
 
 .nameImgBtn{
+  position: relative;
   border:0;
   background:transparent;
   cursor:pointer;
   padding:0;
-}
-
-/* wrapper so we can apply VHS + glow without touching the global overlays */
-.nameFX{
-  position: relative;
   display:inline-block;
-  transform: translateZ(0);
 }
 
-/* subtle animated red glow (requested) */
-.nameFX{
-  animation: nameGlow 2.9s ease-in-out infinite;
-  filter:
-    drop-shadow(0 10px 14px rgba(0,0,0,0.5))
-    drop-shadow(0 0 18px rgba(255,42,42,var(--glowA)));
+/* Name image scale changes per route (smooth) */
+.nameImg{
+  display:block;
+  margin:0 auto;
+  width:min(980px, 92vw);
+  height:auto;
+  transition: width 380ms ease, filter 380ms ease, transform 380ms ease;
+  filter: drop-shadow(0 10px 14px rgba(0,0,0,0.5));
 }
 
-@keyframes nameGlow{
-  0%{
-    filter:
-      drop-shadow(0 10px 14px rgba(0,0,0,0.5))
-      drop-shadow(0 0 16px rgba(255,42,42,var(--glowA)));
-  }
-  50%{
-    filter:
-      drop-shadow(0 10px 14px rgba(0,0,0,0.5))
-      drop-shadow(0 0 22px rgba(255,42,42,var(--glowB)));
-  }
-  100%{
-    filter:
-      drop-shadow(0 10px 14px rgba(0,0,0,0.5))
-      drop-shadow(0 0 16px rgba(255,42,42,var(--glowA)));
-  }
+body.route-films .nameImg,
+body.route-about .nameImg,
+body.route-contact .nameImg,
+body.route-film .nameImg{
+  width: min(540px, 86vw);
+  transform: translateY(-2px);
 }
 
-/* VHS effect ON THE NAME (requested to restore) */
-.nameFX::after{
+/* Subtle animated red glow on name */
+@keyframes glowPulse{
+  0%   { filter: drop-shadow(0 10px 14px rgba(0,0,0,0.5)) drop-shadow(0 0 10px rgba(255,42,42,0.28)); }
+  50%  { filter: drop-shadow(0 10px 14px rgba(0,0,0,0.5)) drop-shadow(0 0 18px rgba(255,42,42,0.40)); }
+  100% { filter: drop-shadow(0 10px 14px rgba(0,0,0,0.5)) drop-shadow(0 0 10px rgba(255,42,42,0.28)); }
+}
+.nameImg{
+  animation: glowPulse 3.6s ease-in-out infinite;
+}
+
+/* VHS-ish shimmer on name (masked to letters; NOT a rectangle) */
+.nameImgBtn::before,
+.nameImgBtn::after{
   content:"";
   position:absolute;
   inset:-8px;
   pointer-events:none;
-  background: url("assets/textures/vhs-texture.png") center/cover no-repeat;
-  mix-blend-mode: lighten;
-  opacity: 0.33;
-  filter: contrast(135%) brightness(112%);
-  animation: vhsDrift 1.2s steps(6) infinite;
-  border-radius: 10px;
+  background-image: url("assets/textures/film-grain.png");
+  background-repeat: repeat;
+  mix-blend-mode: overlay;
+  opacity: 0;
+  animation: grainMove 700ms steps(6) infinite;
+
+  /* KEY: mask to the name image so it only appears on the letters */
+  -webkit-mask-image: url("assets/branding/taro-name.png");
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+
+  mask-image: url("assets/branding/taro-name.png");
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
 }
 
-@keyframes vhsDrift{
-  0%   { transform: translate(0,0) skewX(0deg); background-position: 0 0; }
-  20%  { transform: translate(1px,-1px) skewX(-0.2deg); background-position: 40px -20px; }
-  40%  { transform: translate(-1px,1px) skewX(0.25deg); background-position: -30px 30px; }
-  60%  { transform: translate(1px,0px) skewX(-0.15deg); background-position: 25px 10px; }
-  80%  { transform: translate(-1px,-1px) skewX(0.1deg); background-position: -18px -12px; }
-  100% { transform: translate(0,0) skewX(0deg); background-position: 0 0; }
+/* subtle VHS “wiggle” layers */
+@keyframes vhsWobble{
+  0%   { transform: translateX(-1px); opacity: 0.16; filter: hue-rotate(0deg) saturate(120%); }
+  50%  { transform: translateX(1px); opacity: 0.10; filter: hue-rotate(6deg) saturate(140%); }
+  100% { transform: translateX(-1px); opacity: 0.16; filter: hue-rotate(0deg) saturate(120%); }
 }
 
-.nameImg{
-  display:block;
-  margin:0 auto;
-  width: var(--nameHomeW);
-  height:auto;
-  transition: width 420ms ease, transform 420ms ease, opacity 420ms ease;
+/* After = visible subtle grain on name */
+.nameImgBtn::after{
+  opacity: 0.16;
+  background-size: 340px 340px;
 }
 
-/* compact name for non-home */
-body:not(.route-home) .nameImg{
-  width: var(--nameOtherW);
+/* Before = VHS wobble tint */
+.nameImgBtn::before{
+  opacity: 0.10;
+  background-size: 520px 520px;
+  mix-blend-mode: screen;
+  animation: grainMove 700ms steps(6) infinite, vhsWobble 2.8s ease-in-out infinite;
 }
 
 .sub{
@@ -229,13 +223,15 @@ body:not(.route-home) .nameImg{
   opacity: 0.85;
   transition: margin 380ms ease;
 }
-
-body:not(.route-home) .sub{
+body.route-films .sub,
+body.route-about .sub,
+body.route-contact .sub,
+body.route-film .sub{
   margin-top: 6px;
 }
 
 /* -----------------------------
-   NAV BUTTONS (IMAGE ASSETS) + GRAIN MASK (ICON ONLY)
+   NAV (PNG buttons)
 ------------------------------ */
 .tabs{
   margin-top: 14px;
@@ -245,81 +241,44 @@ body:not(.route-home) .sub{
   align-items:center;
 }
 
-/* larger buttons requested */
 .navBtn{
-  position:relative;
   border:0;
   background:transparent;
   padding:0;
   cursor:pointer;
+}
+
+.navPill{
+  position:relative;
+  display:inline-block;
+  border-radius: 999px;
+  overflow:hidden; /* CLIP grain to pill area */
   transform: translateZ(0);
   transition: transform 140ms ease;
 }
-
-/* slightly bigger on hover (requested) */
-.navBtn:hover{
-  transform: scale(1.05);
+.navBtn:hover .navPill{
+  transform: scale(1.055);
 }
 
 .navBtnImg{
   display:block;
-  width: var(--navBtnW);
-  height: auto;
+  width: 176px; /* larger */
+  height:auto;
   user-select:none;
   -webkit-user-drag:none;
 }
 
-/* ICON-ONLY HOVER GRAIN:
-   Uses CSS mask-image set by JS per-state so the grain only appears on non-transparent pixels
-*/
-.navBtn::after{
-  content:"";
-  position:absolute;
-  inset:-2px;                 /* tiny bleed so edges don’t clip */
-  pointer-events:none;
-  background-image: url("assets/textures/film-grain.png");
-  background-repeat: repeat;
-  background-size: 520px 520px;
-  mix-blend-mode: overlay;
-  opacity: 0;
-  animation: grainMove 700ms steps(6) infinite;
-  filter: contrast(140%) brightness(112%);
-  transform: translateZ(0);
-
-  /* MASK (set by JS: --btnMask: url(...) ) */
-  -webkit-mask-image: var(--btnMask);
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  -webkit-mask-size: contain;
-
-  mask-image: var(--btnMask);
-  mask-repeat: no-repeat;
-  mask-position: center;
-  mask-size: contain;
-}
-
-/* Big, obvious grain on hover, but ONLY on icon */
-.navBtn:hover::after{
-  opacity: var(--hoverGrainOpacity);
-  background-size: var(--hoverGrainSize) var(--hoverGrainSize);
-}
-
 /* -----------------------------
-   LAYOUT FRAME (CONTENT STARTS HIGHER ON NON-HOME)
+   FRAME + LAYOUT (no mystery divider line)
 ------------------------------ */
 .frame{
   position:relative;
   z-index: 5;
   padding: 10px 16px 44px;
-  transition: padding 380ms ease;
-}
-
-body:not(.route-home) .frame{
-  padding-top: 2px; /* pull content up when name shrinks */
 }
 
 .system{
-  max-width: 1280px;
+  max-width: 1400px;
   margin: 0 auto;
   display:grid;
   grid-template-columns: 170px 1fr 170px;
@@ -327,18 +286,19 @@ body:not(.route-home) .frame{
   align-items: start;
 }
 
+/* Side stacks only on home */
+body:not(.route-home) .side{ display:none; }
+body:not(.route-home) .system{ grid-template-columns: 1fr; }
+
 .side{
   min-height: 520px;
 }
-
 .sideStack{
   display:flex;
   flex-direction:column;
   gap: 14px;
   padding-top: 140px;
 }
-
-/* side boxes */
 .sideBox{
   width: 100%;
   aspect-ratio: 4 / 3;
@@ -347,7 +307,6 @@ body:not(.route-home) .frame{
   overflow:hidden;
   background: rgba(0,0,0,0.25);
 }
-
 .sideBox img{
   width:100%;
   height:100%;
@@ -375,7 +334,6 @@ body:not(.route-home) .frame{
   background: rgba(0,0,0,0.25);
   box-shadow: 0 18px 60px rgba(0,0,0,0.55);
 }
-
 .heroImg{
   width:100%;
   height:100%;
@@ -385,70 +343,100 @@ body:not(.route-home) .frame{
 }
 
 /* -----------------------------
-   FILMS GRID (BIGGER TILES + LOGOS)
+   FILMS GRID (mockup behavior)
 ------------------------------ */
 .filmsGrid{
   display:grid;
-  grid-template-columns: 1.25fr 1fr 1fr;
-  grid-template-rows: 310px 310px;   /* bigger */
-  gap: 14px;
-  padding-top: 10px;
-  padding-bottom: 26px;
+  grid-template-columns: 1.55fr 1fr 1fr;
+  grid-template-rows: 320px 320px;   /* bigger */
+  gap: 16px;
+  padding-top: 12px;
+  padding-bottom: 24px;
 }
 
-.filmCard{
+/* tile base: still fills, no logo until hover */
+.filmTile{
   position:relative;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(255,255,255,0.20);
   border-radius: 10px;
   overflow:hidden;
   background: rgba(0,0,0,0.25);
   cursor:pointer;
   transform: translateZ(0);
-  transition: transform 160ms ease, box-shadow 160ms ease;
+  transition: transform 180ms ease, box-shadow 180ms ease;
 }
 
-.filmCard:hover{
-  transform: translateY(-4px);
-  box-shadow: 0 16px 38px rgba(0,0,0,0.55);
+.filmTile.is-feature{
+  grid-row: 1 / span 2;
 }
 
-.filmCard .filmInner{
+.filmTile:hover{
+  transform: scale(1.035);
+  z-index: 3;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.62);
+}
+
+/* still image layer */
+.filmStill{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit: cover;
+  display:block;
+  transform: scale(1.02);
+  transition: filter 180ms ease, transform 180ms ease;
+  filter: contrast(106%) brightness(96%);
+}
+
+.filmTile:hover .filmStill{
+  filter: blur(5px) contrast(108%) brightness(92%);
+  transform: scale(1.05);
+}
+
+/* overlay comes in on hover */
+.filmOverlay{
   position:absolute;
   inset:0;
   display:flex;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
   padding: 18px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 180ms ease, transform 180ms ease;
 }
 
+.filmTile:hover .filmOverlay{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* logo in overlay */
 .filmLogo{
-  max-width: 84%;
-  max-height: 64%;
+  max-width: 78%;
+  max-height: 56%;
   width:auto;
   height:auto;
   display:block;
-  filter: drop-shadow(0 10px 18px rgba(0,0,0,0.55));
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,0.60));
+  margin-bottom: 14px;
 }
 
-/* Humanzee bigger than the rest */
-.filmCard[data-slug="humanzee"] .filmLogo{
-  max-width: 92%;
-  max-height: 70%;
+/* Humanzee tends to want bigger logo */
+.filmTile[data-slug="humanzee"] .filmLogo{
+  max-width: 86%;
+  max-height: 60%;
 }
 
+/* meta text */
 .filmMetaLine{
-  position:absolute;
-  left: 16px;
-  right: 16px;
-  bottom: 14px;
-  font-size: 13px;
+  font-size: 14px;
   letter-spacing: 0.06em;
-  opacity: 0.86;
-  text-align:left;
-}
-
-.filmCard.is-feature{
-  grid-row: 1 / span 2;
+  opacity: 0.90;
+  text-align:center;
+  text-shadow: 0 10px 18px rgba(0,0,0,0.55);
 }
 
 /* -----------------------------
@@ -458,10 +446,9 @@ body:not(.route-home) .frame{
   display:grid;
   grid-template-columns: 1fr 1.2fr;
   gap: 14px;
-  padding-top: 10px;
-  padding-bottom: 26px;
+  padding-top: 10px;   /* start higher */
+  padding-bottom: 24px;
 }
-
 .aboutPhoto{
   width:100%;
   height: 360px;
@@ -470,7 +457,6 @@ body:not(.route-home) .frame{
   border-radius: 10px;
   background: rgba(0,0,0,0.25);
 }
-
 .aboutText{
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -478,31 +464,22 @@ body:not(.route-home) .frame{
   background: rgba(0,0,0,0.25);
   line-height: 1.55;
 }
-
 .contactWrap{
   padding-top: 10px;
-  padding-bottom: 26px;
+  padding-bottom: 24px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: rgba(0,0,0,0.25);
   padding: 18px;
 }
 
-.contactLinks a{
-  display:inline-block;
-  margin-right: 14px;
-  color: rgba(255,255,255,0.85);
-  text-decoration:none;
-}
-
 .filmPage{
   padding-top: 10px;
-  padding-bottom: 26px;
+  padding-bottom: 24px;
 }
-
 .filmHeroImg{
   width:100%;
-  height: 320px;
+  height: 360px;
   object-fit: cover;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -510,18 +487,15 @@ body:not(.route-home) .frame{
   display:block;
   margin-bottom: 18px;
 }
-
 #filmTitle{
   margin: 0 0 8px;
   font-size: 28px;
   letter-spacing: 0.02em;
 }
-
 #filmMeta{
   opacity: 0.85;
   margin-bottom: 14px;
 }
-
 #filmDesc{
   max-width: 80ch;
   line-height: 1.6;
@@ -530,29 +504,62 @@ body:not(.route-home) .frame{
 .errorCard{
   border: 1px solid var(--line);
   border-radius: 10px;
-  padding: 18px;
   background: rgba(0,0,0,0.25);
+  padding: 18px;
+}
+
+/* -----------------------------
+   HOVER GRAIN — CLIPPED TO ELEMENT (pill / tile)
+   IMPORTANT: apply .grainHover to the thing you want textured,
+   not the parent button (prevents “big circle around icon”).
+------------------------------ */
+.grainHover{
+  position: relative;
+  overflow: hidden;
+}
+
+.grainHover::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius: inherit;
+  pointer-events:none;
+  background-image: url("assets/textures/film-grain.png");
+  background-repeat: repeat;
+  mix-blend-mode: overlay;
+  opacity: 0;
+  animation: grainMove 700ms steps(6) infinite;
+  filter: contrast(140%) brightness(112%);
+  transform: translateZ(0);
+}
+
+.grainHover:hover::after{
+  opacity: var(--hoverGrainOpacity);
+  background-size: var(--hoverGrainSize) var(--hoverGrainSize);
 }
 
 /* -----------------------------
    RESPONSIVE
 ------------------------------ */
 @media (max-width: 1080px){
-  .system{ grid-template-columns: 1fr; }
-  .side{ display:none; }
-
   .filmsGrid{
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 300px 300px 300px;
   }
-  .filmCard.is-feature{ grid-row: auto; }
-
-  .aboutWrap{ grid-template-columns: 1fr; }
+  .filmTile.is-feature{
+    grid-row: auto;
+  }
+  .aboutWrap{
+    grid-template-columns: 1fr;
+  }
   .aboutPhoto{ height: 280px; }
 }
 
 @media (max-width: 520px){
-  :root{ --navBtnW: 150px; }
-  .filmsGrid{ grid-template-columns: 1fr; grid-template-rows: repeat(4, 260px); }
+  .navBtnImg{ width: 150px; }
+  .filmsGrid{
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(4, 260px);
+  }
   .heroClip{ height: 46vh; }
 }
