@@ -1,6 +1,6 @@
 /* =========================================================
    TARO SITE — V2.2
-   Fonts: EB Garamond (body/meta) + Cormorant Garamond (headings)
+   Fonts: Source Serif 4 (body/meta) + Playfair Display (headings)
    16mm projection aesthetic: gate weave, projector flicker, amber glow
    SVG feTurbulence grain only — no film-grain.png
 ========================================================= */
@@ -30,8 +30,8 @@
   --vigOuterOther: 92%;
 
   /* typography */
-  --fontBody: 'EB Garamond', Georgia, serif;
-  --fontHead: 'Cormorant Garamond', Georgia, serif;
+  --fontBody: 'Source Serif 4', Georgia, serif;
+  --fontHead: 'Playfair Display', Georgia, serif;
 }
 
 *{ box-sizing:border-box; }
@@ -42,10 +42,12 @@ body{
   font-size: 16px;
   color: var(--ink);
   background:#000;
-  overflow-x:hidden;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Headings use Cormorant Garamond */
+/* Headings use Playfair Display */
 h1,h2,h3,h4{
   font-family: var(--fontHead);
   font-weight: 500;
@@ -184,21 +186,22 @@ body.route-error .vignette{
 .hdr{
   position:relative;
   z-index: 20;
+  flex-shrink: 0;
   text-align:center;
-  padding: 46px 16px 10px;
+  padding: 28px 16px 8px;
   transition: padding 380ms ease;
 }
 
 body.route-home .hdr{
-  padding-top: 46px;
+  padding-top: 28px;
 }
 body.route-films .hdr,
 body.route-about .hdr,
 body.route-contact .hdr,
 body.route-film .hdr,
 body.route-error .hdr{
-  padding-top: 36px; /* more space so minimized name sits lower */
-  padding-bottom: 8px;
+  padding-top: 20px; /* more space so minimized name sits lower */
+  padding-bottom: 6px;
 }
 
 /* Subtle gate weave on name button */
@@ -237,14 +240,60 @@ body.route-error .nameImg{
   width: min(540px, 82vw);
 }
 
-/* Warm projector lamp glow — amber/orange, not red */
-@keyframes glowPulse{
-  0%   { filter: drop-shadow(0 8px 12px rgba(0,0,0,0.5)) drop-shadow(0 0 8px rgba(255,180,80,0.22)); }
-  50%  { filter: drop-shadow(0 8px 12px rgba(0,0,0,0.5)) drop-shadow(0 0 22px rgba(255,180,80,0.45)); }
-  100% { filter: drop-shadow(0 8px 12px rgba(0,0,0,0.5)) drop-shadow(0 0 8px rgba(255,180,80,0.22)); }
+/* Organic projector-lamp glow — irregular, multi-layered, non-rhythmic */
+/* Primary glow: complex asymmetric keyframes at prime-ish duration */
+@keyframes organicGlow{
+  0%    { filter: drop-shadow(0 8px 14px rgba(0,0,0,0.55))
+                  drop-shadow(0 0 8px hsla(35,100%,65%,0.18))
+                  drop-shadow(1px 0 10px hsla(25,100%,58%,0.08)); }
+  11%   { filter: drop-shadow(0 8px 14px rgba(0,0,0,0.55))
+                  drop-shadow(-1px 0 16px hsla(40,100%,68%,0.28))
+                  drop-shadow(2px 1px 8px hsla(28,100%,55%,0.12)); }
+  23%   { filter: drop-shadow(0 8px 14px rgba(0,0,0,0.55))
+                  drop-shadow(0 0 11px hsla(33,100%,64%,0.22))
+                  drop-shadow(-1px 0 9px hsla(22,100%,53%,0.09)); }
+  38%   { filter: drop-shadow(0 8px 14px rgba(0,0,0,0.55))
+                  drop-shadow(1px 1px 19px hsla(42,100%,70%,0.36))
+                  drop-shadow(-2px 0 12px hsla(30,100%,60%,0.13)); }
+  51%   { filter: drop-shadow(0 8px 14px rgba(0,0,0,0.55))
+                  drop-shadow(0 0 13px hsla(38,100%,67%,0.26))
+                  drop-shadow(1px -1px 10px hsla(26,100%,56%,0.10)); }
+  67%   { filter: drop-shadow(0 8px 14px rgba(0,0,0,0.55))
+                  drop-shadow(-1px 0 9px hsla(30,100%,63%,0.20))
+                  drop-shadow(2px 0 8px hsla(20,100%,52%,0.08)); }
+  79%   { filter: drop-shadow(0 8px 14px rgba(0,0,0,0.55))
+                  drop-shadow(0 1px 17px hsla(44,100%,69%,0.32))
+                  drop-shadow(-1px 1px 11px hsla(29,100%,59%,0.12)); }
+  91%   { filter: drop-shadow(0 8px 14px rgba(0,0,0,0.55))
+                  drop-shadow(0 0 10px hsla(36,100%,66%,0.24))
+                  drop-shadow(1px 0 9px hsla(24,100%,57%,0.09)); }
+  100%  { filter: drop-shadow(0 8px 14px rgba(0,0,0,0.55))
+                  drop-shadow(0 0 8px hsla(35,100%,65%,0.18))
+                  drop-shadow(1px 0 10px hsla(25,100%,58%,0.08)); }
+}
+/* Subtle glow for inner pages */
+@keyframes organicGlowSubtle{
+  0%    { filter: drop-shadow(0 6px 10px rgba(0,0,0,0.50))
+                  drop-shadow(0 0 5px hsla(35,100%,65%,0.09)); }
+  38%   { filter: drop-shadow(0 6px 10px rgba(0,0,0,0.50))
+                  drop-shadow(-1px 0 8px hsla(40,100%,68%,0.14)); }
+  67%   { filter: drop-shadow(0 6px 10px rgba(0,0,0,0.50))
+                  drop-shadow(0 0 6px hsla(33,100%,64%,0.10)); }
+  100%  { filter: drop-shadow(0 6px 10px rgba(0,0,0,0.50))
+                  drop-shadow(0 0 5px hsla(35,100%,65%,0.09)); }
 }
 .nameImg{
-  animation: glowPulse 4.2s ease-in-out infinite;
+  /* 13.7s: long prime-number-adjacent duration so the animation rarely feels
+     like it restarts; combined with the 11.7s haloShift and 7.3s-equivalent
+     keyframe spacing, the overlapping cycles create an organic, non-repeating feel */
+  animation: organicGlow 13.7s ease-in-out infinite;
+}
+body.route-films .nameImg,
+body.route-about .nameImg,
+body.route-contact .nameImg,
+body.route-film .nameImg,
+body.route-error .nameImg{
+  animation: organicGlowSubtle 13.7s ease-in-out infinite;
 }
 
 /* Grain masked to letter shapes */
@@ -278,22 +327,35 @@ body.route-error .nameImg{
   animation: nameGrainBreathe 3.8s ease-in-out infinite;
 }
 
-/* Warm projector tint on ::before */
+/* Halation/aberration layer — slightly offset, slightly different color, unmasked */
+/* Simulates optical bloom where bright areas bleed light in analog projection */
+@keyframes haloShift{
+  0%    { opacity: 0.18; }
+  19%   { opacity: 0.26; }
+  41%   { opacity: 0.14; }
+  63%   { opacity: 0.22; }
+  81%   { opacity: 0.30; }
+  100%  { opacity: 0.18; }
+}
+/* Warm projector tint on ::before — halation glow, NOT masked to letters */
 .nameImgBtn::before{
   mix-blend-mode: screen;
-  background: rgba(255,180,80,0.25);
-  filter: url(#grain-noise-b) contrast(130%);
-  opacity: 0.12;
+  background: radial-gradient(ellipse 85% 70% at 51% 48%, hsla(28,100%,62%,1), hsla(38,100%,55%,0.5) 40%, transparent 70%);
+  filter: blur(14px);
+  animation: haloShift 11.7s ease-in-out infinite;
+  /* No mask — glow bleeds slightly outside letter shapes for halation */
+  -webkit-mask-image: none;
+  mask-image: none;
 }
 
 /* Subtitle — visible on all pages, smaller on inner pages */
 .sub{
-  margin-top: 10px;
+  margin-top: 4px;
   font-family: var(--fontBody);
-  font-size: 14px;
+  font-size: 16px;
   letter-spacing: 0.12em;
   opacity: 0.80;
-  transition: font-size 380ms ease, opacity 380ms ease;
+  transition: font-size 380ms ease, opacity 380ms ease, margin-top 380ms ease;
 }
 body.route-films .sub,
 body.route-about .sub,
@@ -302,13 +364,14 @@ body.route-film .sub,
 body.route-error .sub{
   font-size: 11px;
   opacity: 0.55;
+  margin-top: 3px;
 }
 
 /* -----------------------------
    NAV (PNG buttons)
 ------------------------------ */
 .tabs{
-  margin-top: 14px;
+  margin-top: 10px;
   display:flex;
   gap: 18px;
   justify-content:center;
@@ -357,60 +420,106 @@ body.route-error .sub{
 .frame{
   position:relative;
   z-index: 5;
-  padding: 10px 16px 44px;
+  padding: 6px 0 0;
+  flex: 1;
+  min-height: 0;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
 }
 
 .system{
-  max-width: 1400px;
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
   display:grid;
-  grid-template-columns: 170px 1fr 170px;
-  gap: 16px;
-  align-items: center; /* vertically centered alongside hero */
+  grid-template-columns: 22vw 1fr 22vw;
+  gap: 0;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+  overflow: visible;
+  transition: grid-template-columns 450ms cubic-bezier(0.4,0,1,1);
 }
 
-/* Side stacks only on home */
-body:not(.route-home) .side{ display:none; }
-body:not(.route-home) .system{ grid-template-columns: 1fr; }
+/* On non-home routes, collapse side columns (animated) */
+body:not(.route-home) .system{ grid-template-columns: 0px 1fr 0px; }
 
 .side{
-  min-height: 400px;
+  height: 100%;
+  overflow: hidden;
 }
+
+/* Reset bleed margins on non-home routes */
+body:not(.route-home) .side-left{ margin-left: 0; }
+body:not(.route-home) .side-right{ margin-right: 0; }
+
+/* Left side bleeds off left edge */
+.side-left{
+  margin-left: -3vw;
+}
+
+/* Right side bleeds off right edge */
+.side-right{
+  margin-right: -3vw;
+}
+
+/* Side stacks and boxes transition for home→inner animation */
 .sideStack{
   display:flex;
   flex-direction:column;
-  gap: 14px;
-  /* Removed fixed padding-top — centering handled by grid align-items */
+  gap: 0;
+  height: 100%;
+  transition: transform 400ms cubic-bezier(0.4,0,1,1), opacity 400ms ease, filter 400ms ease;
 }
+
+/* Animate side stacks out when leaving home */
+body:not(.route-home) .side-left .sideStack{
+  transform: translateX(-12vw) scale(0.95);
+  opacity: 0;
+  filter: blur(4px);
+}
+body:not(.route-home) .side-right .sideStack{
+  transform: translateX(12vw) scale(0.95);
+  opacity: 0;
+  filter: blur(4px);
+}
+
 .sideBox{
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  border: 1px solid var(--line2);
-  border-radius: 6px;
+  flex: 1;
+  border: none;
+  border-radius: 0;
   overflow:hidden;
   background: rgba(0,0,0,0.25);
+  min-height: 0;
 }
 .sideBox img{
   width:100%;
   height:100%;
   object-fit: cover;
   display:block;
-  opacity: 0.92;
+  opacity: 0.85;
+  filter: contrast(1.06) brightness(0.85) saturate(0.80) sepia(0.06);
 }
 
 .center{
-  min-height: 420px;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0 16px;
 }
 
 /* -----------------------------
    VIEWS
 ------------------------------ */
-.view{ display:block; }
+.view{ display:flex; flex-direction:column; flex:1; min-height:0; overflow:hidden; }
 .view[hidden]{ display:none !important; }
 
 .heroClip{
   width: 100%;
-  height: min(500px, 55vh);
+  flex: 1;
+  min-height: 0;
   border: 1px solid var(--line);
   border-radius: 10px;
   overflow:hidden;
@@ -436,12 +545,19 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   animation: heroGateWeave 10.5s ease-in-out infinite;
 }
 
+/* Home view fills column */
+#view-home{
+  flex: 1;
+  min-height: 0;
+}
+
 /* Bottom row of images on home — partially faded by vignette */
 .homeBottomRow{
   display:flex;
-  gap: 10px;
-  margin-top: 12px;
-  height: 90px;
+  gap: 8px;
+  margin-top: 8px;
+  height: 80px;
+  flex-shrink: 0;
   overflow: hidden;
 }
 .homeBottomBox{
@@ -470,10 +586,11 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
 .filmsGrid{
   display:grid;
   grid-template-columns: 1.55fr 1fr 1fr;
-  grid-template-rows: 320px 320px;
-  gap: 16px;
-  padding-top: 12px;
-  padding-bottom: 24px;
+  grid-template-rows: 1fr 1fr;
+  gap: 10px;
+  padding-top: 8px;
+  flex: 1;
+  min-height: 0;
 }
 
 .filmTile{
@@ -570,26 +687,34 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
    ABOUT — PRESS KIT LAYOUT
 ------------------------------ */
 .aboutWrap{
-  padding-top: 10px;
-  padding-bottom: 24px;
+  padding-top: 8px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .aboutPressKit{
   display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 24px;
-  align-items: start;
+  grid-template-columns: 40% 1fr;
+  gap: 20px;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
 }
 
 .aboutPhotoCol{
   display: flex;
   flex-direction: column;
   gap: 14px;
+  overflow: hidden;
 }
 
 .aboutPhoto{
   width: 100%;
-  aspect-ratio: 2/3;
+  flex: 1;
+  min-height: 0;
   object-fit: cover;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -600,7 +725,11 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
 .aboutRightCol{
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.12) transparent;
+  padding-right: 4px;
 }
 
 .aboutHeader{
@@ -716,9 +845,11 @@ a.laurelSlot:hover{ border-color: var(--line); }
   border: 1px solid var(--line);
   border-radius: 10px;
   background: rgba(0,0,0,0.25);
-  padding: 22px;
-  padding-top: 10px;
-  padding-bottom: 24px;
+  padding: 20px 22px;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 #contactBody{
   font-family: var(--fontBody);
@@ -767,25 +898,29 @@ a.laurelSlot:hover{ border-color: var(--line); }
    FILM DETAIL — VHS back-cover layout
 ------------------------------ */
 .filmPage{
-  padding-top: 10px;
-  padding-bottom: 24px;
+  padding-top: 6px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.12) transparent;
 }
 
 .vhsSleeve{
   border: 1px solid rgba(255,255,255,0.18);
   border-radius: 6px;
   background: rgba(0,0,0,0.30);
-  padding: 22px;
+  padding: 16px;
 }
 
-/* Responsive 16:9 YouTube embed */
+/* Responsive 16:9 YouTube embed — capped to 40vh */
 .filmEmbedWrap{
   position: relative;
-  padding-bottom: 56.25%;
-  height: 0;
+  height: 40vh;
+  max-height: 40vh;
   overflow: hidden;
   border-radius: 4px;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
   background: #000;
 }
 .filmEmbed{
@@ -795,7 +930,7 @@ a.laurelSlot:hover{ border-color: var(--line); }
   border: 0;
 }
 
-.vhsInfo{ padding: 4px 0 12px; }
+.vhsInfo{ padding: 4px 0 8px; }
 
 .vhsTitle{
   font-family: var(--fontHead);
@@ -963,10 +1098,11 @@ a.filmLaurelSlot:hover{ border-color: var(--line); }
 .filmSlideshow{
   position: relative;
   aspect-ratio: 16 / 9;
+  max-height: 40vh;
   overflow: hidden;
   border-radius: 4px;
   background: #000;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 .slidesWrap{
   position: relative;
@@ -1078,7 +1214,7 @@ a.filmLaurelSlot:hover{ border-color: var(--line); }
 
 /* -----------------------------
    HOVER GRAIN — CLIPPED TO ELEMENT
-   overflow:hidden + isolation:isolate ensures grain stays inside pill
+   overflow:hidden + border-radius + PNG mask ensures grain stays inside pill
 ------------------------------ */
 .grainHover{
   position: relative;
@@ -1101,6 +1237,29 @@ a.filmLaurelSlot:hover{ border-color: var(--line); }
   z-index: 2;
 }
 
+/* Apply PNG mask per nav button so grain is clipped to exact pill shape */
+/* Shared mask properties (image varies per button, set below) */
+.navBtn[data-route] .grainHover::after{
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+.navBtn[data-route="films"] .grainHover::after{
+  -webkit-mask-image: url("assets/ui/films-button-notselected-standard.png");
+  mask-image: url("assets/ui/films-button-notselected-standard.png");
+}
+.navBtn[data-route="about"] .grainHover::after{
+  -webkit-mask-image: url("assets/ui/about-button-notselected-standard.png");
+  mask-image: url("assets/ui/about-button-notselected-standard.png");
+}
+.navBtn[data-route="contact"] .grainHover::after{
+  -webkit-mask-image: url("assets/ui/contact-button-notselected-standard.png");
+  mask-image: url("assets/ui/contact-button-notselected-standard.png");
+}
+
 .grainHover:hover::after{
   opacity: var(--hoverGrainOpacity);
 }
@@ -1119,19 +1278,6 @@ a.filmLaurelSlot:hover{ border-color: var(--line); }
 .navPill.grainHover::after{ transition: none; }
 .navPill.grainHover:hover::after{
   animation: navSpliceFlash 0.28s ease-out, navGrainBreathe 2.0s ease-in-out 0.28s infinite;
-}
-
-/* -----------------------------
-   FILM BURN OVERLAY
------------------------------- */
-.burnOverlay{
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 900;
-  background: rgba(255,210,120,1);
-  opacity: 0;
-  display: none;
 }
 
 /* -----------------------------
@@ -1186,8 +1332,9 @@ a.filmLaurelSlot:hover{ border-color: var(--line); }
 .siteFooter{
   position: relative;
   z-index: 20;
+  flex-shrink: 0;
   text-align: center;
-  padding: 20px 16px 28px;
+  padding: 10px 16px 14px;
   font-family: var(--fontBody);
   font-size: 11px;
   letter-spacing: 0.12em;
@@ -1209,13 +1356,15 @@ a.filmLaurelSlot:hover{ border-color: var(--line); }
   .tabs{ gap: 10px; }
 
   /* Full-width hero */
-  .heroClip{ height: 46vw; min-height: 200px; }
+  .heroClip{ flex: 1; min-height: 0; }
 
-  /* Single-column film grid */
+  /* Single-column film grid — allow scroll on mobile */
   .filmsGrid{
     grid-template-columns: 1fr;
     grid-template-rows: auto;
     gap: 12px;
+    flex: unset;
+    overflow-y: auto;
   }
   .filmTile{
     height: 220px;
@@ -1226,18 +1375,22 @@ a.filmLaurelSlot:hover{ border-color: var(--line); }
   .filmMobileInfo{ display: block; }
   .filmOverlay{ display: none; }
 
-  /* About: single column */
+  /* About: single column — allow scroll */
   .aboutPressKit{
     grid-template-columns: 1fr;
+    overflow-y: auto;
+    flex: unset;
   }
   .aboutPhoto{
     aspect-ratio: 3/2;
     max-height: 240px;
+    flex: unset;
   }
 
   /* Film detail */
   .vhsSleeve{ padding: 14px; }
   .vhsTitle{ font-size: 22px; }
+  .filmEmbedWrap{ height: 35vw; max-height: 35vw; }
 
   /* Gallery thumbs */
   .filmGalleryThumb{ width: 90px; height: 60px; }
@@ -1246,14 +1399,14 @@ a.filmLaurelSlot:hover{ border-color: var(--line); }
   .lbContent{ max-width: 96vw; }
 
   /* Footer */
-  .siteFooter{ font-size: 10px; }
+  .siteFooter{ font-size: 10px; padding: 8px 16px 10px; }
 }
 
 /* Old breakpoints still valid for in-between sizes */
 @media (max-width: 1080px) and (min-width: 769px){
   .filmsGrid{
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 300px 300px 300px;
+    grid-template-rows: 1fr 1fr 1fr;
   }
   .filmTile.is-feature{ grid-row: auto; }
   .aboutPressKit{ grid-template-columns: 220px 1fr; }
