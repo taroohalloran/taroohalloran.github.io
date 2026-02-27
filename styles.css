@@ -1,47 +1,89 @@
 /* =========================================================
-   TARO SITE -- V2
-   - name shrinks + moves up off-home (16mm projection glow)
-   - nav uses PNG assets + films selected never vanishes
-   - hover grain is CLIPPED to pill (no circle halo)
-   - film tiles match mockup: stills fill, hover enlarge + blur + info reveal
-   - side stacks ONLY on home
-   - 16mm projection aesthetic: gate weave, projector flicker, warm amber glow
-   - Film detail: VHS back-cover layout, slideshow, lightbox, gallery
-   - Film burn page transitions
+   TARO SITE — V2.2
+   Fonts: EB Garamond (body/meta) + Cormorant Garamond (headings)
+   16mm projection aesthetic: gate weave, projector flicker, amber glow
+   SVG feTurbulence grain only — no film-grain.png
 ========================================================= */
 
+/* Google Fonts are imported in <head> via <link> */
 :root{
   --red: #ff2a2a;
   --ink: rgba(255,255,255,0.82);
   --line: rgba(255,255,255,0.22);
   --line2: rgba(255,255,255,0.14);
   --shadow: rgba(0,0,0,0.55);
+  --amber: rgba(255,180,80,1);
 
-  /* global grain subtle */
-  --grainOpacity: 0.08;
+  /* global grain */
+  --grainOpacity: 0.10;
+  --grainOpacityB: 0.05;
 
-  /* hover grain big + obvious */
-  --hoverGrainOpacity: 0.34;
-  --hoverGrainSize: 220px;
+  /* hover grain */
+  --hoverGrainOpacity: 0.36;
 
   /* vignette */
   --vigHomeStrength: 0.92;
   --vigInnerHome: 50%;
   --vigOuterHome: 88%;
-
   --vigOtherStrength: 0.72;
   --vigInnerOther: 62%;
   --vigOuterOther: 92%;
+
+  /* typography */
+  --fontBody: 'EB Garamond', Georgia, serif;
+  --fontHead: 'Cormorant Garamond', Georgia, serif;
 }
 
 *{ box-sizing:border-box; }
 html, body{ height:100%; }
 body{
   margin:0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  font-family: var(--fontBody);
+  font-size: 16px;
   color: var(--ink);
   background:#000;
   overflow-x:hidden;
+}
+
+/* Headings use Cormorant Garamond */
+h1,h2,h3,h4{
+  font-family: var(--fontHead);
+  font-weight: 500;
+}
+
+/* -----------------------------
+   LOADING OVERLAY
+------------------------------ */
+.loadingOverlay{
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 600ms ease;
+}
+.loadingOverlay.is-done{
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Irregular projector flicker during loading */
+@keyframes loadFlicker{
+  0%,100%{ opacity: 1; }
+  8%      { opacity: 0.82; }
+  23%     { opacity: 0.94; }
+  37%     { opacity: 0.76; }
+  52%     { opacity: 0.90; }
+  71%     { opacity: 0.68; }
+  86%     { opacity: 0.95; }
+}
+.loadingFlicker{
+  position: absolute;
+  inset: 0;
+  background: rgba(30,20,10,1);
+  animation: loadFlicker 0.8s steps(1) infinite;
 }
 
 /* -----------------------------
@@ -67,31 +109,43 @@ body{
   opacity: 0.76;
 }
 
-/* Projector flicker oscillates the grain opacity slightly */
+/* PRIMARY grain layer — SVG feTurbulence only, no film-grain.png */
+/* Irregular projector flicker: asymmetric timing for organic feel */
 @keyframes projectorFlicker{
   0%   { opacity: var(--grainOpacity); }
-  22%  { opacity: calc(var(--grainOpacity) * 1.38); }
-  47%  { opacity: calc(var(--grainOpacity) * 0.82); }
-  68%  { opacity: calc(var(--grainOpacity) * 1.25); }
-  85%  { opacity: calc(var(--grainOpacity) * 0.90); }
+  11%  { opacity: calc(var(--grainOpacity) * 1.45); }
+  19%  { opacity: calc(var(--grainOpacity) * 0.78); }
+  34%  { opacity: calc(var(--grainOpacity) * 1.30); }
+  48%  { opacity: calc(var(--grainOpacity) * 0.85); }
+  60%  { opacity: calc(var(--grainOpacity) * 1.22); }
+  73%  { opacity: calc(var(--grainOpacity) * 0.90); }
+  89%  { opacity: calc(var(--grainOpacity) * 1.15); }
   100% { opacity: var(--grainOpacity); }
 }
 
 .texture-grain{
   mix-blend-mode: overlay;
-  background-image: url("assets/textures/film-grain.png");
-  background-repeat: repeat;
-  background-size: 420px 420px;
-  filter: contrast(115%) brightness(105%);
-  animation: grainMove 700ms steps(6) infinite, projectorFlicker 3.7s ease-in-out infinite;
+  /* SVG grain via CSS pseudo-background using the filter */
+  background: rgba(127,127,127,1);
+  filter: url(#grain-noise) contrast(120%) brightness(108%);
+  animation: projectorFlicker 4.1s ease-in-out infinite;
 }
 
-@keyframes grainMove{
-  0%   { background-position: 0 0; }
-  25%  { background-position: 90px -70px; }
-  50%  { background-position: -60px 110px; }
-  75%  { background-position: 120px 60px; }
-  100% { background-position: 0 0; }
+/* SECONDARY grain layer — lighter, slightly different timing */
+@keyframes projectorFlickerB{
+  0%   { opacity: var(--grainOpacityB); }
+  17%  { opacity: calc(var(--grainOpacityB) * 1.6); }
+  33%  { opacity: calc(var(--grainOpacityB) * 0.7); }
+  55%  { opacity: calc(var(--grainOpacityB) * 1.4); }
+  78%  { opacity: calc(var(--grainOpacityB) * 0.8); }
+  100% { opacity: var(--grainOpacityB); }
+}
+
+.texture-grain-b{
+  mix-blend-mode: soft-light;
+  background: rgba(180,140,80,0.5);
+  filter: url(#grain-noise-b) contrast(110%);
+  animation: projectorFlickerB 2.9s ease-in-out infinite;
 }
 
 .vignette{
@@ -100,7 +154,7 @@ body{
   pointer-events:none;
   z-index: 9;
   transform: translateZ(0);
-  transition: opacity 450ms ease, filter 450ms ease;
+  transition: opacity 450ms ease;
 }
 
 body.route-home .vignette{
@@ -114,7 +168,8 @@ body.route-home .vignette{
 body.route-films .vignette,
 body.route-about .vignette,
 body.route-contact .vignette,
-body.route-film .vignette{
+body.route-film .vignette,
+body.route-error .vignette{
   opacity: 1;
   background: radial-gradient(
     ellipse at center,
@@ -124,7 +179,7 @@ body.route-film .vignette{
 }
 
 /* -----------------------------
-   HEADER + NAME (home big -> other small)
+   HEADER + NAME
 ------------------------------ */
 .hdr{
   position:relative;
@@ -140,17 +195,19 @@ body.route-home .hdr{
 body.route-films .hdr,
 body.route-about .hdr,
 body.route-contact .hdr,
-body.route-film .hdr{
-  padding-top: 18px; /* content starts higher on non-home */
-  padding-bottom: 6px;
+body.route-film .hdr,
+body.route-error .hdr{
+  padding-top: 36px; /* more space so minimized name sits lower */
+  padding-bottom: 8px;
 }
 
-/* Gate weave on button container -- subtle, slow, organic */
+/* Subtle gate weave on name button */
 @keyframes gateWeave{
   0%   { transform: translate(0px, 0px); }
-  22%  { transform: translate(-0.6px, 0.4px); }
-  47%  { transform: translate(0.5px, -0.6px); }
-  73%  { transform: translate(-0.4px, 0.5px); }
+  17%  { transform: translate(-0.5px, 0.3px); }
+  38%  { transform: translate(0.6px, -0.4px); }
+  57%  { transform: translate(-0.4px, 0.6px); }
+  78%  { transform: translate(0.3px, -0.3px); }
   100% { transform: translate(0px, 0px); }
 }
 
@@ -161,92 +218,90 @@ body.route-film .hdr{
   cursor:pointer;
   padding:0;
   display:inline-block;
-  animation: gateWeave 7.3s ease-in-out infinite;
+  animation: gateWeave 8.1s ease-in-out infinite;
 }
 
-/* Name image scale changes per route (smooth) */
 .nameImg{
   display:block;
   margin:0 auto;
   width:min(980px, 92vw);
   height:auto;
-  transition: width 380ms ease, filter 380ms ease, transform 380ms ease;
-  filter: drop-shadow(0 10px 14px rgba(0,0,0,0.5));
+  transition: width 380ms ease;
 }
 
 body.route-films .nameImg,
 body.route-about .nameImg,
 body.route-contact .nameImg,
-body.route-film .nameImg{
-  width: min(540px, 86vw);
-  transform: translateY(-2px);
+body.route-film .nameImg,
+body.route-error .nameImg{
+  width: min(540px, 82vw);
 }
 
-/* Warm projector lamp glow -- amber/orange instead of red */
+/* Warm projector lamp glow — amber/orange, not red */
 @keyframes glowPulse{
-  0%   { filter: drop-shadow(0 10px 14px rgba(0,0,0,0.5)) drop-shadow(0 0 10px rgba(255,180,80,0.28)); }
-  50%  { filter: drop-shadow(0 10px 14px rgba(0,0,0,0.5)) drop-shadow(0 0 20px rgba(255,180,80,0.42)); }
-  100% { filter: drop-shadow(0 10px 14px rgba(0,0,0,0.5)) drop-shadow(0 0 10px rgba(255,180,80,0.28)); }
+  0%   { filter: drop-shadow(0 8px 12px rgba(0,0,0,0.5)) drop-shadow(0 0 8px rgba(255,180,80,0.22)); }
+  50%  { filter: drop-shadow(0 8px 12px rgba(0,0,0,0.5)) drop-shadow(0 0 22px rgba(255,180,80,0.45)); }
+  100% { filter: drop-shadow(0 8px 12px rgba(0,0,0,0.5)) drop-shadow(0 0 8px rgba(255,180,80,0.22)); }
 }
 .nameImg{
-  animation: glowPulse 3.6s ease-in-out infinite;
+  animation: glowPulse 4.2s ease-in-out infinite;
 }
 
-/* Masked pseudo-elements: grain only on the letter shapes */
+/* Grain masked to letter shapes */
 .nameImgBtn::before,
 .nameImgBtn::after{
   content:"";
   position:absolute;
   inset:0;
   pointer-events:none;
-  mix-blend-mode: overlay;
-  opacity: 0;
-
-  /* KEY: mask to the name image so it only appears on the letters */
   -webkit-mask-image: url("assets/branding/taro-name.png");
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-position: center;
   -webkit-mask-size: contain;
-
   mask-image: url("assets/branding/taro-name.png");
   mask-repeat: no-repeat;
   mask-position: center;
   mask-size: contain;
 }
 
-/* Breathing grain opacity on name letters */
+/* Breathing grain on name letters — clearly visible */
 @keyframes nameGrainBreathe{
-  0%, 100% { opacity: 0.16; }
-  38%       { opacity: 0.09; }
-  65%       { opacity: 0.21; }
+  0%, 100% { opacity: 0.38; }
+  28%       { opacity: 0.18; }
+  60%       { opacity: 0.48; }
 }
 
-/* After = visible grain on name with breathing */
 .nameImgBtn::after{
-  background: rgba(127,127,127,1);
-  filter: url(#grain-noise) contrast(140%);
-  animation: nameGrainBreathe 4.1s ease-in-out infinite;
+  mix-blend-mode: overlay;
+  background: rgba(200,180,140,1);
+  filter: url(#grain-noise) contrast(160%) brightness(130%);
+  animation: nameGrainBreathe 3.8s ease-in-out infinite;
 }
 
-/* Before = warm projector tint (no VHS wobble translateX) */
+/* Warm projector tint on ::before */
 .nameImgBtn::before{
-  opacity: 0.08;
-  background: rgba(255,180,80,0.3);
   mix-blend-mode: screen;
-  filter: url(#grain-noise) contrast(120%);
+  background: rgba(255,180,80,0.25);
+  filter: url(#grain-noise-b) contrast(130%);
+  opacity: 0.12;
 }
 
+/* Subtitle — visible on all pages, smaller on inner pages */
 .sub{
   margin-top: 10px;
-  font-size: 13px;
+  font-family: var(--fontBody);
+  font-size: 14px;
   letter-spacing: 0.12em;
-  opacity: 0.85;
+  opacity: 0.80;
+  transition: font-size 380ms ease, opacity 380ms ease;
 }
 body.route-films .sub,
 body.route-about .sub,
 body.route-contact .sub,
-body.route-film .sub{
-  display: none;
+body.route-film .sub,
+body.route-error .sub{
+  font-size: 11px;
+  opacity: 0.55;
 }
 
 /* -----------------------------
@@ -271,29 +326,33 @@ body.route-film .sub{
   position:relative;
   display:inline-block;
   border-radius: 999px;
-  overflow:hidden; /* CLIP grain to pill area */
+  overflow:hidden;
   transform: translateZ(0);
   transition: transform 140ms ease, box-shadow 300ms ease;
+  /* ensure clip is enforced */
+  isolation: isolate;
 }
 .navBtn:hover .navPill{
   transform: scale(1.055);
 }
 
-/* Selected nav button: constant soft warm projector glow */
+/* Selected nav: soft warm ambient projector glow */
 .navBtn.is-active .navPill{
-  box-shadow: 0 0 14px 4px rgba(255,180,80,0.22), 0 0 28px 8px rgba(255,180,80,0.10);
+  box-shadow: 0 0 14px 5px rgba(255,180,80,0.24), 0 0 30px 10px rgba(255,180,80,0.10);
 }
 
 .navBtnImg{
   display:block;
-  width: 176px; /* larger */
+  width: 176px;
   height:auto;
   user-select:none;
   -webkit-user-drag:none;
+  position: relative;
+  z-index: 1;
 }
 
 /* -----------------------------
-   FRAME + LAYOUT (no mystery divider line)
+   FRAME + LAYOUT
 ------------------------------ */
 .frame{
   position:relative;
@@ -307,7 +366,7 @@ body.route-film .sub{
   display:grid;
   grid-template-columns: 170px 1fr 170px;
   gap: 16px;
-  align-items: start;
+  align-items: center; /* vertically centered alongside hero */
 }
 
 /* Side stacks only on home */
@@ -315,13 +374,13 @@ body:not(.route-home) .side{ display:none; }
 body:not(.route-home) .system{ grid-template-columns: 1fr; }
 
 .side{
-  min-height: 520px;
+  min-height: 400px;
 }
 .sideStack{
   display:flex;
   flex-direction:column;
   gap: 14px;
-  padding-top: 140px;
+  /* Removed fixed padding-top — centering handled by grid align-items */
 }
 .sideBox{
   width: 100%;
@@ -340,7 +399,7 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
 }
 
 .center{
-  min-height: 520px;
+  min-height: 420px;
 }
 
 /* -----------------------------
@@ -351,7 +410,7 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
 
 .heroClip{
   width: 100%;
-  height: min(520px, 58vh);
+  height: min(500px, 55vh);
   border: 1px solid var(--line);
   border-radius: 10px;
   overflow:hidden;
@@ -359,12 +418,12 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   box-shadow: 0 18px 60px rgba(0,0,0,0.55);
 }
 
-/* Gate weave on home hero -- film unsteady in the projector gate */
+/* Gate weave on home hero image */
 @keyframes heroGateWeave{
   0%   { transform: translate(0px, 0px); }
-  30%  { transform: translate(-1.2px, 0.8px); }
-  58%  { transform: translate(0.9px, -1.2px); }
-  80%  { transform: translate(-0.7px, 1px); }
+  25%  { transform: translate(-1.0px, 0.7px); }
+  52%  { transform: translate(0.8px, -1.1px); }
+  78%  { transform: translate(-0.6px, 0.9px); }
   100% { transform: translate(0px, 0px); }
 }
 
@@ -374,7 +433,30 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   object-fit: cover;
   display:block;
   filter: contrast(1.06) brightness(0.97) saturate(0.88) sepia(0.04);
-  animation: heroGateWeave 9.5s ease-in-out infinite;
+  animation: heroGateWeave 10.5s ease-in-out infinite;
+}
+
+/* Bottom row of images on home — partially faded by vignette */
+.homeBottomRow{
+  display:flex;
+  gap: 10px;
+  margin-top: 12px;
+  height: 90px;
+  overflow: hidden;
+}
+.homeBottomBox{
+  flex: 1;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--line2);
+  opacity: 0.55;
+}
+.homeBottomBox img{
+  width:100%;
+  height:100%;
+  object-fit: cover;
+  display:block;
+  filter: contrast(1.06) brightness(0.97) saturate(0.88) sepia(0.04);
 }
 
 /* Analog color grade for all film imagery */
@@ -382,24 +464,18 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   filter: contrast(1.06) brightness(0.97) saturate(0.88) sepia(0.04);
 }
 
-/* Override for hover state on film stills */
-.filmTile:hover .filmStill.filmGrade{
-  filter: blur(5px) contrast(1.08) brightness(0.92) saturate(0.88) sepia(0.04);
-}
-
 /* -----------------------------
-   FILMS GRID (mockup behavior)
+   FILMS GRID
 ------------------------------ */
 .filmsGrid{
   display:grid;
   grid-template-columns: 1.55fr 1fr 1fr;
-  grid-template-rows: 320px 320px;   /* bigger */
+  grid-template-rows: 320px 320px;
   gap: 16px;
   padding-top: 12px;
   padding-bottom: 24px;
 }
 
-/* tile base: still fills, no logo until hover */
 .filmTile{
   position:relative;
   border: 1px solid rgba(255,255,255,0.20);
@@ -411,9 +487,7 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   transition: transform 180ms ease, box-shadow 180ms ease;
 }
 
-.filmTile.is-feature{
-  grid-row: 1 / span 2;
-}
+.filmTile.is-feature{ grid-row: 1 / span 2; }
 
 .filmTile:hover{
   transform: scale(1.035);
@@ -421,7 +495,6 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   box-shadow: 0 20px 60px rgba(0,0,0,0.62);
 }
 
-/* still image layer */
 .filmStill{
   position:absolute;
   inset:0;
@@ -431,13 +504,14 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   display:block;
   transform: scale(1.02);
   transition: filter 180ms ease, transform 180ms ease;
+  filter: contrast(1.06) brightness(0.97) saturate(0.88) sepia(0.04);
 }
-
 .filmTile:hover .filmStill{
+  filter: blur(5px) contrast(1.08) brightness(0.92) saturate(0.88) sepia(0.04);
   transform: scale(1.05);
 }
 
-/* overlay comes in on hover */
+/* Overlay (desktop hover) */
 .filmOverlay{
   position:absolute;
   inset:0;
@@ -450,13 +524,28 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   transform: translateY(6px);
   transition: opacity 180ms ease, transform 180ms ease;
 }
+.filmTile:hover .filmOverlay{ opacity:1; transform:translateY(0); }
 
-.filmTile:hover .filmOverlay{
-  opacity: 1;
-  transform: translateY(0);
+/* Mobile always-visible strip at bottom of tile */
+.filmMobileInfo{
+  display: none;
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 8px 12px 10px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.78));
+  font-family: var(--fontBody);
+}
+.filmMobileTitle{
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.filmMobileYear{
+  font-size: 12px;
+  opacity: 0.70;
+  margin-top: 2px;
 }
 
-/* logo in overlay */
 .filmLogo{
   max-width: 78%;
   max-height: 56%;
@@ -466,15 +555,10 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   filter: drop-shadow(0 10px 18px rgba(0,0,0,0.60));
   margin-bottom: 14px;
 }
+.filmTile[data-slug="humanzee"] .filmLogo{ max-width:86%; max-height:60%; }
 
-/* Humanzee tends to want bigger logo */
-.filmTile[data-slug="humanzee"] .filmLogo{
-  max-width: 86%;
-  max-height: 60%;
-}
-
-/* meta text */
 .filmMetaLine{
+  font-family: var(--fontBody);
   font-size: 14px;
   letter-spacing: 0.06em;
   opacity: 0.90;
@@ -483,42 +567,165 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
 }
 
 /* -----------------------------
-   ABOUT / CONTACT / FILM DETAIL
+   ABOUT — PRESS KIT LAYOUT
 ------------------------------ */
 .aboutWrap{
-  display:grid;
-  grid-template-columns: 1fr 1.2fr;
-  gap: 14px;
-  padding-top: 10px;   /* start higher */
-  padding-bottom: 24px;
-}
-.aboutPhoto{
-  width:100%;
-  height: 360px;
-  object-fit: cover;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: rgba(0,0,0,0.25);
-}
-.aboutText{
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 18px;
-  background: rgba(0,0,0,0.25);
-  line-height: 1.55;
-}
-
-/* Contact page */
-.contactWrap{
   padding-top: 10px;
   padding-bottom: 24px;
+}
+
+.aboutPressKit{
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.aboutPhotoCol{
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.aboutPhoto{
+  width: 100%;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(0,0,0,0.25);
+  display: block;
+}
+
+.aboutRightCol{
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.aboutHeader{
+  font-family: var(--fontHead);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin: 0 0 8px;
+}
+
+.aboutBio{
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 18px 20px;
+  background: rgba(0,0,0,0.25);
+  line-height: 1.65;
+  font-size: 15px;
+}
+.aboutBio p{ margin: 0 0 12px; }
+.aboutBio p:last-child{ margin-bottom: 0; }
+
+/* Festival laurel row */
+.aboutFestSection{
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px 18px;
+  background: rgba(0,0,0,0.20);
+}
+
+.sectionLabel{
+  font-family: var(--fontHead);
+  font-size: 11px;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  opacity: 0.50;
+  margin: 0 0 12px;
+}
+
+.laurelRow{
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.laurelRow::-webkit-scrollbar{ display: none; }
+
+.laurelSlot{
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border: 1px solid var(--line2);
+  border-radius: 4px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.laurelSlot img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0.88;
+}
+a.laurelSlot{ cursor: pointer; text-decoration: none; }
+a.laurelSlot:hover{ border-color: var(--line); }
+
+/* Press section */
+.aboutPressSection{
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px 18px;
+  background: rgba(0,0,0,0.20);
+}
+
+.pressItems{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pressItem{
+  border-left: 2px solid rgba(255,255,255,0.18);
+  padding-left: 12px;
+}
+.pressItemQuote{
+  font-family: var(--fontHead);
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.5;
+  opacity: 0.90;
+}
+.pressItemTitle{
+  font-family: var(--fontBody);
+  font-size: 14px;
+  opacity: 0.90;
+}
+.pressItemSource{
+  font-family: var(--fontBody);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.50;
+  margin-top: 4px;
+}
+
+/* -----------------------------
+   CONTACT
+------------------------------ */
+.contactWrap{
   border: 1px solid var(--line);
   border-radius: 10px;
   background: rgba(0,0,0,0.25);
-  padding: 18px;
+  padding: 22px;
+  padding-top: 10px;
+  padding-bottom: 24px;
+}
+#contactBody{
+  font-family: var(--fontBody);
+  font-size: 15px;
+  line-height: 1.6;
 }
 
-/* Contact badges -- like VHS sleeve genre tags */
 .contactLinks{
   display: flex;
   flex-wrap: wrap;
@@ -536,13 +743,12 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   color: var(--ink);
   transition: box-shadow 150ms ease;
 }
-.contactBadge:hover{
-  box-shadow: 0 0 14px rgba(255,42,42,0.35);
-}
+.contactBadge:hover{ box-shadow: 0 0 14px rgba(255,42,42,0.35); }
 
 .badgeLabel{
   background: var(--red);
   color: #fff;
+  font-family: var(--fontBody);
   font-size: 11px;
   letter-spacing: 0.14em;
   padding: 3px 10px;
@@ -552,12 +758,13 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
 
 .badgeValue{
   padding: 6px 10px;
-  font-size: 13px;
+  font-family: var(--fontBody);
+  font-size: 14px;
   letter-spacing: 0.04em;
 }
 
 /* -----------------------------
-   FILM DETAIL -- VHS back-cover layout
+   FILM DETAIL — VHS back-cover layout
 ------------------------------ */
 .filmPage{
   padding-top: 10px;
@@ -568,7 +775,7 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   border: 1px solid rgba(255,255,255,0.18);
   border-radius: 6px;
   background: rgba(0,0,0,0.30);
-  padding: 20px;
+  padding: 22px;
 }
 
 /* Responsive 16:9 YouTube embed */
@@ -588,29 +795,142 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   border: 0;
 }
 
-/* Info block below media */
-.vhsInfo{
-  padding: 4px 0 12px;
-}
+.vhsInfo{ padding: 4px 0 12px; }
+
 .vhsTitle{
-  margin: 0 0 8px;
-  font-size: 24px;
+  font-family: var(--fontHead);
+  font-size: 28px;
+  font-weight: 600;
   letter-spacing: 0.04em;
+  margin: 0 0 8px;
 }
+
 .vhsMeta{
+  font-family: var(--fontBody);
   font-size: 12px;
-  letter-spacing: 0.10em;
-  opacity: 0.68;
+  letter-spacing: 0.12em;
+  opacity: 0.60;
   margin-bottom: 14px;
   text-transform: uppercase;
 }
+
 .vhsDesc{
+  font-family: var(--fontBody);
+  font-size: 15px;
   max-width: 72ch;
-  line-height: 1.68;
+  line-height: 1.72;
   text-align: justify;
   opacity: 0.88;
-  font-size: 14px;
   margin: 0;
+}
+
+/* Film action buttons (Watch / Letterboxd) */
+.filmActions{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.filmActionBtn{
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-family: var(--fontBody);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink);
+  background: rgba(255,255,255,0.06);
+  transition: background 150ms ease, border-color 150ms ease;
+}
+.filmActionBtn:hover{
+  background: rgba(255,255,255,0.12);
+  border-color: var(--line);
+}
+.filmActionBtn.is-lbd{
+  border-color: rgba(0,200,100,0.40);
+  background: rgba(0,200,100,0.08);
+}
+.filmActionBtn.is-lbd:hover{
+  background: rgba(0,200,100,0.16);
+  border-color: rgba(0,200,100,0.70);
+}
+
+/* Film laurel row */
+.filmLaurelRow{
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 16px 0 4px;
+  scrollbar-width: none;
+}
+.filmLaurelRow::-webkit-scrollbar{ display: none; }
+
+.filmLaurelSlot{
+  flex-shrink: 0;
+  width: 68px;
+  height: 68px;
+  border: 1px solid var(--line2);
+  border-radius: 4px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.03);
+}
+.filmLaurelSlot img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0.90;
+}
+a.filmLaurelSlot{ cursor: pointer; text-decoration: none; }
+a.filmLaurelSlot:hover{ border-color: var(--line); }
+
+/* Press & Publications section */
+.filmPressSection{
+  border-top: 1px solid var(--line2);
+  margin-top: 20px;
+  padding-top: 18px;
+}
+.filmPressLabel{
+  font-family: var(--fontHead);
+  font-size: 11px;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  opacity: 0.50;
+  margin: 0 0 14px;
+}
+.filmPressItems{
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.filmPressItem{
+  border-left: 2px solid rgba(255,255,255,0.16);
+  padding-left: 12px;
+}
+.filmPressQuote{
+  font-family: var(--fontHead);
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.5;
+  opacity: 0.88;
+}
+.filmPressTitleText{
+  font-family: var(--fontBody);
+  font-size: 14px;
+  opacity: 0.88;
+}
+.filmPressSource{
+  font-family: var(--fontBody);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.48;
+  margin-top: 4px;
 }
 
 /* Gallery row */
@@ -620,7 +940,9 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   margin-top: 18px;
   overflow-x: auto;
   padding-bottom: 4px;
+  scrollbar-width: none;
 }
+.filmGalleryRow::-webkit-scrollbar{ display: none; }
 .filmGalleryThumb{
   width: 120px;
   height: 80px;
@@ -630,6 +952,7 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   cursor: pointer;
   flex-shrink: 0;
   transition: transform 150ms ease, box-shadow 150ms ease;
+  filter: contrast(1.06) brightness(0.97) saturate(0.88) sepia(0.04);
 }
 .filmGalleryThumb:hover{
   transform: scale(1.06);
@@ -657,11 +980,9 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  transition: opacity 600ms ease-in-out;
+  transition: opacity 700ms ease-in-out;
 }
-.slideImg.is-active{
-  opacity: 1;
-}
+.slideImg.is-active{ opacity: 1; }
 .slideArrow{
   position: absolute;
   top: 50%;
@@ -687,7 +1008,7 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
 .lightbox{
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.88);
+  background: rgba(0,0,0,0.90);
   z-index: 500;
   display: flex;
   align-items: center;
@@ -744,9 +1065,11 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   cursor: pointer;
   border-radius: 4px;
   transition: background 150ms ease;
+  font-family: inherit;
 }
 .lbPrev:hover, .lbNext:hover{ background: rgba(0,0,0,0.72); }
 .lbCounter{
+  font-family: var(--fontBody);
   font-size: 13px;
   opacity: 0.65;
   min-width: 54px;
@@ -754,13 +1077,13 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
 }
 
 /* -----------------------------
-   HOVER GRAIN -- CLIPPED TO ELEMENT (pill / tile)
-   IMPORTANT: apply .grainHover to the thing you want textured,
-   not the parent button (prevents "big circle around icon").
+   HOVER GRAIN — CLIPPED TO ELEMENT
+   overflow:hidden + isolation:isolate ensures grain stays inside pill
 ------------------------------ */
 .grainHover{
   position: relative;
   overflow: hidden;
+  isolation: isolate;
 }
 
 .grainHover::after{
@@ -769,12 +1092,13 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   inset:0;
   border-radius: inherit;
   pointer-events:none;
-  background: rgba(127,127,127,1);
+  background: rgba(180,160,120,1);
   mix-blend-mode: overlay;
   opacity: 0;
-  filter: url(#grain-noise) contrast(140%) brightness(112%);
+  filter: url(#grain-noise) contrast(150%) brightness(120%);
   transform: translateZ(0);
   transition: opacity 180ms ease;
+  z-index: 2;
 }
 
 .grainHover:hover::after{
@@ -783,20 +1107,18 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
 
 /* Nav pill: hot splice flash + breathing grain on hover */
 @keyframes navSpliceFlash{
-  0%   { opacity: 0.72; filter: url(#grain-noise) contrast(140%) brightness(300%); }
-  30%  { opacity: 0.55; filter: url(#grain-noise) contrast(140%) brightness(180%); }
-  100% { opacity: var(--hoverGrainOpacity); filter: url(#grain-noise) contrast(140%) brightness(112%); }
+  0%   { opacity: 0.80; filter: url(#grain-noise) contrast(150%) brightness(400%); }
+  20%  { opacity: 0.62; filter: url(#grain-noise) contrast(150%) brightness(220%); }
+  100% { opacity: var(--hoverGrainOpacity); filter: url(#grain-noise) contrast(150%) brightness(120%); }
 }
 @keyframes navGrainBreathe{
-  0%, 100% { opacity: var(--hoverGrainOpacity); }
-  50%       { opacity: calc(var(--hoverGrainOpacity) * 0.60); }
+  0%,100% { opacity: var(--hoverGrainOpacity); }
+  50%      { opacity: calc(var(--hoverGrainOpacity) * 0.58); }
 }
 
-.navPill.grainHover::after{
-  transition: none; /* animation takes over */
-}
+.navPill.grainHover::after{ transition: none; }
 .navPill.grainHover:hover::after{
-  animation: navSpliceFlash 0.32s ease-out, navGrainBreathe 2.2s ease-in-out 0.32s infinite;
+  animation: navSpliceFlash 0.28s ease-out, navGrainBreathe 2.0s ease-in-out 0.28s infinite;
 }
 
 /* -----------------------------
@@ -807,19 +1129,55 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   inset: 0;
   pointer-events: none;
   z-index: 900;
-  background: rgba(255,220,140,1);
+  background: rgba(255,210,120,1);
   opacity: 0;
   display: none;
 }
 
 /* -----------------------------
-   ERROR
+   ERROR PAGE
 ------------------------------ */
 .errorCard{
   border: 1px solid var(--line);
   border-radius: 10px;
   background: rgba(0,0,0,0.25);
-  padding: 18px;
+  padding: 40px 28px;
+  text-align: center;
+}
+
+.errorReel{
+  font-family: var(--fontHead);
+  font-size: 52px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  margin-bottom: 14px;
+  opacity: 0.92;
+}
+
+.errorSub{
+  font-family: var(--fontBody);
+  font-size: 15px;
+  opacity: 0.55;
+  letter-spacing: 0.04em;
+  margin-bottom: 28px;
+}
+
+.errorReturn{
+  display: inline-block;
+  font-family: var(--fontBody);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 10px 20px;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+.errorReturn:hover{
+  border-color: rgba(255,255,255,0.50);
+  background: rgba(255,255,255,0.06);
 }
 
 /* -----------------------------
@@ -830,38 +1188,73 @@ body:not(.route-home) .system{ grid-template-columns: 1fr; }
   z-index: 20;
   text-align: center;
   padding: 20px 16px 28px;
+  font-family: var(--fontBody);
   font-size: 11px;
-  letter-spacing: 0.10em;
-  opacity: 0.38;
+  letter-spacing: 0.12em;
+  opacity: 0.32;
   color: var(--ink);
   text-transform: uppercase;
 }
 
 /* -----------------------------
-   RESPONSIVE
+   RESPONSIVE — ≤768px MOBILE
 ------------------------------ */
-@media (max-width: 1080px){
+@media (max-width: 768px){
+  /* Hide side stacks */
+  .side{ display: none !important; }
+  .system{ grid-template-columns: 1fr !important; }
+
+  /* Smaller nav buttons */
+  .navBtnImg{ width: 120px; }
+  .tabs{ gap: 10px; }
+
+  /* Full-width hero */
+  .heroClip{ height: 46vw; min-height: 200px; }
+
+  /* Single-column film grid */
+  .filmsGrid{
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    gap: 12px;
+  }
+  .filmTile{
+    height: 220px;
+  }
+  .filmTile.is-feature{ grid-row: auto; }
+
+  /* Show title/year on mobile by default (no hover) */
+  .filmMobileInfo{ display: block; }
+  .filmOverlay{ display: none; }
+
+  /* About: single column */
+  .aboutPressKit{
+    grid-template-columns: 1fr;
+  }
+  .aboutPhoto{
+    aspect-ratio: 3/2;
+    max-height: 240px;
+  }
+
+  /* Film detail */
+  .vhsSleeve{ padding: 14px; }
+  .vhsTitle{ font-size: 22px; }
+
+  /* Gallery thumbs */
+  .filmGalleryThumb{ width: 90px; height: 60px; }
+
+  /* Lightbox */
+  .lbContent{ max-width: 96vw; }
+
+  /* Footer */
+  .siteFooter{ font-size: 10px; }
+}
+
+/* Old breakpoints still valid for in-between sizes */
+@media (max-width: 1080px) and (min-width: 769px){
   .filmsGrid{
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 300px 300px 300px;
   }
-  .filmTile.is-feature{
-    grid-row: auto;
-  }
-  .aboutWrap{
-    grid-template-columns: 1fr;
-  }
-  .aboutPhoto{ height: 280px; }
-}
-
-@media (max-width: 520px){
-  .navBtnImg{ width: 150px; }
-  .filmsGrid{
-    grid-template-columns: 1fr;
-    grid-template-rows: repeat(4, 260px);
-  }
-  .heroClip{ height: 46vh; }
-  .filmGalleryThumb{ width: 96px; height: 64px; }
-  .vhsSleeve{ padding: 14px; }
-  .lbContent{ max-width: 96vw; }
+  .filmTile.is-feature{ grid-row: auto; }
+  .aboutPressKit{ grid-template-columns: 220px 1fr; }
 }

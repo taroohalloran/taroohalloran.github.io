@@ -1,12 +1,17 @@
 /* =========================================================
-   TARO SITE ROUTER + UI (V2)
+   TARO SITE ROUTER + UI — V2.2
    - Hash router (#home, #films, #about, #contact, #film/<slug>)
    - PNG nav button assets from /assets/ui/
-   - Films grid uses poster stills; hover zoom + blur; overlay logo+meta
-   - Hover grain is CLIPPED to the element only (no big circle/box)
-   - Home-only side stacks (never on other pages)
+   - Fonts: EB Garamond + Cormorant Garamond (loaded via CSS)
+   - Films grid: hover overlay on desktop, always-visible strip on mobile
    - Film detail: three types (youtube+gallery, slideshow, youtube)
-   - Lightbox, crossfade slideshow, film burn transitions
+   - Humanzee: laurels + press & publications sections
+   - Letterboxd / Watch action buttons per film
+   - Lightbox with focus trapping + touch/swipe
+   - Slideshow with touch/swipe
+   - Film burn transitions, loading state
+   - About: press kit layout (bio, festival laurels, press)
+   - Error: "REEL MISSING" page
 ========================================================= */
 
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -40,8 +45,9 @@ const UI = {
 
 /* ---------------------------------------------------------
    FILMS DATA
-   - UAP and "Do Dragons Sleep in Fictitious Caves?" are SEPARATE films.
-   - type: "youtube+gallery" | "slideshow" | "youtube"
+   type: "youtube+gallery" | "slideshow" | "youtube"
+   actions: array of { label, href, variant? }
+     variant "lbd" = Letterboxd green style
 --------------------------------------------------------- */
 const FILMS = [
   {
@@ -62,6 +68,28 @@ const FILMS = [
       "assets/films/humanzee/gallery-3.jpg",
       "assets/films/humanzee/gallery-4.jpg",
       "assets/films/humanzee/gallery-5.jpg",
+    ],
+    laurels: [
+      { img: "assets/films/humanzee/laurels/laurel-01.png", href: "" },
+      { img: "assets/films/humanzee/laurels/laurel-02.png", href: "" },
+      { img: "assets/films/humanzee/laurels/laurel-03.png", href: "" },
+      { img: "assets/films/humanzee/laurels/laurel-04.png", href: "" },
+      { img: "assets/films/humanzee/laurels/laurel-05.png", href: "" },
+      { img: "assets/films/humanzee/laurels/laurel-06.png", href: "" },
+      { img: "assets/films/humanzee/laurels/laurel-07.png", href: "" },
+      { img: "assets/films/humanzee/laurels/laurel-08.png", href: "" },
+      { img: "assets/films/humanzee/laurels/laurel-09.png", href: "" },
+      { img: "assets/films/humanzee/laurels/laurel-10.png", href: "" },
+    ],
+    press: [
+      { type: "review", quote: "Replace this with a press quote.", source: "PUBLICATION NAME" },
+      { type: "article", title: "Replace with article title.", source: "OUTLET NAME" },
+      { type: "press-release", title: "Replace with press release title.", source: "SOURCE NAME" },
+    ],
+    letterboxd: "",
+    actions: [
+      { label: "WATCH", href: "https://www.youtube.com/watch?v=atS2CL-sMSs" },
+      { label: "LOG IT ON LETTERBOXD", href: "https://letterboxd.com/", variant: "lbd" },
     ],
     feature: true,
   },
@@ -85,6 +113,11 @@ const FILMS = [
       "assets/films/rendezvous/gallery-4.jpg",
       "assets/films/rendezvous/gallery-5.jpg",
     ],
+    letterboxd: "",
+    actions: [
+      { label: "WATCH", href: "https://www.youtube.com/watch?v=6H2bz3OdPy8" },
+      { label: "LOG IT ON LETTERBOXD", href: "https://letterboxd.com/", variant: "lbd" },
+    ],
   },
 
   {
@@ -104,6 +137,10 @@ const FILMS = [
       "assets/films/uap/slide-3.jpg",
       "assets/films/uap/slide-4.jpg",
       "assets/films/uap/slide-5.jpg",
+    ],
+    letterboxd: "",
+    actions: [
+      { label: "LOG IT ON LETTERBOXD", href: "https://letterboxd.com/", variant: "lbd" },
     ],
   },
 
@@ -125,6 +162,7 @@ const FILMS = [
       "assets/films/dragons/slide-4.jpg",
       "assets/films/dragons/slide-5.jpg",
     ],
+    actions: [],
   },
 
   {
@@ -139,22 +177,46 @@ const FILMS = [
     desc: "Replace this with your Whispers description.",
     type: "youtube",
     youtube: "https://www.youtube.com/embed/zg2Qe_hOSyE",
+    actions: [
+      { label: "WATCH", href: "https://www.youtube.com/watch?v=zg2Qe_hOSyE" },
+    ],
   },
 ];
 
-/* Home images (only shown on HOME) */
+/* Home images */
 const HOME = {
   hero: "assets/backgrounds/bg.jpg",
   left: ["assets/backgrounds/home-left-1.jpg", "assets/backgrounds/home-left-2.jpg"],
   right: ["assets/backgrounds/home-right-1.jpg", "assets/backgrounds/home-right-2.jpg"],
+  bottom: [
+    "assets/backgrounds/home-bottom-1.jpg",
+    "assets/backgrounds/home-bottom-2.jpg",
+    "assets/backgrounds/home-bottom-3.jpg",
+  ],
 };
 
 const ABOUT = {
   photo: "assets/branding/about-photo.jpg",
-  body: `
-    <p><strong>Taro O'Halloran</strong> is a writer/director/producer based in Massachusetts, working in horror and genre with a handmade, grindhouse-forward sensibility.</p>
+  bio: `
+    <p><strong>Taro O'Halloran</strong> is a writer, director, and producer based in Massachusetts, working in horror and genre with a handmade, grindhouse-forward sensibility.</p>
     <p>Replace this with your bio copy.</p>
   `,
+  festivalLaurels: [
+    { img: "assets/branding/laurels/festival-01.png", href: "" },
+    { img: "assets/branding/laurels/festival-02.png", href: "" },
+    { img: "assets/branding/laurels/festival-03.png", href: "" },
+    { img: "assets/branding/laurels/festival-04.png", href: "" },
+    { img: "assets/branding/laurels/festival-05.png", href: "" },
+    { img: "assets/branding/laurels/festival-06.png", href: "" },
+    { img: "assets/branding/laurels/festival-07.png", href: "" },
+    { img: "assets/branding/laurels/festival-08.png", href: "" },
+    { img: "assets/branding/laurels/festival-09.png", href: "" },
+    { img: "assets/branding/laurels/festival-10.png", href: "" },
+  ],
+  press: [
+    { type: "review", quote: "Replace this with a press quote.", source: "PUBLICATION NAME" },
+    { type: "article", title: "Replace with article title.", source: "OUTLET NAME" },
+  ],
 };
 
 const CONTACT = {
@@ -179,21 +241,26 @@ const views = {
 };
 
 const homeHeroImg = $("#homeHero");
+const homeBottomRow = $("#homeBottomRow");
 const leftStack = $("#homeLeftStack");
 const rightStack = $("#homeRightStack");
-
 const filmsGrid = $("#filmsGrid");
-
-const aboutImg = $("#aboutImg");
-const aboutBody = $("#aboutBody");
-
+const aboutWrap = $("#aboutWrap");
 const contactBody = $("#contactBody");
 const contactLinks = $("#contactLinks");
-
-const errorText = $("#errorText");
-
-/* Nav buttons */
+const errorSub = $("#errorSub");
 const navButtons = $$(".navBtn");
+
+/* -----------------------------
+   HELPERS
+------------------------------ */
+function formatFilmMeta(f) {
+  return `${f.year} \u00b7 ${f.minutes} min. \u00b7 ${f.genres}`;
+}
+
+function hideOnError(img) {
+  img.onerror = () => { img.style.display = "none"; };
+}
 
 /* -----------------------------
    PRELOAD
@@ -217,6 +284,28 @@ preload([
 ]);
 
 /* -----------------------------
+   LOADING STATE
+------------------------------ */
+function initLoading() {
+  const overlay = $("#loadingOverlay");
+  if (!overlay) return;
+
+  function done() {
+    overlay.classList.add("is-done");
+    setTimeout(() => { overlay.style.display = "none"; }, 700);
+  }
+
+  // Fade out after all DOM content + key images are ready
+  if (document.readyState === "complete") {
+    done();
+  } else {
+    window.addEventListener("load", done, { once: true });
+    // Fallback — never block more than 3s
+    setTimeout(done, 3000);
+  }
+}
+
+/* -----------------------------
    NAV IMAGE STATE
 ------------------------------ */
 function setNavImage(key, { selected, hovered }) {
@@ -236,7 +325,6 @@ function setNavImage(key, { selected, hovered }) {
 function parseRoute() {
   const raw = (location.hash || "#home").replace(/^#/, "");
   const parts = raw.split("/").filter(Boolean);
-
   if (parts.length === 0) return { page: "home" };
   if (parts[0] === "home") return { page: "home" };
   if (parts[0] === "films") return { page: "films" };
@@ -307,18 +395,14 @@ function showOnly(which) {
 
 function setBodyRouteClass(page) {
   document.body.classList.remove(
-    "route-home",
-    "route-films",
-    "route-about",
-    "route-contact",
-    "route-film",
-    "route-error"
+    "route-home","route-films","route-about",
+    "route-contact","route-film","route-error"
   );
   document.body.classList.add(`route-${page}`);
 }
 
 /* -----------------------------
-   HOME (side stacks ONLY on home)
+   HOME
 ------------------------------ */
 function clearHomeSides() {
   if (leftStack) leftStack.innerHTML = "";
@@ -342,17 +426,30 @@ function renderHome() {
 
   if (homeHeroImg) homeHeroImg.src = HOME.hero;
 
-  // build sides on home only (safe to rebuild)
+  // Bottom row of images partially hidden by vignette
+  if (homeBottomRow) {
+    homeBottomRow.innerHTML = "";
+    HOME.bottom.forEach((src) => {
+      const box = document.createElement("div");
+      box.className = "homeBottomBox";
+      const img = document.createElement("img");
+      img.alt = "";
+      img.src = src;
+      hideOnError(img);
+      box.appendChild(img);
+      homeBottomRow.appendChild(box);
+    });
+  }
+
   clearHomeSides();
   if (leftStack) HOME.left.forEach((src) => leftStack.appendChild(makeSideBox(src)));
   if (rightStack) HOME.right.forEach((src) => rightStack.appendChild(makeSideBox(src)));
 
-  // nav none selected on home
   ["films", "about", "contact"].forEach((key) => setNavImage(key, { selected: false, hovered: false }));
 }
 
 /* -----------------------------
-   FILMS GRID (hover blur + overlay)
+   FILMS GRID
 ------------------------------ */
 function renderFilms() {
   setBodyRouteClass("films");
@@ -374,13 +471,11 @@ function renderFilms() {
     card.setAttribute("role", "button");
     card.setAttribute("aria-label", f.title);
 
-    // background still
     const bg = document.createElement("img");
-    bg.className = "filmStill filmGrade";
+    bg.className = "filmStill";
     bg.src = f.still;
     bg.alt = "";
 
-    // overlay panel
     const overlay = document.createElement("div");
     overlay.className = "filmOverlay";
 
@@ -396,8 +491,21 @@ function renderFilms() {
     overlay.appendChild(logo);
     overlay.appendChild(meta);
 
+    // Mobile always-visible info strip
+    const mobileInfo = document.createElement("div");
+    mobileInfo.className = "filmMobileInfo";
+    const mobileTitle = document.createElement("div");
+    mobileTitle.className = "filmMobileTitle";
+    mobileTitle.textContent = f.title;
+    const mobileYear = document.createElement("div");
+    mobileYear.className = "filmMobileYear";
+    mobileYear.textContent = `${f.year} \u00b7 ${f.genres}`;
+    mobileInfo.appendChild(mobileTitle);
+    mobileInfo.appendChild(mobileYear);
+
     card.appendChild(bg);
     card.appendChild(overlay);
+    card.appendChild(mobileInfo);
 
     card.addEventListener("click", () => go(`#film/${f.slug}`));
     card.addEventListener("keydown", (e) => {
@@ -412,8 +520,41 @@ function renderFilms() {
 }
 
 /* -----------------------------
-   ABOUT / CONTACT
+   ABOUT — PRESS KIT LAYOUT
 ------------------------------ */
+function buildLaurelSlot({ img, href }) {
+  const el = href ? document.createElement("a") : document.createElement("div");
+  el.className = "laurelSlot";
+  if (href) { el.href = href; el.target = "_blank"; el.rel = "noreferrer"; }
+  const imgEl = document.createElement("img");
+  imgEl.alt = "Festival laurel";
+  hideOnError(imgEl);
+  imgEl.src = img;
+  el.appendChild(imgEl);
+  return el;
+}
+
+function buildPressItem(item) {
+  const wrap = document.createElement("div");
+  wrap.className = "pressItem";
+  if (item.type === "review") {
+    const q = document.createElement("p");
+    q.className = "pressItemQuote";
+    q.textContent = `\u201c${item.quote}\u201d`;
+    wrap.appendChild(q);
+  } else {
+    const t = document.createElement("p");
+    t.className = "pressItemTitle";
+    t.textContent = item.title;
+    wrap.appendChild(t);
+  }
+  const src = document.createElement("p");
+  src.className = "pressItemSource";
+  src.textContent = item.source;
+  wrap.appendChild(src);
+  return wrap;
+}
+
 function renderAbout() {
   setBodyRouteClass("about");
   showOnly("about");
@@ -421,10 +562,83 @@ function renderAbout() {
   stopSlideshow();
   syncNavImages();
 
-  if (aboutImg) aboutImg.src = ABOUT.photo;
-  if (aboutBody) aboutBody.innerHTML = ABOUT.body;
+  if (!aboutWrap) return;
+  aboutWrap.innerHTML = "";
+
+  const kit = document.createElement("div");
+  kit.className = "aboutPressKit";
+
+  // Left column: photo
+  const photoCol = document.createElement("div");
+  photoCol.className = "aboutPhotoCol";
+
+  const photo = document.createElement("img");
+  photo.className = "aboutPhoto filmGrade";
+  photo.src = ABOUT.photo;
+  photo.alt = "Taro O\u2019Halloran";
+  hideOnError(photo);
+  photoCol.appendChild(photo);
+
+  // Right column: bio + festivals + press
+  const rightCol = document.createElement("div");
+  rightCol.className = "aboutRightCol";
+
+  // Header
+  const hdr = document.createElement("h2");
+  hdr.className = "aboutHeader";
+  hdr.textContent = "ABOUT THE FILMMAKER";
+  rightCol.appendChild(hdr);
+
+  // Bio
+  const bio = document.createElement("div");
+  bio.className = "aboutBio";
+  bio.innerHTML = ABOUT.bio;
+  rightCol.appendChild(bio);
+
+  // Festival selections
+  if (ABOUT.festivalLaurels && ABOUT.festivalLaurels.length > 0) {
+    const festSection = document.createElement("div");
+    festSection.className = "aboutFestSection";
+
+    const festLabel = document.createElement("p");
+    festLabel.className = "sectionLabel";
+    festLabel.textContent = "FESTIVAL SELECTIONS";
+    festSection.appendChild(festLabel);
+
+    const laurelRow = document.createElement("div");
+    laurelRow.className = "laurelRow";
+    ABOUT.festivalLaurels.forEach((l) => laurelRow.appendChild(buildLaurelSlot(l)));
+    festSection.appendChild(laurelRow);
+
+    rightCol.appendChild(festSection);
+  }
+
+  // Press
+  if (ABOUT.press && ABOUT.press.length > 0) {
+    const pressSection = document.createElement("div");
+    pressSection.className = "aboutPressSection";
+
+    const pressLabel = document.createElement("p");
+    pressLabel.className = "sectionLabel";
+    pressLabel.textContent = "PRESS";
+    pressSection.appendChild(pressLabel);
+
+    const pressItems = document.createElement("div");
+    pressItems.className = "pressItems";
+    ABOUT.press.forEach((p) => pressItems.appendChild(buildPressItem(p)));
+    pressSection.appendChild(pressItems);
+
+    rightCol.appendChild(pressSection);
+  }
+
+  kit.appendChild(photoCol);
+  kit.appendChild(rightCol);
+  aboutWrap.appendChild(kit);
 }
 
+/* -----------------------------
+   CONTACT
+------------------------------ */
 function renderContact() {
   setBodyRouteClass("contact");
   showOnly("contact");
@@ -471,7 +685,7 @@ function stopSlideshow() {
   }
 }
 
-function buildSlideshow(slides, filmTitle) {
+function buildSlideshow(slides, title) {
   const container = document.createElement("div");
   container.className = "filmSlideshow";
 
@@ -481,7 +695,7 @@ function buildSlideshow(slides, filmTitle) {
   slides.forEach((src, i) => {
     const img = document.createElement("img");
     img.className = "slideImg filmGrade" + (i === 0 ? " is-active" : "");
-    img.alt = `${filmTitle} slide ${i + 1}`;
+    img.alt = `${title} slide ${i + 1}`;
     img.loading = i === 0 ? "eager" : "lazy";
     hideOnError(img);
     img.src = src;
@@ -507,10 +721,14 @@ function buildSlideshow(slides, filmTitle) {
   slideshowIndex = 0;
   stopSlideshow();
 
-  function goToSlide(idx) {
-    const imgs = Array.from(slidesWrap.querySelectorAll(".slideImg")).filter(
+  function getVisibleImgs() {
+    return Array.from(slidesWrap.querySelectorAll(".slideImg")).filter(
       (img) => img.style.display !== "none"
     );
+  }
+
+  function goToSlide(idx) {
+    const imgs = getVisibleImgs();
     if (imgs.length === 0) return;
     idx = ((idx % imgs.length) + imgs.length) % imgs.length;
     slideshowIndex = idx;
@@ -522,31 +740,45 @@ function buildSlideshow(slides, filmTitle) {
 
   slideshowInterval = setInterval(() => goToSlide(slideshowIndex + 1), 4000);
 
+  // Touch/swipe support
+  addSwipe(container, {
+    onLeft: () => goToSlide(slideshowIndex + 1),
+    onRight: () => goToSlide(slideshowIndex - 1),
+  });
+
   return container;
 }
 
 /* -----------------------------
-   LIGHTBOX
+   LIGHTBOX — with focus trapping
 ------------------------------ */
 let lbPaths = [];
 let lbIndex = 0;
 let lbTitle = "";
+let lbPrevFocus = null;
+
+const LB_FOCUSABLE = ["#lbClose", "#lbPrev", "#lbNext"];
 
 function openLightbox(paths, idx, title) {
   lbPaths = paths;
   lbIndex = idx;
   lbTitle = title;
+  lbPrevFocus = document.activeElement;
   updateLightbox();
   const lb = $("#lightbox");
   if (lb) {
     lb.hidden = false;
-    lb.focus();
+    $("#lbClose").focus();
   }
 }
 
 function closeLightbox() {
   const lb = $("#lightbox");
   if (lb) lb.hidden = true;
+  if (lbPrevFocus) {
+    try { lbPrevFocus.focus(); } catch (_) {}
+    lbPrevFocus = null;
+  }
 }
 
 function updateLightbox() {
@@ -574,37 +806,72 @@ function wireLightbox() {
     updateLightbox();
   });
 
+  // Backdrop click
   lb.addEventListener("click", (e) => {
     if (e.target === lb) closeLightbox();
   });
 
+  // Keyboard: Esc, arrows, Tab trap
   document.addEventListener("keydown", (e) => {
     if (lb.hidden) return;
-    if (e.key === "Escape") closeLightbox();
+    if (e.key === "Escape") { closeLightbox(); return; }
     if (e.key === "ArrowLeft") {
       lbIndex = (lbIndex - 1 + lbPaths.length) % lbPaths.length;
       updateLightbox();
+      return;
     }
     if (e.key === "ArrowRight") {
       lbIndex = (lbIndex + 1) % lbPaths.length;
       updateLightbox();
+      return;
     }
+    // Tab focus trapping
+    if (e.key === "Tab") {
+      const focusable = LB_FOCUSABLE.map((sel) => $(sel)).filter(Boolean);
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    }
+  });
+
+  // Touch/swipe on lightbox image
+  addSwipe(lb, {
+    onLeft: () => { lbIndex = (lbIndex + 1) % lbPaths.length; updateLightbox(); },
+    onRight: () => { lbIndex = (lbIndex - 1 + lbPaths.length) % lbPaths.length; updateLightbox(); },
   });
 }
 
 /* -----------------------------
-   HELPERS
+   TOUCH / SWIPE HELPER
 ------------------------------ */
-function formatFilmMeta(f) {
-  return `${f.year} \u00b7 ${f.minutes} min. \u00b7 ${f.genres}`;
-}
-
-function hideOnError(img) {
-  img.onerror = () => { img.style.display = "none"; };
+function addSwipe(el, { onLeft, onRight, threshold = 40 }) {
+  let startX = null;
+  el.addEventListener("touchstart", (e) => {
+    startX = e.touches[0].clientX;
+  }, { passive: true });
+  el.addEventListener("touchend", (e) => {
+    if (startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > threshold) {
+      if (dx < 0) onLeft();
+      else onRight();
+    }
+    startX = null;
+  }, { passive: true });
 }
 
 /* -----------------------------
-   FILM DETAIL -- BUILDERS
+   FILM DETAIL — BUILDERS
 ------------------------------ */
 function buildYoutubeEmbed(src) {
   const wrap = document.createElement("div");
@@ -624,7 +891,6 @@ function buildGalleryRow(paths, title) {
   if (!paths || paths.length === 0) return null;
   const row = document.createElement("div");
   row.className = "filmGalleryRow";
-
   paths.forEach((src, i) => {
     const img = document.createElement("img");
     img.className = "filmGalleryThumb filmGrade";
@@ -635,7 +901,76 @@ function buildGalleryRow(paths, title) {
     img.addEventListener("click", () => openLightbox(paths, i, title));
     row.appendChild(img);
   });
+  return row;
+}
 
+function buildLaurelRow(laurels) {
+  if (!laurels || laurels.length === 0) return null;
+  const row = document.createElement("div");
+  row.className = "filmLaurelRow";
+  laurels.forEach(({ img, href }) => {
+    const slot = href ? document.createElement("a") : document.createElement("div");
+    slot.className = "filmLaurelSlot";
+    if (href) { slot.href = href; slot.target = "_blank"; slot.rel = "noreferrer"; }
+    const imgEl = document.createElement("img");
+    imgEl.alt = "Festival laurel";
+    hideOnError(imgEl);
+    imgEl.src = img;
+    slot.appendChild(imgEl);
+    row.appendChild(slot);
+  });
+  return row;
+}
+
+function buildPressSection(pressItems) {
+  if (!pressItems || pressItems.length === 0) return null;
+  const section = document.createElement("div");
+  section.className = "filmPressSection";
+
+  const label = document.createElement("p");
+  label.className = "filmPressLabel";
+  label.textContent = "PRESS & PUBLICATIONS";
+  section.appendChild(label);
+
+  const items = document.createElement("div");
+  items.className = "filmPressItems";
+  pressItems.forEach((item) => {
+    const wrap = document.createElement("div");
+    wrap.className = "filmPressItem";
+    if (item.type === "review") {
+      const q = document.createElement("p");
+      q.className = "filmPressQuote";
+      q.textContent = `\u201c${item.quote}\u201d`;
+      wrap.appendChild(q);
+    } else {
+      const t = document.createElement("p");
+      t.className = "filmPressTitleText";
+      t.textContent = item.title;
+      wrap.appendChild(t);
+    }
+    const src = document.createElement("p");
+    src.className = "filmPressSource";
+    src.textContent = item.source;
+    wrap.appendChild(src);
+    items.appendChild(wrap);
+  });
+  section.appendChild(items);
+  return section;
+}
+
+function buildActionButtons(actions) {
+  if (!actions || actions.length === 0) return null;
+  const row = document.createElement("div");
+  row.className = "filmActions";
+  actions.forEach(({ label, href, variant }) => {
+    const a = document.createElement("a");
+    a.className = "filmActionBtn" + (variant === "lbd" ? " is-lbd" : "");
+    a.href = href;
+    a.target = "_blank";
+    a.rel = "noreferrer";
+    a.textContent = label;
+    row.appendChild(a);
+  });
   return row;
 }
 
@@ -666,7 +1001,7 @@ function renderFilm(slug) {
     sleeve.appendChild(buildSlideshow(f.slides || [], f.title));
   }
 
-  // Info: title, meta, description
+  // Info block
   const info = document.createElement("div");
   info.className = "vhsInfo";
 
@@ -687,25 +1022,44 @@ function renderFilm(slug) {
 
   sleeve.appendChild(info);
 
-  // Gallery row (youtube+gallery only)
+  // Action buttons (Watch / Letterboxd)
+  const actions = buildActionButtons(f.actions || []);
+  if (actions) sleeve.appendChild(actions);
+
+  // Humanzee laurels
+  if (f.laurels && f.laurels.length > 0) {
+    const lr = buildLaurelRow(f.laurels);
+    if (lr) sleeve.appendChild(lr);
+  }
+
+  // Gallery row (youtube+gallery)
   if (f.type === "youtube+gallery") {
     const gallery = buildGalleryRow(f.gallery || [], f.title);
     if (gallery) sleeve.appendChild(gallery);
   }
 
+  // Press & Publications
+  if (f.press && f.press.length > 0) {
+    const pressSection = buildPressSection(f.press);
+    if (pressSection) sleeve.appendChild(pressSection);
+  }
+
   page.appendChild(sleeve);
 }
 
+/* -----------------------------
+   ERROR
+------------------------------ */
 function renderError(msg) {
   setBodyRouteClass("error");
   showOnly("error");
   clearHomeSides();
-  if (errorText) errorText.textContent = msg || "Something went wrong.";
+  if (errorSub && msg) errorSub.textContent = msg;
   ["films", "about", "contact"].forEach((key) => setNavImage(key, { selected: false, hovered: false }));
 }
 
 /* -----------------------------
-   NAV / CLICK WIRES
+   NAV / ROUTING
 ------------------------------ */
 function go(hash) {
   filmBurn(() => { location.hash = hash; });
@@ -720,33 +1074,21 @@ function wireNav() {
     btn.addEventListener("click", () => go(`#${route}`));
   });
 
-  // Hover swapping for button assets (selected/notselected + hover)
   navButtons.forEach((btn) => {
-    const route = btn.getAttribute("data-route"); // films/about/contact
-
+    const route = btn.getAttribute("data-route");
     btn.addEventListener("pointerenter", () => {
-      const active = currentActiveNavKey();
-      const selected = active === route;
-      setNavImage(route, { selected, hovered: true });
+      setNavImage(route, { selected: currentActiveNavKey() === route, hovered: true });
     });
-
     btn.addEventListener("pointerleave", () => {
-      const active = currentActiveNavKey();
-      const selected = active === route;
-      setNavImage(route, { selected, hovered: false });
+      setNavImage(route, { selected: currentActiveNavKey() === route, hovered: false });
     });
   });
 
-  // Ensure initial images exist immediately
   ["films", "about", "contact"].forEach((k) => setNavImage(k, { selected: false, hovered: false }));
 }
 
-/* -----------------------------
-   ROUTE DISPATCH
------------------------------- */
 function renderFromRoute() {
   const r = parseRoute();
-
   if (r.page === "home") return renderHome();
   if (r.page === "films") return renderFilms();
   if (r.page === "about") return renderAbout();
@@ -759,13 +1101,13 @@ function renderFromRoute() {
    INIT
 ------------------------------ */
 function init() {
+  initLoading();
   wireNav();
   wireLightbox();
   window.addEventListener("hashchange", () => {
     renderFromRoute();
     syncNavImages();
   });
-
   renderFromRoute();
   syncNavImages();
 }
