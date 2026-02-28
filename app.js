@@ -349,31 +349,32 @@ function syncNavImages() {
 }
 
 /* -----------------------------
-   FILM BURN TRANSITION
+   CROSSFADE TRANSITION — replaces film burn
+   Fades main frame out (150ms), switches route, fades back in (200ms)
 ------------------------------ */
-function filmBurn(cb) {
-  const overlay = $("#burnOverlay");
-  if (!overlay) { cb(); return; }
+const FADE_OUT_MS = 150;
+const FADE_IN_MS = 200;
 
-  overlay.style.display = "block";
-  overlay.style.opacity = "0";
-  overlay.style.transition = "opacity 130ms ease-in";
+function crossfade(cb) {
+  const frame = document.querySelector(".frame");
+  if (!frame) {
+    console.warn("crossfade: .frame element not found, skipping transition");
+    cb();
+    return;
+  }
 
-  requestAnimationFrame(() => {
+  frame.style.transition = `opacity ${FADE_OUT_MS}ms ease`;
+  frame.style.opacity = "0";
+
+  setTimeout(() => {
+    cb();
     requestAnimationFrame(() => {
-      overlay.style.opacity = "1";
-      setTimeout(() => {
-        cb();
-        overlay.style.transition = "opacity 220ms ease-out";
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            overlay.style.opacity = "0";
-            setTimeout(() => { overlay.style.display = "none"; }, 220);
-          });
-        });
-      }, 130);
+      requestAnimationFrame(() => {
+        frame.style.transition = `opacity ${FADE_IN_MS}ms ease`;
+        frame.style.opacity = "1";
+      });
     });
-  });
+  }, FADE_OUT_MS);
 }
 
 /* -----------------------------
@@ -1062,7 +1063,7 @@ function renderError(msg) {
    NAV / ROUTING
 ------------------------------ */
 function go(hash) {
-  filmBurn(() => { location.hash = hash; });
+  crossfade(() => { location.hash = hash; });
 }
 
 function wireNav() {
